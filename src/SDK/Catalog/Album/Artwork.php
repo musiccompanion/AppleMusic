@@ -51,7 +51,7 @@ final class Artwork
         return $this->height;
     }
 
-    public function url(): Url
+    public function url(): UrlInterface
     {
         return $this->url;
     }

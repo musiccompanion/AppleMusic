@@ -46,6 +46,7 @@ class ArtworkTest extends TestCase
 
                 $this->assertSame($width, $artwork->width());
                 $this->assertSame($height, $artwork->height());
+                $this->assertSame($url, $artwork->url());
                 $this->assertSame($background, $artwork->backgroundColor());
                 $this->assertSame($text1, $artwork->textColor1());
                 $this->assertSame($text2, $artwork->textColor2());
