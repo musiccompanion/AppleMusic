@@ -6,6 +6,7 @@ namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog;
 use MusicCompanion\AppleMusic\SDK\Catalog\{
     Artist,
     Album,
+    Genre,
 };
 use Innmind\Immutable\Set;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Artist\{
@@ -31,7 +32,7 @@ class ArtistTest extends TestCase
                     $id,
                     $name,
                     $url,
-                    $genres = Set::of(Artist\Genre::class),
+                    $genres = Set::of(Genre::class),
                     $albums = Set::of(Album\Id::class)
                 );
 
@@ -54,7 +55,7 @@ class ArtistTest extends TestCase
             )
             ->then(function($id, $name, $url, string $type) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 3 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Artist\Genre>');
+                $this->expectExceptionMessage('Argument 3 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
 
                 new Artist(
                     $id,
@@ -83,7 +84,7 @@ class ArtistTest extends TestCase
                     $id,
                     $name,
                     $url,
-                    Set::of(Artist\Genre::class),
+                    Set::of(Genre::class),
                     Set::of($type)
                 );
             });

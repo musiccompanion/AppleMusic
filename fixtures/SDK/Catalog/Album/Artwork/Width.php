@@ -1,18 +1,18 @@
 <?php
 declare(strict_types = 1);
 
-namespace Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Artist;
+namespace Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\Artist\Genre as Model;
+use MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork\Width as Model;
 use Innmind\BlackBox\Set;
 
-final class Genre implements Set
+final class Width implements Set
 {
     private $set;
 
     private function __construct()
     {
-        $this->set = new Set\Strings;
+        $this->set = new Set\NaturalNumbersExceptZero;
     }
 
     /**
@@ -44,8 +44,8 @@ final class Genre implements Set
      */
     public function values(): \Generator
     {
-        foreach ($this->set->values() as $string) {
-            yield new Model($string);
+        foreach ($this->set->values() as $int) {
+            yield new Model($int);
         }
     }
 }

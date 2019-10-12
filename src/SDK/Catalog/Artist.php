@@ -6,7 +6,6 @@ namespace MusicCompanion\AppleMusic\SDK\Catalog;
 use MusicCompanion\AppleMusic\SDK\Catalog\Artist\{
     Id,
     Name,
-    Genre,
 };
 use Innmind\Url\UrlInterface;
 use Innmind\Immutable\SetInterface;

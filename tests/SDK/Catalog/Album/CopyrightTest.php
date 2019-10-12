@@ -1,16 +1,16 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog\Artist;
+namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog\Album;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\Artist\Genre;
+use MusicCompanion\AppleMusic\SDK\Catalog\Album\Copyright;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
 
-class GenreTest extends TestCase
+class CopyrightTest extends TestCase
 {
     use BlackBox;
 
@@ -19,9 +19,9 @@ class GenreTest extends TestCase
         $this
             ->forAll(new Set\Strings)
             ->then(function(string $string) {
-                $genre = new Genre($string);
+                $copyright = new Copyright($string);
 
-                $this->assertSame($string, (string) $genre);
+                $this->assertSame($string, (string) $copyright);
             });
     }
 }

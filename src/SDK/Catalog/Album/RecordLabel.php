@@ -1,9 +1,9 @@
 <?php
 declare(strict_types = 1);
 
-namespace MusicCompanion\AppleMusic\SDK\Catalog\Artist;
+namespace MusicCompanion\AppleMusic\SDK\Catalog\Album;
 
-final class Genre
+final class RecordLabel
 {
     private $value;
 
