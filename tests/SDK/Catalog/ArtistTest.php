@@ -27,6 +27,7 @@ class ArtistTest extends TestCase
     {
         $this
             ->forAll(Id::any(), Name::any(), DataSet\Url::of())
+            ->take(1000)
             ->then(function($id, $name, $url) {
                 $artist = new Artist(
                     $id,
@@ -53,6 +54,7 @@ class ArtistTest extends TestCase
                 DataSet\Url::of(),
                 new DataSet\Strings
             )
+            ->take(1000)
             ->then(function($id, $name, $url, string $type) {
                 $this->expectException(\TypeError::class);
                 $this->expectExceptionMessage('Argument 3 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
@@ -76,6 +78,7 @@ class ArtistTest extends TestCase
                 DataSet\Url::of(),
                 new DataSet\Strings
             )
+            ->take(1000)
             ->then(function($id, $name, $url, string $type) {
                 $this->expectException(\TypeError::class);
                 $this->expectExceptionMessage('Argument 4 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Album\Id>');

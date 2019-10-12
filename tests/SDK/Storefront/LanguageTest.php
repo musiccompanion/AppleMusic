@@ -25,6 +25,7 @@ class LanguageTest extends TestCase
 
         $this
             ->forAll($char, $char)
+            ->take(1000)
             ->then(function(string $char1, string $char2) {
                 $language = new Language($char1.$char2);
 
@@ -43,6 +44,7 @@ class LanguageTest extends TestCase
 
         $this
             ->forAll($char, $char, $region, $region)
+            ->take(1000)
             ->then(function(string $char1, string $char2, $region1, $region2) {
                 $language = new Language($char1.$char2.'-'.$region1.$region2);
 

@@ -44,6 +44,7 @@ class AlbumTest extends TestCase
                 Copyright::any(),
                 EditorialNotes::any()
             )
+            ->take(1000)
             ->then(function($id, $artwork, $name, $single, $url, $complete, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
                 $album = new Album(
                     $id,
@@ -96,6 +97,7 @@ class AlbumTest extends TestCase
                 Copyright::any(),
                 EditorialNotes::any()
             )
+            ->take(1000)
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
                 $this->expectException(\TypeError::class);
                 $this->expectExceptionMessage('Argument 7 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
@@ -136,6 +138,7 @@ class AlbumTest extends TestCase
                 Copyright::any(),
                 EditorialNotes::any()
             )
+            ->take(1000)
             ->then(function($id, $artwork, $name, $single, $url, $complete, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
                 $this->expectException(\TypeError::class);
                 $this->expectExceptionMessage('Argument 8 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Song\Id>');
@@ -176,6 +179,7 @@ class AlbumTest extends TestCase
                 EditorialNotes::any(),
                 new DataSet\Strings
             )
+            ->take(1000)
             ->then(function($id, $artwork, $name, $single, $url, $complete, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $this->expectException(\TypeError::class);
                 $this->expectExceptionMessage('Argument 14 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Artist\Id>');

@@ -31,6 +31,7 @@ class ArtworkTest extends TestCase
                 Set\Colour::of(),
                 Set\Colour::of()
             )
+            ->take(1000)
             ->then(function($width, $height, $url, $background, $text1, $text2, $text3, $text4) {
                 $artwork = new Artwork(
                     $width,

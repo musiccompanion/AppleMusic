@@ -25,6 +25,7 @@ class IdTest extends TestCase
 
         $this
             ->forAll($char, $char)
+            ->take(1000)
             ->then(function(string $char1, string $char2) {
                 $id = new Id($char1.$char2);
 
@@ -40,6 +41,7 @@ class IdTest extends TestCase
                     return !\preg_match('~^[a-z]{2}$~', $string);
                 })
             )
+            ->take(1000)
             ->then(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);

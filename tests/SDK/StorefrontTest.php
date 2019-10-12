@@ -27,6 +27,7 @@ class StorefrontTest extends TestCase
                 Language::any(),
                 Language::any()
             )
+            ->take(1000)
             ->then(function($id, $name, $defaultLanguage, $supportedLanguage1, $supportedLanguage2) {
                 $storefront = new Storefront(
                     $id,
