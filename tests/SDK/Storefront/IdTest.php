@@ -17,7 +17,7 @@ class IdTest extends TestCase
 {
     use BlackBox;
 
-    public function test_any_country_code_is_accepted()
+    public function testAnyCountryCodeIsAccepted()
     {
         $char = Set\Chars::of()->filter(static function($char): bool {
             return \in_array($char, \range('a', 'z'), true);
@@ -32,7 +32,7 @@ class IdTest extends TestCase
             });
     }
 
-    public function test_any_other_string_is_not_accepted()
+    public function testAnyOtherStringIsNotAccepted()
     {
         $this
             ->forAll(

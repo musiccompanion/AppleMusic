@@ -17,7 +17,7 @@ class LanguageTest extends TestCase
 {
     use BlackBox;
 
-    public function test_any_country_code_is_accepted()
+    public function testAnyCountryCodeIsAccepted()
     {
         $char = Set\Chars::of()->filter(static function($char): bool {
             return \in_array($char, \range('a', 'z'), true);
@@ -32,7 +32,7 @@ class LanguageTest extends TestCase
             });
     }
 
-    public function test_regional_language_is_accepted()
+    public function testRegionalLanguageIsAccepted()
     {
         $char = Set\Chars::of()->filter(static function($char): bool {
             return \in_array($char, \range('a', 'z'), true);
@@ -50,7 +50,7 @@ class LanguageTest extends TestCase
             });
     }
 
-    public function test_chinese_codes_are_accepted()
+    public function testChineseCodesAreAccepted()
     {
         $this
             ->forAll(Set\Elements::of(
@@ -65,7 +65,7 @@ class LanguageTest extends TestCase
             });
     }
 
-    public function test_any_other_string_is_not_accepted()
+    public function testAnyOtherStringIsNotAccepted()
     {
         $this
             ->forAll(

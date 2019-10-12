@@ -14,7 +14,7 @@ class NameTest extends TestCase
 {
     use BlackBox;
 
-    public function test_any_string_is_accepted()
+    public function testAnyStringIsAccepted()
     {
         $this
             ->forAll(new Set\Strings)
