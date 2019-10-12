@@ -1,10 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork;
+namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog\Song;
 
 use MusicCompanion\AppleMusic\{
-    SDK\Catalog\Album\Artwork\Height,
+    SDK\Catalog\Song\Duration,
     Exception\DomainException,
 };
 use PHPUnit\Framework\TestCase;
@@ -13,23 +13,22 @@ use Innmind\BlackBox\{
     Set,
 };
 
-class HeightTest extends TestCase
+class DurationTest extends TestCase
 {
     use BlackBox;
 
-    public function testItCanBeOfAnyNaturalNumber()
+    public function testRealNumbersExceptZeroAreAccepted()
     {
         $this
             ->forAll(new Set\NaturalNumbersExceptZero)
             ->then(function(int $number) {
-                $height = new Height($number);
+                $duration = new Duration($number);
 
-                $this->assertSame($number, $height->toInt());
-                $this->assertSame((string) $number, (string) $height);
+                $this->assertSame($number, $duration->toInt());
             });
     }
 
-    public function testNegativeNumbersAreNotAccepted()
+    public function testNumbersBelowOneAreRejected()
     {
         $this
             ->forAll(Set\Integers::of(null, 1))
@@ -37,7 +36,7 @@ class HeightTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);
 
-                new Height($negative);
+                new Duration($negative);
             });
     }
 }

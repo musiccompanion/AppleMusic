@@ -1,10 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog\Album;
+namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork;
-use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork\{
+use MusicCompanion\AppleMusic\SDK\Catalog\Artwork;
+use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Artwork\{
     Width,
     Height,
 };

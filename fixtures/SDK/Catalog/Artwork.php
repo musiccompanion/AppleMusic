@@ -1,9 +1,9 @@
 <?php
 declare(strict_types = 1);
 
-namespace Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Album;
+namespace Fixtures\MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork as Model;
+use MusicCompanion\AppleMusic\SDK\Catalog\Artwork as Model;
 use Innmind\BlackBox\Set;
 
 final class Artwork

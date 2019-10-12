@@ -1,11 +1,14 @@
 <?php
 declare(strict_types = 1);
 
-namespace MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork;
+namespace MusicCompanion\AppleMusic\SDK\Catalog\Song;
 
 use MusicCompanion\AppleMusic\Exception\DomainException;
 
-final class Height
+/**
+ * Expressed in milliseconds
+ */
+final class Duration
 {
     private $value;
 
@@ -21,10 +24,5 @@ final class Height
     public function toInt(): int
     {
         return $this->value;
-    }
-
-    public function __toString(): string
-    {
-        return (string) $this->value;
     }
 }

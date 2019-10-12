@@ -1,9 +1,9 @@
 <?php
 declare(strict_types = 1);
 
-namespace Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork;
+namespace Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Artwork;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork\Height as Model;
+use MusicCompanion\AppleMusic\SDK\Catalog\Artwork\Height as Model;
 use Innmind\BlackBox\Set;
 
 final class Height

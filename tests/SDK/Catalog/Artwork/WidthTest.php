@@ -1,10 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork;
+namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog\Artwork;
 
 use MusicCompanion\AppleMusic\{
-    SDK\Catalog\Album\Artwork\Width,
+    SDK\Catalog\Artwork\Width,
     Exception\DomainException,
 };
 use PHPUnit\Framework\TestCase;

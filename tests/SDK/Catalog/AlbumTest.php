@@ -10,13 +10,13 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Artist,
 };
 use Innmind\Immutable\Set;
-use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Album\{
-    Id,
+use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
-    Name,
-    RecordLabel,
-    Copyright,
-    EditorialNotes,
+    Album\Id,
+    Album\Name,
+    Album\RecordLabel,
+    Album\Copyright,
+    Album\EditorialNotes,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{

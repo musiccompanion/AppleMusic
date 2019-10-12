@@ -1,9 +1,9 @@
 <?php
 declare(strict_types = 1);
 
-namespace MusicCompanion\AppleMusic\SDK\Catalog\Album;
+namespace MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\Album\Artwork\{
+use MusicCompanion\AppleMusic\SDK\Catalog\Artwork\{
     Width,
     Height,
 };

@@ -5,7 +5,6 @@ namespace MusicCompanion\AppleMusic\SDK\Catalog;
 
 use MusicCompanion\AppleMusic\SDK\Catalog\Album\{
     Id,
-    Artwork,
     Name,
     RecordLabel,
     Copyright,
