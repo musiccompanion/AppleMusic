@@ -16,7 +16,8 @@ final class Id
         return new Set\Decorate(
             static function(int $number): Model {
                 return new Model($number);
-            }
+            },
+            new Set\NaturalNumbers
         );
     }
 }
