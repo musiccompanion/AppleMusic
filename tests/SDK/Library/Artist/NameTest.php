@@ -19,9 +19,9 @@ class NameTest extends TestCase
         $this
             ->forAll(new Set\Strings)
             ->then(function(string $string) {
-                $id = new Name($string);
+                $name = new Name($string);
 
-                $this->assertSame($string, (string) $id);
+                $this->assertSame($string, (string) $name);
             });
     }
 }
