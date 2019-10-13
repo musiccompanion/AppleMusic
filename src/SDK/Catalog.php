@@ -199,10 +199,8 @@ final class Catalog
         return Json::decode((string) $response->body());
     }
 
-    private function url(string $path, string $query = null): UrlInterface
+    private function url(string $path): UrlInterface
     {
-        $query = \is_null($query) ? '' : "?$query";
-
-        return Url::fromString("/v1/catalog/{$this->storefront}/$path$query");
+        return Url::fromString("/v1/catalog/{$this->storefront}/$path");
     }
 }
