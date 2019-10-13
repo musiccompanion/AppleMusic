@@ -5,6 +5,7 @@ namespace Tests\MusicCompanion\AppleMusic\SDK;
 
 use MusicCompanion\AppleMusic\SDK\{
     Library,
+    Library\Artist,
     Storefront,
 };
 use Innmind\HttpTransport\Transport;
@@ -16,6 +17,7 @@ use Innmind\Http\{
     Message\Response,
 };
 use Innmind\Stream\Readable;
+use Innmind\Immutable\SetInterface;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\PHPUnit\BlackBox;
 
@@ -76,5 +78,96 @@ JSON
         $this->assertSame('France', (string) $storefront->name());
         $this->assertSame('fr-FR', (string) $storefront->defaultLanguage());
         $this->assertCount(2, $storefront->supportedLanguages());
+    }
+
+    public function testArtists()
+    {
+        $library = new Library(
+            $fulfill = $this->createMock(Transport::class),
+            $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
+            $userToken = new Header('Music-User-Token', new Value('token'))
+        );
+        $fulfill
+            ->expects($this->at(0))
+            ->method('__invoke')
+            ->with($this->callback(static function($request) use ($authorization, $userToken): bool {
+                return (string) $request->url() === '/v1/me/library/artists' &&
+                    (string) $request->method() === 'GET' &&
+                    $request->headers()->get('authorization') === $authorization &&
+                    $request->headers()->get('music-user-token') === $userToken;
+            }))
+            ->willReturn($response = $this->createMock(Response::class));
+        $response
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn($body = $this->createMock(Readable::class));
+        $body
+            ->expects($this->once())
+            ->method('__toString')
+            ->willReturn(<<<JSON
+{
+  "next": "/v1/me/library/artists?offset=25",
+  "data": [
+    {
+      "id": "r.2S6SRHl",
+      "type": "library-artists",
+      "href": "/v1/me/library/artists/r.2S6SRHl",
+      "attributes": {
+        "name": "\"Weird Al\" Yankovic"
+      }
+    }
+  ],
+  "meta": {
+    "total": 1158
+  }
+}
+JSON
+            );
+        $fulfill
+            ->expects($this->at(1))
+            ->method('__invoke')
+            ->with($this->callback(static function($request) use ($authorization, $userToken): bool {
+                return (string) $request->url() === '/v1/me/library/artists?offset=25' &&
+                    (string) $request->method() === 'GET' &&
+                    $request->headers()->get('authorization') === $authorization &&
+                    $request->headers()->get('music-user-token') === $userToken;
+            }))
+            ->willReturn($response = $this->createMock(Response::class));
+        $response
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn($body = $this->createMock(Readable::class));
+        $body
+            ->expects($this->once())
+            ->method('__toString')
+            ->willReturn(<<<JSON
+{
+  "data": [
+    {
+      "id": "r.o860e82",
+      "type": "library-artists",
+      "href": "/v1/me/library/artists/r.o860e82",
+      "attributes": {
+        "name": "(hed) p.e."
+      }
+    }
+  ],
+  "meta": {
+    "total": 1158
+  }
+}
+JSON
+            );
+
+        $artists = $library->artists();
+
+        $this->assertInstanceOf(SetInterface::class, $artists);
+        $this->assertSame(Artist::class, (string) $artists->type());
+        $this->assertCount(2, $artists);
+        $this->assertSame('r.2S6SRHl', (string) $artists->current()->id());
+        $this->assertSame('"Weird Al" Yankovic', (string) $artists->current()->name());
+        $artists->next();
+        $this->assertSame('r.o860e82', (string) $artists->current()->id());
+        $this->assertSame('(hed) p.e.', (string) $artists->current()->name());
     }
 }

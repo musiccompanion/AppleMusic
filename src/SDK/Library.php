@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK;
 
+use MusicCompanion\AppleMusic\SDK\Library\Artist;
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
@@ -17,6 +18,10 @@ use Innmind\Url\{
     Url,
 };
 use Innmind\Json\Json;
+use Innmind\Immutable\{
+    SetInterface,
+    Set,
+};
 
 final class Library
 {
@@ -49,6 +54,33 @@ final class Library
                 $resource['data'][0]['attributes']['supportedLanguageTags']
             )
         );
+    }
+
+    /**
+     * @return SetInterface<Artist>
+     */
+    public function artists(): SetInterface
+    {
+        $url = $this->url('artists');
+        $artists = Set::of(Artist::class);
+
+        do {
+            $resource = $this->get($url);
+            $url = null;
+
+            foreach ($resource['data'] as $artist) {
+                $artists = $artists->add(new Artist(
+                    new Artist\Id($artist['id']),
+                    new Artist\Name($artist['attributes']['name'])
+                ));
+            }
+
+            if (\array_key_exists('next', $resource)) {
+                $url = Url::fromString($resource['next']);
+            }
+        } while ($url instanceof UrlInterface);
+
+        return $artists;
     }
 
     private function get(UrlInterface $url): array
