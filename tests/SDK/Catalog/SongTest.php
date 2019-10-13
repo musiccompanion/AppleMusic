@@ -20,6 +20,9 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Song\ISRC,
     Song\TrackNumber,
     Song\Composer,
+    Genre as GenreSet,
+    Artist as ArtistSet,
+    Album as AlbumSet,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -36,33 +39,37 @@ class SongTest extends TestCase
         $this
             ->forAll(
                 Id::any(),
+                DataSet\Set::of(UrlInterface::class, DataSet\Url::of()),
                 Artwork::any(),
                 DataSet\Url::of(),
                 DiscNumber::any(),
+                DataSet\Set::of(Genre::class, GenreSet::any()),
                 Duration::any(),
                 DataSet\PointInTime::of(),
                 Name::any(),
                 ISRC::any(),
                 TrackNumber::any(),
-                Composer::any()
+                Composer::any(),
+                DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any()),
+                DataSet\Set::of(Album\Id::class, AlbumSet\Id::any())
             )
             ->take(1000)
-            ->then(function($id, $artwork, $url, $discNumber, $duration, $release, $name, $isrc, $trackNumber, $composer) {
+            ->then(function($id, $previews, $artwork, $url, $discNumber, $genres, $duration, $release, $name, $isrc, $trackNumber, $composer, $artists, $albums) {
                 $song = new Song(
                     $id,
-                    $previews = Set::of(UrlInterface::class),
+                    $previews,
                     $artwork,
                     $url,
                     $discNumber,
-                    $genres = Set::of(Genre::class),
+                    $genres,
                     $duration,
                     $release,
                     $name,
                     $isrc,
                     $trackNumber,
                     $composer,
-                    $artists = Set::of(Artist\Id::class),
-                    $albums = Set::of(Album\Id::class)
+                    $artists,
+                    $albums
                 );
 
                 $this->assertSame($id, $song->id());

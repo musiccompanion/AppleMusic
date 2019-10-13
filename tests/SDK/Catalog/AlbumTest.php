@@ -12,11 +12,14 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
 use Innmind\Immutable\Set;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
+    Genre as GenreSet,
     Album\Id,
     Album\Name,
     Album\RecordLabel,
     Album\Copyright,
     Album\EditorialNotes,
+    Song as SongSet,
+    Artist as ArtistSet,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -38,14 +41,17 @@ class AlbumTest extends TestCase
                 DataSet\Elements::of(true, false),
                 DataSet\Url::of(),
                 DataSet\Elements::of(true, false),
+                DataSet\Set::of(Genre::class, GenreSet::any()),
+                DataSet\Set::of(Song\Id::class, SongSet\Id::any()),
                 DataSet\Elements::of(true, false),
                 DataSet\PointInTime::of(),
                 RecordLabel::any(),
                 Copyright::any(),
-                EditorialNotes::any()
+                EditorialNotes::any(),
+                DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any())
             )
             ->take(1000)
-            ->then(function($id, $artwork, $name, $single, $url, $complete, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
+            ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $album = new Album(
                     $id,
                     $artwork,
@@ -53,14 +59,14 @@ class AlbumTest extends TestCase
                     $single,
                     $url,
                     $complete,
-                    $genres = Set::of(Genre::class),
-                    $tracks = Set::of(Song\Id::class),
+                    $genres,
+                    $tracks,
                     $masteredForItunes,
                     $release,
                     $recordLabel,
                     $copyright,
                     $editorialNotes,
-                    $artists = Set::of(Artist\Id::class)
+                    $artists
                 );
 
                 $this->assertSame($id, $album->id());

@@ -34,6 +34,6 @@
     },
     "require-dev": {
         "phpunit/phpunit": "~8.0",
-        "innmind/black-box": "~2.3"
+        "innmind/black-box": "~2.4"
     }
 }

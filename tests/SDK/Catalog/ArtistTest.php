@@ -9,9 +9,11 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Genre,
 };
 use Innmind\Immutable\Set;
-use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Artist\{
-    Id,
-    Name,
+use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
+    Artist\Id,
+    Artist\Name,
+    Genre as GenreSet,
+    Album as AlbumSet,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -26,15 +28,21 @@ class ArtistTest extends TestCase
     public function testInterface()
     {
         $this
-            ->forAll(Id::any(), Name::any(), DataSet\Url::of())
+            ->forAll(
+                Id::any(),
+                Name::any(),
+                DataSet\Url::of(),
+                DataSet\Set::of(Genre::class, GenreSet::any()),
+                DataSet\Set::of(Album\Id::class, AlbumSet\Id::any())
+            )
             ->take(1000)
-            ->then(function($id, $name, $url) {
+            ->then(function($id, $name, $url, $genres, $albums) {
                 $artist = new Artist(
                     $id,
                     $name,
                     $url,
-                    $genres = Set::of(Genre::class),
-                    $albums = Set::of(Album\Id::class)
+                    $genres,
+                    $albums
                 );
 
                 $this->assertSame($id, $artist->id());
