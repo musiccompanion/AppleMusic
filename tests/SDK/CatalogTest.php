@@ -7,6 +7,7 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog,
     Catalog\Artist,
     Catalog\Album,
+    Catalog\Song,
 };
 use Innmind\TimeContinuum\{
     TimeContinuumInterface,
@@ -23,6 +24,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Storefront as StorefrontSet,
     Catalog\Artist as ArtistSet,
     Catalog\Album as AlbumSet,
+    Catalog\Song as SongSet,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\PHPUnit\BlackBox;
@@ -796,6 +798,152 @@ JSON
                 $this->assertSame('Columbia', (string) $album->recordLabel());
                 $this->assertSame('℗ 1984 Bruce Springsteen', (string) $album->copyright());
                 $this->assertCount(1, $album->artists());
+            });
+    }
+
+    public function testSong()
+    {
+        $this
+            ->forAll(
+                StorefrontSet\Id::any(),
+                SongSet\Id::any()
+            )
+            ->take(1000)
+            ->then(function($storefront, $id) {
+                $catalog = new Catalog(
+                    $clock = $this->createMock(TimeContinuumInterface::class),
+                    $fulfill = $this->createMock(Transport::class),
+                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
+                    $storefront
+                );
+                $fulfill
+                    ->expects($this->once())
+                    ->method('__invoke')
+                    ->with($this->callback(static function($request) use ($storefront, $id, $authorization) {
+                        return (string) $request->url()->path() === "/v1/catalog/$storefront/songs/$id" &&
+                            (string) $request->method() === 'GET' &&
+                            $request->headers()->get('authorization') === $authorization;
+                    }))
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Readable::class));
+                $body
+                    ->expects($this->once())
+                    ->method('__toString')
+                    ->willReturn(<<<JSON
+{
+  "data": [
+    {
+      "id": "203708455",
+      "type": "songs",
+      "href": "/v1/catalog/us/songs/203708455",
+      "attributes": {
+        "previews": [
+          {
+            "url": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview71/v4/c4/e7/0d/c4e70dda-9011-caf6-bc47-e80c93412dba/mzaf_702934268268391713.plus.aac.p.m4a"
+          }
+        ],
+        "artwork": {
+          "width": 6000,
+          "height": 6000,
+          "url": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg",
+          "bgColor": "d9c8b6",
+          "textColor1": "100707",
+          "textColor2": "441016",
+          "textColor3": "382e2a",
+          "textColor4": "623436"
+        },
+        "artistName": "Bruce Springsteen",
+        "url": "https://music.apple.com/us/album/born-in-the-u-s-a/203708420?i=203708455",
+        "discNumber": 1,
+        "genreNames": [
+          "Rock",
+          "Music"
+        ],
+        "durationInMillis": 279784,
+        "releaseDate": "1984-06-04",
+        "name": "Born in the U.S.A. track",
+        "isrc": "USSM18400406",
+        "albumName": "Born In the U.S.A.",
+        "playParams": {
+          "id": "203708455",
+          "kind": "song"
+        },
+        "trackNumber": 2,
+        "composerName": "Bruce Springsteen"
+      },
+      "relationships": {
+        "artists": {
+          "data": [
+            {
+              "id": "178834",
+              "type": "artists",
+              "href": "/v1/catalog/us/artists/178834"
+            }
+          ],
+          "href": "/v1/catalog/us/songs/203708455/artists"
+        },
+        "albums": {
+          "data": [
+            {
+              "id": "203708420",
+              "type": "albums",
+              "href": "/v1/catalog/us/albums/203708420"
+            }
+          ],
+          "href": "/v1/catalog/us/songs/203708455/albums"
+        }
+      }
+    }
+  ]
+}
+JSON
+                    );
+                $clock
+                    ->expects($this->once())
+                    ->method('at')
+                    ->with('1984-06-04')
+                    ->willReturn($release = $this->createMock(PointInTimeInterface::class));
+
+                $song = $catalog->song($id);
+
+                $this->assertInstanceOf(Song::class, $song);
+                $this->assertSame($id, $song->id());
+                $this->assertCount(1, $song->previews());
+                $this->assertSame(
+                    'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview71/v4/c4/e7/0d/c4e70dda-9011-caf6-bc47-e80c93412dba/mzaf_702934268268391713.plus.aac.p.m4a',
+                    (string) $song->previews()->current()
+                );
+                $this->assertSame(6000, $song->artwork()->width()->toInt());
+                $this->assertSame(6000, $song->artwork()->height()->toInt());
+                $this->assertSame(
+                    'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg',
+                    (string) $song->artwork()->url()
+                );
+                $this->assertSame(
+                    '#d9c8b6',
+                    (string) $song->artwork()->backgroundColor()
+                );
+                $this->assertSame('#100707', (string) $song->artwork()->textColor1());
+                $this->assertSame('#441016', (string) $song->artwork()->textColor2());
+                $this->assertSame('#382e2a', (string) $song->artwork()->textColor3());
+                $this->assertSame('#623436', (string) $song->artwork()->textColor4());
+                $this->assertSame(
+                    'https://music.apple.com/us/album/born-in-the-u-s-a/203708420?i=203708455',
+                    (string) $song->url()
+                );
+                $this->assertSame(1, $song->discNumber()->toInt());
+                $this->assertCount(2, $song->genres());
+                $this->assertSame(279784, $song->duration()->toInt());
+                $this->assertSame($release, $song->release());
+                $this->assertSame('Born in the U.S.A. track', (string) $song->name());
+                $this->assertSame('USSM18400406', (string) $song->isrc());
+                $this->assertSame(2, $song->trackNumber()->toInt());
+                $this->assertSame('Bruce Springsteen', $song->composer()->name());
+                $this->assertCount(1, $song->artists());
+                $this->assertCount(1, $song->albums());
             });
     }
 }

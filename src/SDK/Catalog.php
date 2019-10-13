@@ -116,6 +116,57 @@ final class Catalog
         );
     }
 
+    public function song(Song\Id $id): Song
+    {
+        $resource = $this->get($this->url("songs/$id"));
+
+        return new Song(
+            $id,
+            Set::of(UrlInterface::class, ...\array_map(
+                static function(array $preview): UrlInterface {
+                    return Url::fromString($preview['url']);
+                },
+                $resource['data'][0]['attributes']['previews']
+            )),
+            new Artwork(
+                new Artwork\Width($resource['data'][0]['attributes']['artwork']['width']),
+                new Artwork\Height($resource['data'][0]['attributes']['artwork']['height']),
+                Url::fromString($resource['data'][0]['attributes']['artwork']['url']),
+                RGBA::fromString($resource['data'][0]['attributes']['artwork']['bgColor']),
+                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor1']),
+                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor2']),
+                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor3']),
+                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor4'])
+            ),
+            Url::fromString($resource['data'][0]['attributes']['url']),
+            new Song\DiscNumber($resource['data'][0]['attributes']['discNumber']),
+            Set::of(Genre::class, ...\array_map(
+                static function(string $genre): Genre {
+                    return new Genre($genre);
+                },
+                $resource['data'][0]['attributes']['genreNames']
+            )),
+            new Song\Duration($resource['data'][0]['attributes']['durationInMillis']),
+            $this->clock->at($resource['data'][0]['attributes']['releaseDate']),
+            new Song\Name($resource['data'][0]['attributes']['name']),
+            new Song\ISRC($resource['data'][0]['attributes']['isrc']),
+            new Song\TrackNumber($resource['data'][0]['attributes']['trackNumber']),
+            new Song\Composer($resource['data'][0]['attributes']['composerName']),
+            Set::of(Artist\Id::class, ...\array_map(
+                static function(array $artist): Artist\Id {
+                    return new Artist\Id((int) $artist['id']);
+                },
+                $resource['data'][0]['relationships']['artists']['data']
+            )),
+            Set::of(Album\Id::class, ...\array_map(
+                static function(array $album): Album\Id {
+                    return new Album\Id((int) $album['id']);
+                },
+                $resource['data'][0]['relationships']['albums']['data']
+            ))
+        );
+    }
+
     /**
      * @return SetInterface<Album\Id>
      */
