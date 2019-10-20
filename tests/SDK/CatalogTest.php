@@ -8,6 +8,7 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog\Artist,
     Catalog\Album,
     Catalog\Song,
+    Catalog\Genre,
 };
 use Innmind\TimeContinuum\{
     TimeContinuumInterface,
@@ -20,6 +21,7 @@ use Innmind\Http\{
     Message\Response,
 };
 use Innmind\Stream\Readable;
+use Innmind\Immutable\SetInterface;
 use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Storefront as StorefrontSet,
     Catalog\Artist as ArtistSet,
@@ -944,6 +946,92 @@ JSON
                 $this->assertSame('Bruce Springsteen', $song->composer()->name());
                 $this->assertCount(1, $song->artists());
                 $this->assertCount(1, $song->albums());
+            });
+    }
+
+    public function testGenres()
+    {
+        $this
+            ->forAll(StorefrontSet\Id::any())
+            ->then(function($storefront) {
+                $catalog = new Catalog(
+                    $this->createMock(TimeContinuumInterface::class),
+                    $fulfill = $this->createMock(Transport::class),
+                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
+                    $storefront
+                );
+                $fulfill
+                    ->expects($this->at(0))
+                    ->method('__invoke')
+                    ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
+                        return (string) $request->url() === "/v1/catalog/$storefront/genres" &&
+                            (string) $request->method() === 'GET' &&
+                            $request->headers()->get('authorization') === $authorization;
+                    }))
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Readable::class));
+                $body
+                    ->expects($this->once())
+                    ->method('__toString')
+                    ->willReturn(<<<JSON
+{
+  "next": "/v1/catalog/$storefront/genres?offset=1",
+  "data": [
+    {
+      "id": "34",
+      "type": "genres",
+      "href": "/v1/catalog/fr/genres/34",
+      "attributes": {
+        "name": "Musique"
+      }
+    }
+  ]
+}
+JSON
+                    );
+                $fulfill
+                    ->expects($this->at(1))
+                    ->method('__invoke')
+                    ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
+                        return (string) $request->url() === "/v1/catalog/$storefront/genres?offset=1" &&
+                            (string) $request->method() === 'GET' &&
+                            $request->headers()->get('authorization') === $authorization;
+                    }))
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Readable::class));
+                $body
+                    ->expects($this->once())
+                    ->method('__toString')
+                    ->willReturn(<<<JSON
+{
+  "data": [
+    {
+      "id": "20",
+      "type": "genres",
+      "href": "/v1/catalog/fr/genres/20",
+      "attributes": {
+        "name": "Alternative"
+      }
+    }
+  ]
+}
+JSON
+                    );
+
+                $genres = $catalog->genres();
+
+                $this->assertInstanceOf(SetInterface::class, $genres);
+                $this->assertSame(Genre::class, (string) $genres->type());
+                $this->assertCount(2, $genres);
+                $this->assertSame('Musique', (string) $genres->current());
+                $genres->next();
+                $this->assertSame('Alternative', (string) $genres->current());
             });
     }
 }

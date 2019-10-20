@@ -187,6 +187,32 @@ final class Catalog
         return $albums;
     }
 
+    /**
+     * @return SetInterface<Genre>
+     */
+    public function genres(): SetInterface
+    {
+        $url = $this->url('genres');
+        $genres = Set::of(Genre::class);
+
+        do {
+            $resource = $this->get($url);
+            $url = null;
+
+            foreach ($resource['data'] as $genre) {
+                $genres = $genres->add(new Genre(
+                    $genre['attributes']['name']
+                ));
+            }
+
+            if (\array_key_exists('next', $resource)) {
+                $url = Url::fromString($resource['next']);
+            }
+        } while ($url instanceof UrlInterface);
+
+        return $genres;
+    }
+
     private function get(UrlInterface $url): array
     {
         $response = ($this->fulfill)(new Request(
