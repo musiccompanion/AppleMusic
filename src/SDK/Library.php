@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK;
 
-use MusicCompanion\AppleMusic\SDK\Library\Artist;
+use MusicCompanion\AppleMusic\SDK\Library\{
+    Artist,
+    Album,
+};
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
@@ -83,6 +86,47 @@ final class Library
         return $artists;
     }
 
+    /**
+     * @return SetInterface<Album>
+     */
+    public function albums(Artist\Id $artist): SetInterface
+    {
+        $url = $this->url("artists/$artist/albums", "include=artists");
+        $albums = Set::of(Album::class);
+
+        do {
+            $resource = $this->get($url);
+            $url = null;
+
+            foreach ($resource['data'] as $album) {
+                $albums = $albums->add(new Album(
+                    new Album\Id($album['id']),
+                    new Album\Name($album['attributes']['name']),
+                    \array_key_exists('artwork', $album['attributes']) ? new Album\Artwork(
+                        new Album\Artwork\Width($album['attributes']['artwork']['width']),
+                        new Album\Artwork\Height($album['attributes']['artwork']['height']),
+                        Url::fromString($album['attributes']['artwork']['url'])
+                    ) : null,
+                    ...\array_reduce(
+                        $album['relationships']['artists']['data'],
+                        static function(array $artists, array $artist): array {
+                            $artists[] = new Artist\Id($artist['id']);
+
+                            return $artists;
+                        },
+                        []
+                    )
+                ));
+            }
+
+            if (\array_key_exists('next', $resource)) {
+                $url = Url::fromString($resource['next'].'&include=artists');
+            }
+        } while ($url instanceof UrlInterface);
+
+        return $albums;
+    }
+
     private function get(UrlInterface $url): array
     {
         $response = ($this->fulfill)(new Request(
@@ -98,8 +142,10 @@ final class Library
         return Json::decode((string) $response->body());
     }
 
-    private function url(string $path): UrlInterface
+    private function url(string $path, string $query = null): UrlInterface
     {
-        return Url::fromString("/v1/me/library/$path");
+        $query = \is_null($query) ? '' : "?$query";
+
+        return Url::fromString("/v1/me/library/$path$query");
     }
 }
