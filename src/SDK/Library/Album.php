@@ -23,7 +23,7 @@ final class Album
     public function __construct(
         Id $id,
         Name $name,
-        Artwork $artwork,
+        ?Artwork $artwork,
         Artist\Id ...$artists
     ) {
         $this->id = $id;
@@ -40,6 +40,11 @@ final class Album
     public function name(): Name
     {
         return $this->name;
+    }
+
+    public function hasArtwork(): bool
+    {
+        return $this->artwork instanceof Artwork;
     }
 
     public function artwork(): Artwork

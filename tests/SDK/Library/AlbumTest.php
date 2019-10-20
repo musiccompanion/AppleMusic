@@ -38,7 +38,27 @@ class AlbumTest extends TestCase
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());
+                $this->assertTrue($album->hasArtwork());
                 $this->assertSame($artwork, $album->artwork());
+                $this->assertTrue($artists->equals($album->artists()));
+            });
+    }
+
+    public function testAlbumMayNotHaveAnArtwork()
+    {
+        $this
+            ->forAll(
+                Id::any(),
+                Name::any(),
+                Set\Set::of(Artist\Id::class, ArtistSet\Id::any())
+            )
+            ->take(1000)
+            ->then(function($id, $name, $artists) {
+                $album = new Album($id, $name, null, ...$artists);
+
+                $this->assertSame($id, $album->id());
+                $this->assertSame($name, $album->name());
+                $this->assertFalse($album->hasArtwork());
                 $this->assertTrue($artists->equals($album->artists()));
             });
     }
