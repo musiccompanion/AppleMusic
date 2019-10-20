@@ -6,6 +6,7 @@ namespace MusicCompanion\AppleMusic\SDK;
 use MusicCompanion\AppleMusic\SDK\Library\{
     Artist,
     Album,
+    Song,
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
@@ -125,6 +126,71 @@ final class Library
         } while ($url instanceof UrlInterface);
 
         return $albums;
+    }
+
+    /**
+     * @return SetInterface<Song>
+     */
+    public function songs(Album\Id $album): SetInterface
+    {
+        $url = $this->url("albums/$album/tracks", "include=albums,artists");
+        $songs = Set::of(Song::class);
+
+        do {
+            $resource = $this->get($url);
+            $url = null;
+
+            foreach ($resource['data'] as $song) {
+                $songs = $songs->add(new Song(
+                    new Song\Id($song['id']),
+                    new Song\Name($song['attributes']['name']),
+                    new Song\Duration($song['attributes']['durationInMillis']),
+                    new Song\TrackNumber($song['attributes']['trackNumber']),
+                    Set::of(
+                        Song\Genre::class,
+                        ...\array_reduce(
+                            $song['attributes']['genreNames'],
+                            static function(array $genres, string $genre): array {
+                                $genres[] = new Song\Genre($genre);
+
+                                return $genres;
+                            },
+                            []
+                        )
+                    ),
+                    Set::of(
+                        Album\Id::class,
+                        ...\array_reduce(
+                            $song['relationships']['albums']['data'],
+                            static function(array $albums, array $album): array {
+                                $albums[] = new Album\Id($album['id']);
+
+                                return $albums;
+                            },
+                            []
+                        )
+                    ),
+                    Set::of(
+                        Artist\Id::class,
+                        ...\array_reduce(
+                            $song['relationships']['artists']['data'],
+                            static function(array $artists, array $artist): array {
+                                $artists[] = new Artist\Id($artist['id']);
+
+                                return $artists;
+                            },
+                            []
+                        )
+                    )
+                ));
+            }
+
+            if (\array_key_exists('next', $resource)) {
+                $url = Url::fromString($resource['next'].'&include=albums,artists');
+            }
+        } while ($url instanceof UrlInterface);
+
+        return $songs;
     }
 
     private function get(UrlInterface $url): array
