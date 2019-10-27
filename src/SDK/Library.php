@@ -94,7 +94,7 @@ final class Library
      */
     public function albums(Artist\Id $artist): SetInterface
     {
-        $url = $this->url("artists/$artist/albums", "include=artists");
+        $url = $this->url("artists/$artist/albums?include=artists");
         $albums = Set::of(Album::class);
 
         do {
@@ -135,7 +135,7 @@ final class Library
      */
     public function songs(Album\Id $album): SetInterface
     {
-        $url = $this->url("albums/$album/tracks", "include=albums,artists");
+        $url = $this->url("albums/$album/tracks?include=albums,artists");
         $songs = Set::of(Song::class);
 
         do {
@@ -210,10 +210,8 @@ final class Library
         return Json::decode((string) $response->body());
     }
 
-    private function url(string $path, string $query = null): UrlInterface
+    private function url(string $path): UrlInterface
     {
-        $query = \is_null($query) ? '' : "?$query";
-
-        return Url::fromString("/v1/me/library/$path$query");
+        return Url::fromString("/v1/me/library/$path");
     }
 }
