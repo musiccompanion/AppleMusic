@@ -9,6 +9,7 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog\Album,
     Catalog\Song,
     Catalog\Genre,
+    Catalog\Search,
 };
 use Innmind\TimeContinuum\{
     TimeContinuumInterface,
@@ -29,7 +30,10 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Catalog\Song as SongSet,
 };
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set as DataSet,
+};
 
 class CatalogTest extends TestCase
 {
@@ -1032,6 +1036,199 @@ JSON
                 $this->assertSame('Musique', (string) $genres->current());
                 $genres->next();
                 $this->assertSame('Alternative', (string) $genres->current());
+            });
+    }
+
+    public function testSearch()
+    {
+        $this
+            ->forAll(
+                StorefrontSet\Id::any(),
+                new DataSet\Strings
+            )
+            ->take(100)
+            ->then(function($storefront, $term) {
+                $term = json_encode($term);
+                $term = substr($term, 1, -1);
+
+                $catalog = new Catalog(
+                    $this->createMock(TimeContinuumInterface::class),
+                    $fulfill = $this->createMock(Transport::class),
+                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
+                    $storefront
+                );
+                $fulfill
+                    ->expects($this->at(0))
+                    ->method('__invoke')
+                    ->with($this->callback(static function($request) use ($storefront, $term, $authorization): bool {
+                        return (string) $request->url() === "/v1/catalog/$storefront/search?term=$term&types=artists,albums,songs&limit=25" &&
+                            (string) $request->method() === 'GET' &&
+                            $request->headers()->get('authorization') === $authorization;
+                    }))
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Readable::class));
+                $body
+                    ->expects($this->once())
+                    ->method('__toString')
+                    ->willReturn(<<<JSON
+{
+  "results": {
+    "songs": {
+      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=songs",
+      "next": "/v1/catalog/$storefront/search?offset=1&term=foo&types=songs",
+      "data": [
+        {
+          "id": "482678717",
+          "type": "songs",
+          "href": "/v1/catalog/$storefront/songs/482678717"
+        }
+      ]
+    },
+    "albums": {
+      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=albums",
+      "next": "/v1/catalog/$storefront/search?offset=1&term=foo&types=albums",
+      "data": [
+        {
+          "id": "1468503258",
+          "type": "albums",
+          "href": "/v1/catalog/$storefront/albums/1468503258"
+        }
+      ]
+    },
+    "artists": {
+      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=artists",
+      "next": "/v1/catalog/$storefront/search?offset=1&term=foo&types=artists",
+      "data": [
+        {
+          "id": "205748310",
+          "type": "artists",
+          "href": "/v1/catalog/$storefront/artists/205748310"
+        }
+      ]
+    }
+  }
+}
+JSON
+                    );
+                $fulfill
+                    ->expects($this->at(1))
+                    ->method('__invoke')
+                    ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
+                        return (string) $request->url() === "/v1/catalog/$storefront/search?offset=1&term=foo&types=artists" &&
+                            (string) $request->method() === 'GET' &&
+                            $request->headers()->get('authorization') === $authorization;
+                    }))
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Readable::class));
+                $body
+                    ->expects($this->once())
+                    ->method('__toString')
+                    ->willReturn(<<<JSON
+{
+  "results": {
+    "artists": {
+      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=artists",
+      "data": [
+        {
+          "id": "205748311",
+          "type": "artists",
+          "href": "/v1/catalog/$storefront/artists/205748311"
+        }
+      ]
+    }
+  }
+}
+JSON
+                    );
+                $fulfill
+                    ->expects($this->at(2))
+                    ->method('__invoke')
+                    ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
+                        return (string) $request->url() === "/v1/catalog/$storefront/search?offset=1&term=foo&types=albums" &&
+                            (string) $request->method() === 'GET' &&
+                            $request->headers()->get('authorization') === $authorization;
+                    }))
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Readable::class));
+                $body
+                    ->expects($this->once())
+                    ->method('__toString')
+                    ->willReturn(<<<JSON
+{
+  "results": {
+    "albums": {
+      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=albums",
+      "data": [
+        {
+          "id": "1468503259",
+          "type": "albums",
+          "href": "/v1/catalog/$storefront/albums/1468503259"
+        }
+      ]
+    }
+  }
+}
+JSON
+                    );
+                $fulfill
+                    ->expects($this->at(3))
+                    ->method('__invoke')
+                    ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
+                        return (string) $request->url() === "/v1/catalog/$storefront/search?offset=1&term=foo&types=songs" &&
+                            (string) $request->method() === 'GET' &&
+                            $request->headers()->get('authorization') === $authorization;
+                    }))
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Readable::class));
+                $body
+                    ->expects($this->once())
+                    ->method('__toString')
+                    ->willReturn(<<<JSON
+{
+  "results": {
+    "songs": {
+      "href": "/v1/catalog/fr/search?limit=1&term=foo&types=songs",
+      "data": [
+        {
+          "id": "482678718",
+          "type": "songs",
+          "href": "/v1/catalog/fr/songs/482678718"
+        }
+      ]
+    }
+  }
+}
+JSON
+                    );
+
+                $search = $catalog->search($term);
+
+                $this->assertInstanceOf(Search::class, $search);
+                $this->assertSame($term, $search->term());
+                $this->assertCount(2, $search->artists());
+                $this->assertCount(2, $search->albums());
+                $this->assertCount(2, $search->songs());
+                $this->assertSame('205748310', (string) $search->artists()->current());
+                $search->artists()->next();
+                $this->assertSame('205748311', (string) $search->artists()->current());
+                $this->assertSame('1468503258', (string) $search->albums()->current());
+                $search->albums()->next();
+                $this->assertSame('1468503259', (string) $search->albums()->current());
+                $this->assertSame('482678717', (string) $search->songs()->current());
+                $search->songs()->next();
+                $this->assertSame('482678718', (string) $search->songs()->current());
             });
     }
 }
