@@ -1214,21 +1214,24 @@ JSON
                     );
 
                 $search = $catalog->search($term);
+                $artists = \iterator_to_array($search->artists());
+                $albums = \iterator_to_array($search->albums());
+                $songs = \iterator_to_array($search->songs());
 
                 $this->assertInstanceOf(Search::class, $search);
                 $this->assertSame($term, $search->term());
-                $this->assertCount(2, $search->artists());
-                $this->assertCount(2, $search->albums());
-                $this->assertCount(2, $search->songs());
-                $this->assertSame('205748310', (string) $search->artists()->current());
-                $search->artists()->next();
-                $this->assertSame('205748311', (string) $search->artists()->current());
-                $this->assertSame('1468503258', (string) $search->albums()->current());
-                $search->albums()->next();
-                $this->assertSame('1468503259', (string) $search->albums()->current());
-                $this->assertSame('482678717', (string) $search->songs()->current());
-                $search->songs()->next();
-                $this->assertSame('482678718', (string) $search->songs()->current());
+                $this->assertCount(2, $artists);
+                $this->assertCount(2, $albums);
+                $this->assertCount(2, $songs);
+                $this->assertSame('205748310', (string) \current($artists));
+                \next($artists);
+                $this->assertSame('205748311', (string) \current($artists));
+                $this->assertSame('1468503258', (string) \current($albums));
+                \next($albums);
+                $this->assertSame('1468503259', (string) \current($albums));
+                $this->assertSame('482678717', (string) \current($songs));
+                \next($songs);
+                $this->assertSame('482678718', (string) \current($songs));
             });
     }
 }

@@ -217,52 +217,58 @@ final class Catalog
     public function search(string $term): Search
     {
         $url = $this->url("search?term=$term&types=artists,albums,songs&limit=25");
-        $rootResource = $this->get($url);
-        $artists = Set::of(Artist\Id::class);
-        $albums = Set::of(Album\Id::class);
-        $songs = Set::of(Song\Id::class);
+        $resource = $this->get($url);
 
-        $resource = $rootResource;
+        $artists = LazySet::of(
+            Artist\Id::class,
+            function() use ($resource) {
+                do {
+                    foreach ($resource['results']['artists']['data'] as $artist) {
+                        yield new Artist\Id((int) $artist['id']);
+                    }
 
-        do {
-            foreach ($resource['results']['artists']['data'] as $artist) {
-                $artists = $artists->add(new Artist\Id((int) $artist['id']));
+                    if (!\array_key_exists('next', $resource['results']['artists'])) {
+                        return;
+                    }
+
+                    $resource = $this->get(Url::fromString($resource['results']['artists']['next']));
+                } while (true);
             }
+        );
 
-            if (!\array_key_exists('next', $resource['results']['artists'])) {
-                break;
+        $albums = LazySet::of(
+            Album\Id::class,
+            function() use ($resource) {
+                do {
+                    foreach ($resource['results']['albums']['data'] as $album) {
+                        yield new Album\Id((int) $album['id']);
+                    }
+
+                    if (!\array_key_exists('next', $resource['results']['albums'])) {
+                        return;
+                    }
+
+                    $resource = $this->get(Url::fromString($resource['results']['albums']['next']));
+                } while (true);
             }
+        );
 
-            $resource = $this->get(Url::fromString($resource['results']['artists']['next']));
-        } while (true);
+        $songs = LazySet::of(
+            Song\Id::class,
+            function() use ($resource) {
+                do {
+                    foreach ($resource['results']['songs']['data'] as $song) {
+                        yield new Song\Id((int) $song['id']);
+                    }
 
-        $resource = $rootResource;
+                    if (!\array_key_exists('next', $resource['results']['songs'])) {
+                        return;
+                    }
 
-        do {
-            foreach ($resource['results']['albums']['data'] as $album) {
-                $albums = $albums->add(new Album\Id((int) $album['id']));
+                    $resource = $this->get(Url::fromString($resource['results']['songs']['next']));
+                } while (true);
             }
-
-            if (!\array_key_exists('next', $resource['results']['albums'])) {
-                break;
-            }
-
-            $resource = $this->get(Url::fromString($resource['results']['albums']['next']));
-        } while (true);
-
-        $resource = $rootResource;
-
-        do {
-            foreach ($resource['results']['songs']['data'] as $song) {
-                $songs = $songs->add(new Song\Id((int) $song['id']));
-            }
-
-            if (!\array_key_exists('next', $resource['results']['songs'])) {
-                break;
-            }
-
-            $resource = $this->get(Url::fromString($resource['results']['songs']['next']));
-        } while (true);
+        );
 
         return new Search($term, $artists, $albums, $songs);
     }
