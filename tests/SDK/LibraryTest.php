@@ -169,12 +169,13 @@ JSON
 
         $this->assertInstanceOf(SetInterface::class, $artists);
         $this->assertSame(Artist::class, (string) $artists->type());
+        $artists = \iterator_to_array($artists);
         $this->assertCount(2, $artists);
-        $this->assertSame('r.2S6SRHl', (string) $artists->current()->id());
-        $this->assertSame('"Weird Al" Yankovic', (string) $artists->current()->name());
-        $artists->next();
-        $this->assertSame('r.o860e82', (string) $artists->current()->id());
-        $this->assertSame('(hed) p.e.', (string) $artists->current()->name());
+        $this->assertSame('r.2S6SRHl', (string) \current($artists)->id());
+        $this->assertSame('"Weird Al" Yankovic', (string) \current($artists)->name());
+        \next($artists);
+        $this->assertSame('r.o860e82', (string) \current($artists)->id());
+        $this->assertSame('(hed) p.e.', (string) \current($artists)->name());
     }
 
     public function testAlbums()

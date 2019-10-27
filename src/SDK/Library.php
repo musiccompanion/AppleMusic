@@ -66,25 +66,27 @@ final class Library
     public function artists(): SetInterface
     {
         $url = $this->url('artists');
-        $artists = Set::of(Artist::class);
 
-        do {
-            $resource = $this->get($url);
-            $url = null;
+        return LazySet::of(
+            Artist::class,
+            function() use ($url) {
+                do {
+                    $resource = $this->get($url);
+                    $url = null;
 
-            foreach ($resource['data'] as $artist) {
-                $artists = $artists->add(new Artist(
-                    new Artist\Id($artist['id']),
-                    new Artist\Name($artist['attributes']['name'])
-                ));
+                    foreach ($resource['data'] as $artist) {
+                        yield new Artist(
+                            new Artist\Id($artist['id']),
+                            new Artist\Name($artist['attributes']['name'])
+                        );
+                    }
+
+                    if (\array_key_exists('next', $resource)) {
+                        $url = Url::fromString($resource['next']);
+                    }
+                } while ($url instanceof UrlInterface);
             }
-
-            if (\array_key_exists('next', $resource)) {
-                $url = Url::fromString($resource['next']);
-            }
-        } while ($url instanceof UrlInterface);
-
-        return $artists;
+        );
     }
 
     /**
