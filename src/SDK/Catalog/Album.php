@@ -17,20 +17,20 @@ use function Innmind\Immutable\assertSet;
 
 final class Album
 {
-    private $id;
-    private $artwork;
-    private $name;
-    private $single;
-    private $url;
-    private $complete;
-    private $genres;
-    private $tracks;
-    private $masteredForItunes;
-    private $release;
-    private $recordLabel;
-    private $copyright;
-    private $editorialNotes;
-    private $artists;
+    private Id $id;
+    private Artwork $artwork;
+    private Name $name;
+    private bool $single;
+    private UrlInterface $url;
+    private bool $complete;
+    private SetInterface $genres;
+    private SetInterface $tracks;
+    private bool $masteredForItunes;
+    private PointInTimeInterface $release;
+    private RecordLabel $recordLabel;
+    private Copyright $copyright;
+    private EditorialNotes $editorialNotes;
+    private SetInterface $artists;
 
     public function __construct(
         Id $id,

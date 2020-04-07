@@ -7,7 +7,7 @@ use MusicCompanion\AppleMusic\Exception\DomainException;
 
 final class Height
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {

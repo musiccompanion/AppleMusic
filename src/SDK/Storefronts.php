@@ -20,8 +20,8 @@ use Innmind\Immutable\{
 
 final class Storefronts
 {
-    private $fulfill;
-    private $authorization;
+    private Transport $fulfill;
+    private Authorization $authorization;
 
     public function __construct(Transport $fulfill, Authorization $authorization)
     {

@@ -33,10 +33,10 @@ use Innmind\Immutable\{
 
 final class Catalog
 {
-    private $clock;
-    private $fulfill;
-    private $authorization;
-    private $storefront;
+    private TimeContinuumInterface $clock;
+    private Transport $fulfill;
+    private Authorization $authorization;
+    private Storefront\Id $storefront;
 
     public function __construct(
         TimeContinuumInterface $clock,

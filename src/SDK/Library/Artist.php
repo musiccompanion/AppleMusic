@@ -10,8 +10,8 @@ use MusicCompanion\AppleMusic\SDK\Library\Artist\{
 
 final class Artist
 {
-    private $id;
-    private $name;
+    private Id $id;
+    private Name $name;
 
     public function __construct(Id $id, Name $name)
     {

@@ -15,10 +15,10 @@ use Innmind\Immutable\{
 
 final class Storefront
 {
-    private $id;
-    private $name;
-    private $defaultLanguage;
-    private $supportedLanguages;
+    private Id $id;
+    private Name $name;
+    private Language $defaultLanguage;
+    private Set $supportedLanguages;
 
     public function __construct(
         Id $id,

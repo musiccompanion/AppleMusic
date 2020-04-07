@@ -8,10 +8,10 @@ use function Innmind\Immutable\assertSet;
 
 final class Search
 {
-    private $term;
-    private $artists;
-    private $albums;
-    private $songs;
+    private string $term;
+    private SetInterface $artists;
+    private SetInterface $albums;
+    private SetInterface $songs;
 
     public function __construct(
         string $term,

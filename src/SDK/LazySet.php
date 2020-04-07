@@ -16,9 +16,9 @@ use Innmind\Immutable\{
  */
 final class LazySet implements SetInterface
 {
-    private $type;
-    private $factory;
-    private $active;
+    private Str $type;
+    private \Closure $factory;
+    private \Generator $active;
 
     /**
      * {@inheritdoc}

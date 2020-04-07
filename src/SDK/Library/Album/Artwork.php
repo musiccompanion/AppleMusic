@@ -11,9 +11,9 @@ use Innmind\Url\UrlInterface;
 
 final class Artwork
 {
-    private $width;
-    private $height;
-    private $url;
+    private Width $width;
+    private Height $height;
+    private UrlInterface $url;
 
     public function __construct(
         Width $width,

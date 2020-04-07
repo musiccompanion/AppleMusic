@@ -12,14 +12,14 @@ use Innmind\Colour\RGBA;
 
 final class Artwork
 {
-    private $width;
-    private $height;
-    private $url;
-    private $backgroundColor;
-    private $textColor1;
-    private $textColor2;
-    private $textColor3;
-    private $textColor4;
+    private Width $width;
+    private Height $height;
+    private UrlInterface $url;
+    private RGBA $backgroundColor;
+    private RGBA $textColor1;
+    private RGBA $textColor2;
+    private RGBA $textColor3;
+    private RGBA $textColor4;
 
     public function __construct(
         Width $width,

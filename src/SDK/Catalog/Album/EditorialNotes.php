@@ -5,8 +5,8 @@ namespace MusicCompanion\AppleMusic\SDK\Catalog\Album;
 
 final class EditorialNotes
 {
-    private $standard;
-    private $short;
+    private string $standard;
+    private string $short;
 
     public function __construct(string $standard, string $short)
     {

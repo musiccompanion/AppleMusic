@@ -15,10 +15,10 @@ use Innmind\Immutable\{
 
 final class Album
 {
-    private $id;
-    private $name;
-    private $artwork;
-    private $artists;
+    private Id $id;
+    private Name $name;
+    private ?Artwork $artwork;
+    private Set $artists;
 
     public function __construct(
         Id $id,

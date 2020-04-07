@@ -23,9 +23,9 @@ use Lcobucci\JWT\{
 
 final class SDK
 {
-    private $transport;
-    private $clock;
-    private $authorization;
+    private Transport $transport;
+    private TimeContinuumInterface $clock;
+    private Authorization $authorization;
 
     public function __construct(
         TimeContinuumInterface $clock,

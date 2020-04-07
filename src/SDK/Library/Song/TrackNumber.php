@@ -7,7 +7,7 @@ use MusicCompanion\AppleMusic\Exception\DomainException;
 
 final class TrackNumber
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {

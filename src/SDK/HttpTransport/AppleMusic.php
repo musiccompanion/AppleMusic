@@ -15,8 +15,8 @@ use Innmind\Url\Url;
 
 final class AppleMusic implements Transport
 {
-    private $fulfill;
-    private $url;
+    private Transport $fulfill;
+    private Url $url;
 
     public function __construct(Transport $fulfill)
     {

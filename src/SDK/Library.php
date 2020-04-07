@@ -29,9 +29,9 @@ use Innmind\Immutable\{
 
 final class Library
 {
-    private $fulfill;
-    private $authorization;
-    private $userToken;
+    private Transport $fulfill;
+    private Authorization $authorization;
+    private Header $userToken;
 
     public function __construct(
         Transport $fulfill,

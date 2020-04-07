@@ -19,20 +19,20 @@ use function Innmind\Immutable\assertSet;
 
 final class Song
 {
-    private $id;
-    private $previews;
-    private $artwork;
-    private $url;
-    private $discNumber;
-    private $genres;
-    private $duration;
-    private $release;
-    private $name;
-    private $isrc;
-    private $trackNumber;
-    private $composer;
-    private $artists;
-    private $albums;
+    private Id $id;
+    private SetInterface $previews;
+    private Artwork $artwork;
+    private UrlInterface $url;
+    private DiscNumber $discNumber;
+    private SetInterface $genres;
+    private Duration $duration;
+    private PointInTimeInterface $release;
+    private Name $name;
+    private ISRC $isrc;
+    private TrackNumber $trackNumber;
+    private Composer $composer;
+    private SetInterface $artists;
+    private SetInterface $albums;
 
     public function __construct(
         Id $id,

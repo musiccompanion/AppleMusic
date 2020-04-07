@@ -13,11 +13,11 @@ use function Innmind\Immutable\assertSet;
 
 final class Artist
 {
-    private $id;
-    private $name;
-    private $url;
-    private $genres;
-    private $albums;
+    private Id $id;
+    private Name $name;
+    private UrlInterface $url;
+    private SetInterface $genres;
+    private SetInterface $albums;
 
     public function __construct(
         Id $id,

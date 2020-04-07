@@ -5,7 +5,7 @@ namespace MusicCompanion\AppleMusic\SDK\Catalog\Song;
 
 final class Composer
 {
-    private $name;
+    private string $name;
 
     public function __construct(string $name)
     {
