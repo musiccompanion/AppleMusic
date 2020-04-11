@@ -21,16 +21,22 @@ use MusicCompanion\AppleMusic\{
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\TimeContinuum\Period\Earth\Hour;
+use Innmind\Url\Path;
+use Innmind\Filesystem\Name;
 
 $os = Factory::build();
 
-$sdk = new SDK(
+$sdk = new SDK\SDK(
     $os->clock(),
     $os->remote()->http(),
     new Key( // @see https://help.apple.com/developer-account/#/devce5522674 to understand howto generate the key
         'KEY_ID',
         'TEAM_ID',
-        $os->filesystem()->mount('config_dir')->get('AuthKey_TEAM_ID.p8')->content()
+        $os
+            ->filesystem()
+            ->mount(Path::of('config_dir/'))
+            ->get(new Name('AuthKey_TEAM_ID.p8'))
+            ->content(),
     ),
     new Hour(1) // expire the generated token after an hour
 );
