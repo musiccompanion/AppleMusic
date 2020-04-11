@@ -155,30 +155,6 @@ final class Catalog implements CatalogInterface
     }
 
     /**
-     * @param array{data: list<array{id: int}>, next?: string} $resources
-     *
-     * @return Set<Album\Id>
-     */
-    private function artistAlbums(array $resources): Set
-    {
-        /** @var Set<Album\Id> */
-        $albums = Set::of(Album\Id::class);
-
-        foreach ($resources['data'] as $album) {
-            $albums = ($albums)(new Album\Id((int) $album['id']));
-        }
-
-        if (\array_key_exists('next', $resources)) {
-            /** @var array{data: list<array{id: int}>, next?: string} */
-            $resources = $this->get(Url::of($resources['next']));
-
-            $albums = $albums->merge($this->artistAlbums($resources));
-        }
-
-        return $albums;
-    }
-
-    /**
      * @return Set<Genre>
      */
     public function genres(): Set
@@ -270,6 +246,30 @@ final class Catalog implements CatalogInterface
         );
 
         return new Search($term, $artists, $albums, $songs);
+    }
+
+    /**
+     * @param array{data: list<array{id: int}>, next?: string} $resources
+     *
+     * @return Set<Album\Id>
+     */
+    private function artistAlbums(array $resources): Set
+    {
+        /** @var Set<Album\Id> */
+        $albums = Set::of(Album\Id::class);
+
+        foreach ($resources['data'] as $album) {
+            $albums = ($albums)(new Album\Id((int) $album['id']));
+        }
+
+        if (\array_key_exists('next', $resources)) {
+            /** @var array{data: list<array{id: int}>, next?: string} */
+            $resources = $this->get(Url::of($resources['next']));
+
+            $albums = $albums->merge($this->artistAlbums($resources));
+        }
+
+        return $albums;
     }
 
     private function get(Url $url): array
