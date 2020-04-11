@@ -34,7 +34,7 @@ final class AppleMusic implements Transport
             $request->method(),
             $request->protocolVersion(),
             $request->headers(),
-            $request->body()
+            $request->body(),
         ));
     }
 }

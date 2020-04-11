@@ -36,8 +36,8 @@ final class Storefronts
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
-                $this->authorization
-            )
+                $this->authorization,
+            ),
         ));
 
         /** @var array{data: list<array{id: string, attributes: array{name: string, defaultLanguageTag: string, supportedLanguageTags: list<string>}}>} */
@@ -46,16 +46,14 @@ final class Storefronts
         $storefronts = Set::of(Storefront::class);
 
         foreach ($resource['data'] as $storefront) {
-            $storefronts = $storefronts->add(new Storefront(
+            $storefronts = ($storefronts)(new Storefront(
                 new Storefront\Id($storefront['id']),
                 new Storefront\Name($storefront['attributes']['name']),
                 new Storefront\Language($storefront['attributes']['defaultLanguageTag']),
                 ...\array_map(
-                    static function(string $language): Storefront\Language {
-                        return new Storefront\Language($language);
-                    },
-                    $storefront['attributes']['supportedLanguageTags']
-                )
+                    static fn(string $language): Storefront\Language => new Storefront\Language($language),
+                    $storefront['attributes']['supportedLanguageTags'],
+                ),
             ));
         }
 

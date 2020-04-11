@@ -57,12 +57,10 @@ final class Catalog
             new Artist\Name($resource['data'][0]['attributes']['name']),
             Url::of($resource['data'][0]['attributes']['url']),
             Set::of(Genre::class, ...\array_map(
-                static function(string $genre): Genre {
-                    return new Genre($genre);
-                },
-                $resource['data'][0]['attributes']['genreNames']
+                static fn(string $genre): Genre => new Genre($genre),
+                $resource['data'][0]['attributes']['genreNames'],
             )),
-            $this->artistAlbums($resource['data'][0]['relationships']['albums'])
+            $this->artistAlbums($resource['data'][0]['relationships']['albums']),
         );
     }
 
@@ -81,23 +79,19 @@ final class Catalog
                 RGBA::of($resource['data'][0]['attributes']['artwork']['textColor1']),
                 RGBA::of($resource['data'][0]['attributes']['artwork']['textColor2']),
                 RGBA::of($resource['data'][0]['attributes']['artwork']['textColor3']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor4'])
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor4']),
             ),
             new Album\Name($resource['data'][0]['attributes']['name']),
             $resource['data'][0]['attributes']['isSingle'],
             Url::of($resource['data'][0]['attributes']['url']),
             $resource['data'][0]['attributes']['isComplete'],
             Set::of(Genre::class, ...\array_map(
-                static function(string $genre): Genre {
-                    return new Genre($genre);
-                },
-                $resource['data'][0]['attributes']['genreNames']
+                static fn(string $genre): Genre => new Genre($genre),
+                $resource['data'][0]['attributes']['genreNames'],
             )),
             Set::of(Song\Id::class, ...\array_map(
-                static function(array $song): Song\Id {
-                    return new Song\Id((int) $song['id']);
-                },
-                $resource['data'][0]['relationships']['tracks']['data']
+                static fn(array $song): Song\Id => new Song\Id((int) $song['id']),
+                $resource['data'][0]['relationships']['tracks']['data'],
             )),
             $resource['data'][0]['attributes']['isMasteredForItunes'],
             $this->clock->at($resource['data'][0]['attributes']['releaseDate']),
@@ -105,14 +99,12 @@ final class Catalog
             new Album\Copyright($resource['data'][0]['attributes']['copyright']),
             new Album\EditorialNotes(
                 $resource['data'][0]['attributes']['editorialNotes']['standard'],
-                $resource['data'][0]['attributes']['editorialNotes']['short']
+                $resource['data'][0]['attributes']['editorialNotes']['short'],
             ),
             Set::of(Artist\Id::class, ...\array_map(
-                static function(array $artist): Artist\Id {
-                    return new Artist\Id((int) $artist['id']);
-                },
-                $resource['data'][0]['relationships']['artists']['data']
-            ))
+                static fn(array $artist): Artist\Id => new Artist\Id((int) $artist['id']),
+                $resource['data'][0]['relationships']['artists']['data'],
+            )),
         );
     }
 
@@ -124,10 +116,8 @@ final class Catalog
         return new Song(
             $id,
             Set::of(Url::class, ...\array_map(
-                static function(array $preview): Url {
-                    return Url::of($preview['url']);
-                },
-                $resource['data'][0]['attributes']['previews']
+                static fn(array $preview): Url => Url::of($preview['url']),
+                $resource['data'][0]['attributes']['previews'],
             )),
             new Artwork(
                 new Artwork\Width($resource['data'][0]['attributes']['artwork']['width']),
@@ -137,15 +127,13 @@ final class Catalog
                 RGBA::of($resource['data'][0]['attributes']['artwork']['textColor1']),
                 RGBA::of($resource['data'][0]['attributes']['artwork']['textColor2']),
                 RGBA::of($resource['data'][0]['attributes']['artwork']['textColor3']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor4'])
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor4']),
             ),
             Url::of($resource['data'][0]['attributes']['url']),
             new Song\DiscNumber($resource['data'][0]['attributes']['discNumber']),
             Set::of(Genre::class, ...\array_map(
-                static function(string $genre): Genre {
-                    return new Genre($genre);
-                },
-                $resource['data'][0]['attributes']['genreNames']
+                static fn(string $genre): Genre => new Genre($genre),
+                $resource['data'][0]['attributes']['genreNames'],
             )),
             new Song\Duration($resource['data'][0]['attributes']['durationInMillis']),
             $this->clock->at($resource['data'][0]['attributes']['releaseDate']),
@@ -154,17 +142,13 @@ final class Catalog
             new Song\TrackNumber($resource['data'][0]['attributes']['trackNumber']),
             new Song\Composer($resource['data'][0]['attributes']['composerName']),
             Set::of(Artist\Id::class, ...\array_map(
-                static function(array $artist): Artist\Id {
-                    return new Artist\Id((int) $artist['id']);
-                },
-                $resource['data'][0]['relationships']['artists']['data']
+                static fn(array $artist): Artist\Id => new Artist\Id((int) $artist['id']),
+                $resource['data'][0]['relationships']['artists']['data'],
             )),
             Set::of(Album\Id::class, ...\array_map(
-                static function(array $album): Album\Id {
-                    return new Album\Id((int) $album['id']);
-                },
-                $resource['data'][0]['relationships']['albums']['data']
-            ))
+                static fn(array $album): Album\Id => new Album\Id((int) $album['id']),
+                $resource['data'][0]['relationships']['albums']['data'],
+            )),
         );
     }
 
@@ -179,7 +163,7 @@ final class Catalog
         $albums = Set::of(Album\Id::class);
 
         foreach ($resources['data'] as $album) {
-            $albums = $albums->add(new Album\Id((int) $album['id']));
+            $albums = ($albums)(new Album\Id((int) $album['id']));
         }
 
         if (\array_key_exists('next', $resources)) {
@@ -207,8 +191,8 @@ final class Catalog
             $url = null;
 
             foreach ($resource['data'] as $genre) {
-                $genres = $genres->add(new Genre(
-                    $genre['attributes']['name']
+                $genres = ($genres)(new Genre(
+                    $genre['attributes']['name'],
                 ));
             }
 
@@ -242,7 +226,7 @@ final class Catalog
                     /** @var array{results: array{artists: array{data: list<array{id: int}>, next?: string}}} */
                     $resource = $this->get(Url::of($resource['results']['artists']['next']));
                 } while (true);
-            }
+            },
         );
 
         /** @var Sequence<Album\Id> */
@@ -261,7 +245,7 @@ final class Catalog
                     /** @var array{results: array{albums: array{data: list<array{id: int}>, next?: string}}} */
                     $resource = $this->get(Url::of($resource['results']['albums']['next']));
                 } while (true);
-            }
+            },
         );
 
         /** @var Sequence<Song\Id> */
@@ -280,7 +264,7 @@ final class Catalog
                     /** @var array{results: array{songs: array{data: list<array{id: int}>, next?: string}}} */
                     $resource = $this->get(Url::of($resource['results']['songs']['next']));
                 } while (true);
-            }
+            },
         );
 
         return new Search($term, $artists, $albums, $songs);
@@ -292,7 +276,7 @@ final class Catalog
             $url,
             Method::get(),
             new ProtocolVersion(2, 0),
-            Headers::of($this->authorization)
+            Headers::of($this->authorization),
         ));
 
         /** @var array */

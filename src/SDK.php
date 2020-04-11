@@ -40,7 +40,7 @@ final class SDK
             ->withClaim('exp', (int) ($clock->now()->goForward($tokenValidity)->milliseconds() / 1000))
             ->getToken(
                 new Sha256,
-                new Signer\Key($key->content()->toString())
+                new Signer\Key($key->content()->toString()),
             );
 
         $this->clock = $clock;
@@ -58,7 +58,7 @@ final class SDK
         return new SDK\Library(
             $this->transport,
             $this->authorization,
-            new Header('Music-User-Token', new Value($userToken))
+            new Header('Music-User-Token', new Value($userToken)),
         );
     }
 
@@ -68,7 +68,7 @@ final class SDK
             $this->clock,
             $this->transport,
             $this->authorization,
-            $storefront
+            $storefront,
         );
     }
 }

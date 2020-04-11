@@ -50,11 +50,9 @@ final class Library
             new Storefront\Name($resource['data'][0]['attributes']['name']),
             new Storefront\Language($resource['data'][0]['attributes']['defaultLanguageTag']),
             ...\array_map(
-                static function(string $language): Storefront\Language {
-                    return new Storefront\Language($language);
-                },
-                $resource['data'][0]['attributes']['supportedLanguageTags']
-            )
+                static fn(string $language): Storefront\Language => new Storefront\Language($language),
+                $resource['data'][0]['attributes']['supportedLanguageTags'],
+            ),
         );
     }
 
@@ -77,7 +75,7 @@ final class Library
                     foreach ($resource['data'] as $artist) {
                         yield new Artist(
                             new Artist\Id($artist['id']),
-                            new Artist\Name($artist['attributes']['name'])
+                            new Artist\Name($artist['attributes']['name']),
                         );
                     }
 
@@ -85,7 +83,7 @@ final class Library
                         $url = Url::of($resource['next']);
                     }
                 } while ($url instanceof Url);
-            }
+            },
         );
     }
 
@@ -104,13 +102,13 @@ final class Library
             $url = null;
 
             foreach ($resource['data'] as $album) {
-                $albums = $albums->add(new Album(
+                $albums = ($albums)(new Album(
                     new Album\Id($album['id']),
                     new Album\Name($album['attributes']['name']),
                     \array_key_exists('artwork', $album['attributes']) ? new Album\Artwork(
                         new Album\Artwork\Width($album['attributes']['artwork']['width']),
                         new Album\Artwork\Height($album['attributes']['artwork']['height']),
-                        Url::of($album['attributes']['artwork']['url'])
+                        Url::of($album['attributes']['artwork']['url']),
                     ) : null,
                     ...\array_map(
                         static function(array $artist): Artist\Id {
@@ -149,48 +147,37 @@ final class Library
                 /** @var Set<Song\Genre> */
                 $genres = Set::of(
                     Song\Genre::class,
-                    ...\array_reduce(
+                    ...\array_map(
+                        static fn(string $genre): Song\Genre => new Song\Genre($genre),
                         $song['attributes']['genreNames'],
-                        static function(array $genres, string $genre): array {
-                            $genres[] = new Song\Genre($genre);
-
-                            return $genres;
-                        },
-                        []
-                    )
+                    ),
                 );
                 /** @var Set<Album\Id> */
                 $albums = Set::of(
                     Album\Id::class,
-                    ...\array_reduce(
-                        $song['relationships']['albums']['data'],
-                        static function(array $albums, array $album): array {
+                    ...\array_map(
+                        static function(array $album): Album\Id {
                             /** @var array{id: string} $album */
 
-                            $albums[] = new Album\Id($album['id']);
-
-                            return $albums;
+                            return new Album\Id($album['id']);
                         },
-                        []
-                    )
+                        $song['relationships']['albums']['data'],
+                    ),
                 );
                 /** @var Set<Artist\Id> */
                 $artists = Set::of(
                     Artist\Id::class,
-                    ...\array_reduce(
-                        $song['relationships']['artists']['data'],
-                        static function(array $artists, array $artist): array {
+                    ...\array_map(
+                        static function(array $artist): Artist\Id {
                             /** @var array{id: string} $artist */
 
-                            $artists[] = new Artist\Id($artist['id']);
-
-                            return $artists;
+                            return new Artist\Id($artist['id']);
                         },
-                        []
-                    )
+                        $song['relationships']['artists']['data'],
+                    ),
                 );
 
-                $songs = $songs->add(new Song(
+                $songs = ($songs)(new Song(
                     new Song\Id($song['id']),
                     new Song\Name($song['attributes']['name']),
                     new Song\Duration($song['attributes']['durationInMillis']),
@@ -217,8 +204,8 @@ final class Library
             new ProtocolVersion(2, 0),
             Headers::of(
                 $this->authorization,
-                $this->userToken
-            )
+                $this->userToken,
+            ),
         ));
 
         /** @var array */
