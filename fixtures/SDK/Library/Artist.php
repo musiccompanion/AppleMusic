@@ -13,12 +13,12 @@ final class Artist
      */
     public static function any(): Set
     {
-        return new Set\Composite(
+        return Set\Composite::immutable(
             static function($id, $name): Model {
                 return new Model($id, $name);
             },
             Artist\Id::any(),
-            Artist\Name::any()
+            Artist\Name::any(),
         );
     }
 }

@@ -19,7 +19,6 @@ class ArtistTest extends TestCase
     {
         $this
             ->forAll(Id::any(), Name::any())
-            ->take(1000)
             ->then(function($id, $name) {
                 $artist = new Artist($id, $name);
 

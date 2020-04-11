@@ -7,7 +7,7 @@ use MusicCompanion\AppleMusic\Exception\DomainException;
 
 final class Height
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {
@@ -23,7 +23,7 @@ final class Height
         return $this->value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return (string) $this->value;
     }

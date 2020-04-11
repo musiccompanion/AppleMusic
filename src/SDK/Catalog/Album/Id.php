@@ -7,7 +7,7 @@ use MusicCompanion\AppleMusic\Exception\DomainException;
 
 final class Id
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {
@@ -23,7 +23,7 @@ final class Id
         return $this->value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return (string) $this->value;
     }

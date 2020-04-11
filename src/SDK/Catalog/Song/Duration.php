@@ -10,7 +10,7 @@ use MusicCompanion\AppleMusic\Exception\DomainException;
  */
 final class Duration
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {

@@ -20,6 +20,8 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set as DataSet,
 };
+use Fixtures\Innmind\Immutable\Set as ISet;
+use Fixtures\Innmind\Url\Url;
 
 class ArtistTest extends TestCase
 {
@@ -31,11 +33,10 @@ class ArtistTest extends TestCase
             ->forAll(
                 Id::any(),
                 Name::any(),
-                DataSet\Url::of(),
-                DataSet\Set::of(Genre::class, GenreSet::any()),
-                DataSet\Set::of(Album\Id::class, AlbumSet\Id::any())
+                Url::any(),
+                ISet::of(Genre::class, GenreSet::any()),
+                ISet::of(Album\Id::class, AlbumSet\Id::any())
             )
-            ->take(1000)
             ->then(function($id, $name, $url, $genres, $albums) {
                 $artist = new Artist(
                     $id,
@@ -59,13 +60,13 @@ class ArtistTest extends TestCase
             ->forAll(
                 Id::any(),
                 Name::any(),
-                DataSet\Url::of(),
-                new DataSet\Strings
+                Url::any(),
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
             )
-            ->take(1000)
+            ->disableShrinking()
             ->then(function($id, $name, $url, string $type) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 3 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
+                $this->expectExceptionMessage('Argument 3 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
 
                 new Artist(
                     $id,
@@ -83,13 +84,13 @@ class ArtistTest extends TestCase
             ->forAll(
                 Id::any(),
                 Name::any(),
-                DataSet\Url::of(),
-                new DataSet\Strings
+                Url::any(),
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
             )
-            ->take(1000)
+            ->disableShrinking()
             ->then(function($id, $name, $url, string $type) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 4 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Album\Id>');
+                $this->expectExceptionMessage('Argument 4 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Album\Id>');
 
                 new Artist(
                     $id,

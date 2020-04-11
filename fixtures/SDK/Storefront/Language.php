@@ -13,21 +13,17 @@ final class Language
      */
     public static function any(): Set
     {
-        $char = Set\Chars::of()->filter(static function($char): bool {
-            return \in_array($char, \range('a', 'z'), true);
-        });
-        $region = Set\Chars::of()->filter(static function($char): bool {
-            return \in_array($char, \range('A', 'Z'), true);
-        });
+        $char = Set\Elements::of(...\range('a', 'z'));
+        $region = Set\Elements::of(...\range('A', 'Z'));
 
-        return Set\Composite::of(
+        return Set\Composite::immutable(
             static function(string $char1, string $char2, string $region1, string $region2): Model {
                 return new Model($char1.$char2.'-'.$region1.$region2);
             },
             $char,
             $char,
             $region,
-            $region
+            $region,
         )->take(100);
     }
 }

@@ -9,7 +9,7 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Album,
     Genre,
 };
-use Innmind\Url\UrlInterface;
+use Innmind\Url\Url;
 use Innmind\Immutable\Set;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
@@ -29,6 +29,9 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set as DataSet,
 };
+use Fixtures\Innmind\Immutable\Set as ISet;
+use Fixtures\Innmind\Url\Url as FUrl;
+use Fixtures\Innmind\TimeContinuum\Earth\PointInTime;
 
 class SongTest extends TestCase
 {
@@ -39,21 +42,20 @@ class SongTest extends TestCase
         $this
             ->forAll(
                 Id::any(),
-                DataSet\Set::of(UrlInterface::class, DataSet\Url::of()),
+                ISet::of(Url::class, FUrl::any()),
                 Artwork::any(),
-                DataSet\Url::of(),
+                FUrl::any(),
                 DiscNumber::any(),
-                DataSet\Set::of(Genre::class, GenreSet::any()),
+                ISet::of(Genre::class, GenreSet::any()),
                 Duration::any(),
-                DataSet\PointInTime::of(),
+                PointInTime::any(),
                 Name::any(),
                 ISRC::any(),
                 TrackNumber::any(),
                 Composer::any(),
-                DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any()),
-                DataSet\Set::of(Album\Id::class, AlbumSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
+                ISet::of(Album\Id::class, AlbumSet\Id::any())
             )
-            ->take(1000)
             ->then(function($id, $previews, $artwork, $url, $discNumber, $genres, $duration, $release, $name, $isrc, $trackNumber, $composer, $artists, $albums) {
                 $song = new Song(
                     $id,

@@ -13,11 +13,11 @@ final class Duration
      */
     public static function any(): Set
     {
-        return new Set\Decorate(
+        return Set\Decorate::immutable(
             static function(int $number): Model {
                 return new Model($number);
             },
-            new Set\NaturalNumbersExceptZero
+            Set\NaturalNumbersExceptZero::any(),
         );
     }
 }

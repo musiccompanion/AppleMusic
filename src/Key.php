@@ -9,9 +9,9 @@ use Innmind\Immutable\Str;
 
 final class Key
 {
-    private $id;
-    private $teamId;
-    private $content;
+    private string $id;
+    private string $teamId;
+    private Readable $content;
 
     public function __construct(string $id, string $teamId, Readable $content)
     {

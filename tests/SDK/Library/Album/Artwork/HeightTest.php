@@ -20,19 +20,19 @@ class HeightTest extends TestCase
     public function testItCanBeOfAnyNaturalNumber()
     {
         $this
-            ->forAll(new Set\NaturalNumbersExceptZero)
+            ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
                 $height = new Height($number);
 
                 $this->assertSame($number, $height->toInt());
-                $this->assertSame((string) $number, (string) $height);
+                $this->assertSame((string) $number, $height->toString());
             });
     }
 
     public function testNegativeNumbersAreNotAccepted()
     {
         $this
-            ->forAll(Set\Integers::of(null, 1))
+            ->forAll(Set\Integers::below(1))
             ->then(function(int $negative) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);

@@ -20,19 +20,19 @@ class DurationTest extends TestCase
     public function testAnyStringIsAccepted()
     {
         $this
-            ->forAll(new Set\NaturalNumbersExceptZero)
+            ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
                 $duration = new Duration($number);
 
                 $this->assertSame($number, $duration->toInt());
-                $this->assertSame((string) $number, (string) $duration);
+                $this->assertSame((string) $number, $duration->toString());
             });
     }
 
     public function testThrowWhenNegativeNumber()
     {
         $this
-            ->forAll(Set\Integers::of(null, 1))
+            ->forAll(Set\Integers::below(1))
             ->then(function(int $number) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $number);

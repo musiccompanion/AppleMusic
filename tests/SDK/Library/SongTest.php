@@ -23,6 +23,7 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set as DataSet,
 };
+use Fixtures\Innmind\Immutable\Set as ISet;
 
 class SongTest extends TestCase
 {
@@ -36,11 +37,10 @@ class SongTest extends TestCase
                 Name::any(),
                 Duration::any(),
                 TrackNumber::any(),
-                DataSet\Set::of(Song\Genre::class, Genre::any()),
-                DataSet\Set::of(Album\Id::class, AlbumSet\Id::any()),
-                DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Song\Genre::class, Genre::any()),
+                ISet::of(Album\Id::class, AlbumSet\Id::any()),
+                ISet::of(Artist\Id::class, ArtistSet\Id::any())
             )
-            ->take(1000)
             ->then(function($id, $name, $duration, $trackNumber, $genres, $albums, $artists) {
                 $song = new Song(
                     $id,
@@ -69,14 +69,14 @@ class SongTest extends TestCase
                 Name::any(),
                 Duration::any(),
                 TrackNumber::any(),
-                new DataSet\Strings,
-                DataSet\Set::of(Album\Id::class, AlbumSet\Id::any()),
-                DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any())
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                ISet::of(Album\Id::class, AlbumSet\Id::any()),
+                ISet::of(Artist\Id::class, ArtistSet\Id::any())
             )
-            ->take(1000)
+            ->disableShrinking()
             ->then(function($id, $name, $duration, $trackNumber, $genre, $albums, $artists) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 5 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Library\Song\Genre>');
+                $this->expectExceptionMessage('Argument 5 must be of type Set<MusicCompanion\AppleMusic\SDK\Library\Song\Genre>');
 
                 new Song(
                     $id,
@@ -98,14 +98,14 @@ class SongTest extends TestCase
                 Name::any(),
                 Duration::any(),
                 TrackNumber::any(),
-                DataSet\Set::of(Song\Genre::class, Genre::any()),
-                new DataSet\Strings,
-                DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Song\Genre::class, Genre::any()),
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                ISet::of(Artist\Id::class, ArtistSet\Id::any())
             )
-            ->take(1000)
+            ->disableShrinking()
             ->then(function($id, $name, $duration, $trackNumber, $genres, $album, $artists) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 6 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Library\Album\Id>');
+                $this->expectExceptionMessage('Argument 6 must be of type Set<MusicCompanion\AppleMusic\SDK\Library\Album\Id>');
 
                 new Song(
                     $id,
@@ -127,14 +127,14 @@ class SongTest extends TestCase
                 Name::any(),
                 Duration::any(),
                 TrackNumber::any(),
-                DataSet\Set::of(Song\Genre::class, Genre::any()),
-                DataSet\Set::of(Album\Id::class, AlbumSet\Id::any()),
-                new DataSet\Strings
+                ISet::of(Song\Genre::class, Genre::any()),
+                ISet::of(Album\Id::class, AlbumSet\Id::any()),
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
             )
-            ->take(1000)
+            ->disableShrinking()
             ->then(function($id, $name, $duration, $trackNumber, $genres, $albums, $artist) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 7 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Library\Artist\Id>');
+                $this->expectExceptionMessage('Argument 7 must be of type Set<MusicCompanion\AppleMusic\SDK\Library\Artist\Id>');
 
                 new Song(
                     $id,

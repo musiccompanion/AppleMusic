@@ -19,25 +19,22 @@ class IdTest extends TestCase
 
     public function testStringsOfSpecifiedFormatAreAccepted()
     {
-        $char = Set\Chars::of()->filter(static function(string $char): bool {
-            return (bool) \preg_match('~^[a-zA-Z0-9]$~', $char);
-        });
+        $chars = Set\Regex::for('^[a-zA-Z0-9]{7}$');
 
         $this
-            ->forAll(...\array_fill(0, 7, $char))
-            ->take(1000)
-            ->then(function(string ...$chars) {
-                $string = 'l.'.implode('', $chars);
+            ->forAll($chars)
+            ->then(function(string $chars) {
+                $string = 'l.'.$chars;
                 $id = new Id($string);
 
-                $this->assertSame($string, (string) $id);
+                $this->assertSame($string, $id->toString());
             });
     }
 
     public function testAnyRandomStringIsRejected()
     {
         $this
-            ->forAll(new Set\Strings)
+            ->forAll(Set\Strings::any())
             ->then(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);

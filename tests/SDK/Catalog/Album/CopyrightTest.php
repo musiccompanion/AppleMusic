@@ -21,7 +21,7 @@ class CopyrightTest extends TestCase
             ->then(function(string $string) {
                 $copyright = new Copyright($string);
 
-                $this->assertSame($string, (string) $copyright);
+                $this->assertSame($string, $copyright->toString());
             });
     }
 }

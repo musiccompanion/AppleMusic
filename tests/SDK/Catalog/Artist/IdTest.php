@@ -20,19 +20,19 @@ class IdTest extends TestCase
     public function testRealNumbersAreAccepted()
     {
         $this
-            ->forAll(new Set\NaturalNumbers)
+            ->forAll(Set\NaturalNumbers::any())
             ->then(function(int $number) {
                 $id = new Id($number);
 
                 $this->assertSame($number, $id->toInt());
-                $this->assertSame((string) $number, (string) $id);
+                $this->assertSame((string) $number, $id->toString());
             });
     }
 
     public function testNegativeNumbersAreRejected()
     {
         $this
-            ->forAll(Set\Integers::of(null, 0))
+            ->forAll(Set\Integers::below(0))
             ->then(function(int $negative) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);

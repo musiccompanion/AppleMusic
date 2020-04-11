@@ -19,17 +19,14 @@ class IdTest extends TestCase
 
     public function testAnyCountryCodeIsAccepted()
     {
-        $char = Set\Chars::of()->filter(static function($char): bool {
-            return \in_array($char, \range('a', 'z'), true);
-        });
+        $char = Set\Elements::of(...\range('a', 'z'));
 
         $this
             ->forAll($char, $char)
-            ->take(1000)
             ->then(function(string $char1, string $char2) {
                 $id = new Id($char1.$char2);
 
-                $this->assertSame($char1.$char2, (string) $id);
+                $this->assertSame($char1.$char2, $id->toString());
             });
     }
 
@@ -37,11 +34,10 @@ class IdTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Strings::of()->filter(static function($string): bool {
+                Set\Strings::any()->filter(static function($string): bool {
                     return !\preg_match('~^[a-z]{2}$~', $string);
                 })
             )
-            ->take(1000)
             ->then(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);

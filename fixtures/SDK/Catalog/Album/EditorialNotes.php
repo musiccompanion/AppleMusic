@@ -13,12 +13,12 @@ final class EditorialNotes
      */
     public static function any(): Set
     {
-        return new Set\Composite(
+        return Set\Composite::immutable(
             static function($standard, $short): Model {
                 return new Model($standard, $short);
             },
-            new Set\Strings,
-            new Set\Strings
+            Set\Strings::any(),
+            Set\Strings::any(),
         );
     }
 }

@@ -9,6 +9,8 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Genre as GenreModel,
 };
 use Innmind\BlackBox\Set;
+use Fixtures\Innmind\Immutable\Set as ISet;
+use Fixtures\Innmind\Url\Url;
 
 final class Artist
 {
@@ -23,9 +25,9 @@ final class Artist
             },
             Artist\Id::any(),
             Artist\Name::any(),
-            Set\Url::any(),
-            Set\Set::of(GenreModel::class, Genre::any()),
-            Set\Set::of(AlbumModel\Id::class, Album\Id::any())
+            Url::any(),
+            ISet::of(GenreModel::class, Genre::any()),
+            ISet::of(AlbumModel\Id::class, Album\Id::any()),
         );
     }
 }

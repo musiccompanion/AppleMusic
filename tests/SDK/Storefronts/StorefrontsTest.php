@@ -1,10 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK;
+namespace Tests\MusicCompanion\AppleMusic\SDK\Storefronts;
 
 use MusicCompanion\AppleMusic\SDK\{
-    Storefronts,
+    Storefronts\Storefronts,
+    Storefronts as StorefrontsInterface,
     Storefront,
 };
 use Innmind\HttpTransport\Transport;
@@ -14,11 +15,23 @@ use Innmind\Http\{
     Message\Response,
 };
 use Innmind\Stream\Readable;
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class StorefrontsTest extends TestCase
 {
+    public function testInterface()
+    {
+        $this->assertInstanceOf(
+            StorefrontsInterface::class,
+            new Storefronts(
+                $this->createMock(Transport::class),
+                Authorization::of('Bearer', 'jwt'),
+            ),
+        );
+    }
+
     public function testAll()
     {
         $storefronts = new Storefronts(
@@ -29,8 +42,8 @@ class StorefrontsTest extends TestCase
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request) use ($authorization): bool {
-                return (string) $request->url() === '/v1/storefronts' &&
-                    (string) $request->method() === 'GET' &&
+                return $request->url()->toString() === '/v1/storefronts' &&
+                    $request->method()->toString() === 'GET' &&
                     $request->headers()->get('authorization') === $authorization;
             }))
             ->willReturn($response = $this->createMock(Response::class));
@@ -40,7 +53,7 @@ class StorefrontsTest extends TestCase
             ->willReturn($body = $this->createMock(Readable::class));
         $body
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn(<<<JSON
 {
   "data": [
@@ -1629,13 +1642,14 @@ JSON
 
         $all = $storefronts->all();
 
-        $this->assertInstanceOf(SetInterface::class, $all);
-        $this->assertSame(Storefront::class, (string) $all->type());
+        $this->assertInstanceOf(Set::class, $all);
+        $this->assertSame(Storefront::class, $all->type());
+        $all = unwrap($all);
         $this->assertCount(115, $all);
-        $this->assertSame('ai', (string) $all->current()->id());
-        $this->assertSame('Anguilla', (string) $all->current()->name());
-        $this->assertSame('en-GB', (string) $all->current()->defaultLanguage());
-        $all->next();
-        $this->assertSame('ag', (string) $all->current()->id());
+        $this->assertSame('ai', \current($all)->id()->toString());
+        $this->assertSame('Anguilla', \current($all)->name()->toString());
+        $this->assertSame('en-GB', \current($all)->defaultLanguage()->toString());
+        \next($all);
+        $this->assertSame('ag', \current($all)->id()->toString());
     }
 }

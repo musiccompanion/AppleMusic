@@ -21,7 +21,7 @@ class RecordLabelTest extends TestCase
             ->then(function(string $string) {
                 $recordLabel = new RecordLabel($string);
 
-                $this->assertSame($string, (string) $recordLabel);
+                $this->assertSame($string, $recordLabel->toString());
             });
     }
 }

@@ -7,18 +7,22 @@ use MusicCompanion\AppleMusic\SDK\Library\Album\Artwork\{
     Width,
     Height,
 };
-use Innmind\Url\UrlInterface;
+use Innmind\Url\{
+    Url,
+    Path,
+};
+use Innmind\Immutable\Str;
 
 final class Artwork
 {
-    private $width;
-    private $height;
-    private $url;
+    private Width $width;
+    private Height $height;
+    private Url $url;
 
     public function __construct(
         Width $width,
         Height $height,
-        UrlInterface $url
+        Url $url
     ) {
         $this->width = $width;
         $this->height = $height;
@@ -35,8 +39,18 @@ final class Artwork
         return $this->height;
     }
 
-    public function url(): UrlInterface
+    public function url(): Url
     {
         return $this->url;
+    }
+
+    public function ofSize(Width $width, Height $height): Url
+    {
+        $path = Str::of($this->url->path()->toString())
+            ->replace('{w}', $width->toString())
+            ->replace('{h}', $height->toString())
+            ->toString();
+
+        return $this->url->withPath(Path::of($path));
     }
 }

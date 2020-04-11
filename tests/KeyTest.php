@@ -25,7 +25,6 @@ class KeyTest extends TestCase
                 Set\Elements::of(...range('A', 'Z'), ...range(0, 9)),
                 Set\Elements::of(...range('A', 'Z'), ...range(0, 9))
             )
-            ->take(100)
             ->then(function($id, $teamId) {
                 $id = \implode(\array_pad([], 10, $id));
                 $teamId = \implode(\array_pad([], 10, $teamId));
@@ -49,7 +48,6 @@ class KeyTest extends TestCase
                 new Set\Strings,
                 Set\Elements::of(...range('A', 'Z'), ...range(0, 9))
             )
-            ->take(100)
             ->then(function($id, $teamId) {
                 $teamId = \implode(\array_pad([], 10, $teamId));
 
@@ -71,7 +69,6 @@ class KeyTest extends TestCase
                 Set\Elements::of(...range('A', 'Z'), ...range(0, 9)),
                 new Set\Strings
             )
-            ->take(100)
             ->then(function($id, $teamId) {
                 $id = \implode(\array_pad([], 10, $id));
 

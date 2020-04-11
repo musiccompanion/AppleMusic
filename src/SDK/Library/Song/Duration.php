@@ -10,7 +10,7 @@ use MusicCompanion\AppleMusic\Exception\DomainException;
  */
 final class Duration
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {
@@ -26,7 +26,7 @@ final class Duration
         return $this->value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return (string) $this->value;
     }

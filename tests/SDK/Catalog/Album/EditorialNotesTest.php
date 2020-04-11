@@ -18,7 +18,6 @@ class EditorialNotesTest extends TestCase
     {
         $this
             ->forAll(new Set\Strings, new Set\Strings)
-            ->take(1000)
             ->then(function(string $standard, string $short) {
                 $editorialNotes = new EditorialNotes($standard, $short);
 

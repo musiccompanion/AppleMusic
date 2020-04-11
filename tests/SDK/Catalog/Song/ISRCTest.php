@@ -39,13 +39,12 @@ class ISRCTest extends TestCase
                 $n,
                 $n
             )
-            ->take(1000)
             ->then(function(...$bits) {
                 $string = implode('', $bits);
 
                 $isrc = new ISRC($string);
 
-                $this->assertSame($string, (string) $isrc);
+                $this->assertSame($string, $isrc->toString());
             });
     }
 

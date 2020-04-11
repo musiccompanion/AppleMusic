@@ -21,7 +21,7 @@ class GenreTest extends TestCase
             ->then(function(string $string) {
                 $genre = new Genre($string);
 
-                $this->assertSame($string, (string) $genre);
+                $this->assertSame($string, $genre->toString());
             });
     }
 }

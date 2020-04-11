@@ -13,7 +13,7 @@ use Innmind\Immutable\Str;
  */
 final class ISRC
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $value)
     {
@@ -24,7 +24,7 @@ final class ISRC
         $this->value = $value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

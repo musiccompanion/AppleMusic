@@ -20,19 +20,19 @@ class TrackNumberTest extends TestCase
     public function testAnyStringIsAccepted()
     {
         $this
-            ->forAll(new Set\NaturalNumbersExceptZero)
+            ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
                 $trackNumber = new TrackNumber($number);
 
                 $this->assertSame($number, $trackNumber->toInt());
-                $this->assertSame((string) $number, (string) $trackNumber);
+                $this->assertSame((string) $number, $trackNumber->toString());
             });
     }
 
     public function testThrowWhenNegativeNumber()
     {
         $this
-            ->forAll(Set\Integers::of(null, 1))
+            ->forAll(Set\Integers::below(1))
             ->then(function(int $number) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $number);

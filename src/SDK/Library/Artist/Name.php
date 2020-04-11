@@ -5,14 +5,14 @@ namespace MusicCompanion\AppleMusic\SDK\Library\Artist;
 
 final class Name
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $value)
     {
         $this->value = $value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

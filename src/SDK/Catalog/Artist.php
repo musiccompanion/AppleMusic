@@ -7,24 +7,30 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Artist\{
     Id,
     Name,
 };
-use Innmind\Url\UrlInterface;
-use Innmind\Immutable\SetInterface;
+use Innmind\Url\Url;
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\assertSet;
 
 final class Artist
 {
-    private $id;
-    private $name;
-    private $url;
-    private $genres;
-    private $albums;
+    private Id $id;
+    private Name $name;
+    private Url $url;
+    /** @var Set<Genre> */
+    private Set $genres;
+    /** @var Set<Album\Id> */
+    private Set $albums;
 
+    /**
+     * @param Set<Genre> $genres
+     * @param Set<Album\Id> $albums
+     */
     public function __construct(
         Id $id,
         Name $name,
-        UrlInterface $url,
-        SetInterface $genres,
-        SetInterface $albums
+        Url $url,
+        Set $genres,
+        Set $albums
     ) {
         assertSet(Genre::class, $genres, 3);
         assertSet(Album\Id::class, $albums, 4);
@@ -46,23 +52,23 @@ final class Artist
         return $this->name;
     }
 
-    public function url(): UrlInterface
+    public function url(): Url
     {
         return $this->url;
     }
 
     /**
-     * @return SetInterface<Genre>
+     * @return Set<Genre>
      */
-    public function genres(): SetInterface
+    public function genres(): Set
     {
         return $this->genres;
     }
 
     /**
-     * @return SetInterface<Album\Id>
+     * @return Set<Album\Id>
      */
-    public function albums(): SetInterface
+    public function albums(): Set
     {
         return $this->albums;
     }

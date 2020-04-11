@@ -26,6 +26,9 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set as DataSet,
 };
+use Fixtures\Innmind\Immutable\Set as ISet;
+use Fixtures\Innmind\Url\Url;
+use Fixtures\Innmind\TimeContinuum\Earth\PointInTime;
 
 class AlbumTest extends TestCase
 {
@@ -39,18 +42,17 @@ class AlbumTest extends TestCase
                 Artwork::any(),
                 Name::any(),
                 DataSet\Elements::of(true, false),
-                DataSet\Url::of(),
+                Url::any(),
                 DataSet\Elements::of(true, false),
-                DataSet\Set::of(Genre::class, GenreSet::any()),
-                DataSet\Set::of(Song\Id::class, SongSet\Id::any()),
+                ISet::of(Genre::class, GenreSet::any()),
+                ISet::of(Song\Id::class, SongSet\Id::any()),
                 DataSet\Elements::of(true, false),
-                DataSet\PointInTime::of(),
+                PointInTime::any(),
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any(),
-                DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any())
             )
-            ->take(1000)
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $album = new Album(
                     $id,
@@ -94,19 +96,19 @@ class AlbumTest extends TestCase
                 Artwork::any(),
                 Name::any(),
                 DataSet\Elements::of(true, false),
-                DataSet\Url::of(),
+                Url::any(),
                 DataSet\Elements::of(true, false),
-                new DataSet\Strings,
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
                 DataSet\Elements::of(true, false),
-                DataSet\PointInTime::of(),
+                PointInTime::any(),
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any()
             )
-            ->take(1000)
+            ->disableShrinking()
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 7 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
+                $this->expectExceptionMessage('Argument 7 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
 
                 new Album(
                     $id,
@@ -135,19 +137,19 @@ class AlbumTest extends TestCase
                 Artwork::any(),
                 Name::any(),
                 DataSet\Elements::of(true, false),
-                DataSet\Url::of(),
+                Url::any(),
                 DataSet\Elements::of(true, false),
-                new DataSet\Strings,
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
                 DataSet\Elements::of(true, false),
-                DataSet\PointInTime::of(),
+                PointInTime::any(),
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any()
             )
-            ->take(1000)
+            ->disableShrinking()
             ->then(function($id, $artwork, $name, $single, $url, $complete, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 8 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Song\Id>');
+                $this->expectExceptionMessage('Argument 8 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Song\Id>');
 
                 new Album(
                     $id,
@@ -176,19 +178,19 @@ class AlbumTest extends TestCase
                 Artwork::any(),
                 Name::any(),
                 DataSet\Elements::of(true, false),
-                DataSet\Url::of(),
+                Url::any(),
                 DataSet\Elements::of(true, false),
                 DataSet\Elements::of(true, false),
-                DataSet\PointInTime::of(),
+                PointInTime::any(),
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any(),
-                new DataSet\Strings
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
             )
-            ->take(1000)
+            ->disableShrinking()
             ->then(function($id, $artwork, $name, $single, $url, $complete, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 14 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Artist\Id>');
+                $this->expectExceptionMessage('Argument 14 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Artist\Id>');
 
                 new Album(
                     $id,

@@ -8,17 +8,15 @@ use MusicCompanion\AppleMusic\SDK\Storefront\{
     Name,
     Language,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class Storefront
 {
-    private $id;
-    private $name;
-    private $defaultLanguage;
-    private $supportedLanguages;
+    private Id $id;
+    private Name $name;
+    private Language $defaultLanguage;
+    /** @var Set<Language> */
+    private Set $supportedLanguages;
 
     public function __construct(
         Id $id,
@@ -29,6 +27,7 @@ final class Storefront
         $this->id = $id;
         $this->name = $name;
         $this->defaultLanguage = $defaultLanguage;
+        /** @var Set<Language> */
         $this->supportedLanguages = Set::of(Language::class, ...$supportedLanguages);
     }
 
@@ -48,9 +47,9 @@ final class Storefront
     }
 
     /**
-     * @return SetInterface<Language>
+     * @return Set<Language>
      */
-    public function supportedLanguages(): SetInterface
+    public function supportedLanguages(): Set
     {
         return $this->supportedLanguages;
     }

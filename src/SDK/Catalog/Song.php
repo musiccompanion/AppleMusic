@@ -12,45 +12,55 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Song\{
     TrackNumber,
     Composer,
 };
-use Innmind\Url\UrlInterface;
-use Innmind\TimeContinuum\PointInTimeInterface;
-use Innmind\Immutable\SetInterface;
+use Innmind\Url\Url;
+use Innmind\TimeContinuum\PointInTime;
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\assertSet;
 
 final class Song
 {
-    private $id;
-    private $previews;
-    private $artwork;
-    private $url;
-    private $discNumber;
-    private $genres;
-    private $duration;
-    private $release;
-    private $name;
-    private $isrc;
-    private $trackNumber;
-    private $composer;
-    private $artists;
-    private $albums;
+    private Id $id;
+    /** @var Set<Url> */
+    private Set $previews;
+    private Artwork $artwork;
+    private Url $url;
+    private DiscNumber $discNumber;
+    /** @var Set<Genre> */
+    private Set $genres;
+    private Duration $duration;
+    private PointInTime $release;
+    private Name $name;
+    private ISRC $isrc;
+    private TrackNumber $trackNumber;
+    private Composer $composer;
+    /** @var Set<Artist\Id> */
+    private Set $artists;
+    /** @var Set<Album\Id> */
+    private Set $albums;
 
+    /**
+     * @param Set<Url> $previews
+     * @param Set<Genre> $genres
+     * @param Set<Artist\Id> $artists
+     * @param Set<Album\Id> $albums
+     */
     public function __construct(
         Id $id,
-        SetInterface $previews,
+        Set $previews,
         Artwork $artwork,
-        UrlInterface $url,
+        Url $url,
         DiscNumber $discNumber,
-        SetInterface $genres,
+        Set $genres,
         Duration $duration,
-        PointInTimeInterface $release,
+        PointInTime $release,
         Name $name,
         ISRC $isrc,
         TrackNumber $trackNumber,
         Composer $composer,
-        SetInterface $artists,
-        SetInterface $albums
+        Set $artists,
+        Set $albums
     ) {
-        assertSet(UrlInterface::class, $previews, 2);
+        assertSet(Url::class, $previews, 2);
         assertSet(Genre::class, $genres, 6);
         assertSet(Artist\Id::class, $artists, 13);
         assertSet(Album\Id::class, $albums, 14);
@@ -77,9 +87,9 @@ final class Song
     }
 
     /**
-     * @return SetInterface<UrlInterface>
+     * @return Set<Url>
      */
-    public function previews(): SetInterface
+    public function previews(): Set
     {
         return $this->previews;
     }
@@ -89,7 +99,7 @@ final class Song
         return $this->artwork;
     }
 
-    public function url(): UrlInterface
+    public function url(): Url
     {
         return $this->url;
     }
@@ -100,9 +110,9 @@ final class Song
     }
 
     /**
-     * @return SetInterface<Genre>
+     * @return Set<Genre>
      */
-    public function genres(): SetInterface
+    public function genres(): Set
     {
         return $this->genres;
     }
@@ -112,7 +122,7 @@ final class Song
         return $this->duration;
     }
 
-    public function release(): PointInTimeInterface
+    public function release(): PointInTime
     {
         return $this->release;
     }
@@ -138,17 +148,17 @@ final class Song
     }
 
     /**
-     * @return SetInterface<Artist\Id>
+     * @return Set<Artist\Id>
      */
-    public function artists(): SetInterface
+    public function artists(): Set
     {
         return $this->artists;
     }
 
     /**
-     * @return SetInterface<Album\Id>
+     * @return Set<Album\Id>
      */
-    public function albums(): SetInterface
+    public function albums(): Set
     {
         return $this->albums;
     }

@@ -10,30 +10,35 @@ use MusicCompanion\AppleMusic\SDK\Library\Song\{
     Duration,
     TrackNumber,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\assertSet;
 
 final class Song
 {
-    private $id;
-    private $name;
-    private $duration;
-    private $trackNumber;
-    private $genres;
-    private $albums;
-    private $artists;
+    private Id $id;
+    private Name $name;
+    private Duration $duration;
+    private TrackNumber $trackNumber;
+    /** @var Set<Genre> */
+    private Set $genres;
+    /** @var Set<Album\Id> */
+    private Set $albums;
+    /** @var Set<Artist\Id> */
+    private Set $artists;
 
+    /**
+     * @param Set<Genre> $genres
+     * @param Set<Album\Id> $albums
+     * @param Set<Artist\Id> $artists
+     */
     public function __construct(
         Id $id,
         Name $name,
         Duration $duration,
         TrackNumber $trackNumber,
-        SetInterface $genres,
-        SetInterface $albums,
-        SetInterface $artists
+        Set $genres,
+        Set $albums,
+        Set $artists
     ) {
         assertSet(Genre::class, $genres, 5);
         assertSet(Album\Id::class, $albums, 6);
@@ -69,25 +74,25 @@ final class Song
     }
 
     /**
-     * @return SetInterface<Genre>
+     * @return Set<Genre>
      */
-    public function genres(): SetInterface
+    public function genres(): Set
     {
         return $this->genres;
     }
 
     /**
-     * @return SetInterface<Album\Id>
+     * @return Set<Album\Id>
      */
-    public function albums(): SetInterface
+    public function albums(): Set
     {
         return $this->albums;
     }
 
     /**
-     * @return SetInterface<Artist\Id>
+     * @return Set<Artist\Id>
      */
-    public function artists(): SetInterface
+    public function artists(): Set
     {
         return $this->artists;
     }

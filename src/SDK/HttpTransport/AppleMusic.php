@@ -15,13 +15,13 @@ use Innmind\Url\Url;
 
 final class AppleMusic implements Transport
 {
-    private $fulfill;
-    private $url;
+    private Transport $fulfill;
+    private Url $url;
 
     public function __construct(Transport $fulfill)
     {
         $this->fulfill = new ThrowOnErrorTransport($fulfill);
-        $this->url = Url::fromString('https://api.music.apple.com/');
+        $this->url = Url::of('https://api.music.apple.com/');
     }
 
     public function __invoke(Request $request): Response
@@ -34,7 +34,7 @@ final class AppleMusic implements Transport
             $request->method(),
             $request->protocolVersion(),
             $request->headers(),
-            $request->body()
+            $request->body(),
         ));
     }
 }
