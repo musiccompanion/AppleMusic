@@ -19,7 +19,10 @@ use Innmind\Http\{
 };
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Sequence,
+};
 
 final class Library
 {
@@ -56,14 +59,14 @@ final class Library
     }
 
     /**
-     * @return Set<Artist>
+     * @return Sequence<Artist>
      */
-    public function artists(): Set
+    public function artists(): Sequence
     {
         $url = $this->url('artists');
 
-        /** @var Set<Artist> */
-        return Set::lazy(
+        /** @var Sequence<Artist> */
+        return Sequence::lazy(
             Artist::class,
             function() use ($url): \Generator {
                 do {

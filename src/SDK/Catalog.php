@@ -23,7 +23,10 @@ use Innmind\Http\{
 use Innmind\Url\Url;
 use Innmind\Colour\RGBA;
 use Innmind\Json\Json;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Sequence,
+};
 
 final class Catalog
 {
@@ -223,8 +226,8 @@ final class Catalog
         /** @var array{results: array{artists: array{data: list<array{id: int}>, next?: string}, albums: array{data: list<array{id: int}>, next?: string}, songs: array{data: list<array{id: int}>, next?: string}}} */
         $resource = $this->get($url);
 
-        /** @var Set<Artist\Id> */
-        $artists = Set::lazy(
+        /** @var Sequence<Artist\Id> */
+        $artists = Sequence::lazy(
             Artist\Id::class,
             function() use ($resource): \Generator {
                 do {
@@ -242,8 +245,8 @@ final class Catalog
             }
         );
 
-        /** @var Set<Album\Id> */
-        $albums = Set::lazy(
+        /** @var Sequence<Album\Id> */
+        $albums = Sequence::lazy(
             Album\Id::class,
             function() use ($resource): \Generator {
                 do {
@@ -261,8 +264,8 @@ final class Catalog
             }
         );
 
-        /** @var Set<Song\Id> */
-        $songs = Set::lazy(
+        /** @var Sequence<Song\Id> */
+        $songs = Sequence::lazy(
             Song\Id::class,
             function() use ($resource): \Generator {
                 do {

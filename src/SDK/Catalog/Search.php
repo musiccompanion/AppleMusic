@@ -3,33 +3,33 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK\Catalog;
 
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
+use Innmind\Immutable\Sequence;
+use function Innmind\Immutable\assertSequence;
 
 final class Search
 {
     private string $term;
-    /** @var Set<Artist\Id> */
-    private Set $artists;
-    /** @var Set<Album\Id> */
-    private Set $albums;
-    /** @var Set<Song\Id> */
-    private Set $songs;
+    /** @var Sequence<Artist\Id> */
+    private Sequence $artists;
+    /** @var Sequence<Album\Id> */
+    private Sequence $albums;
+    /** @var Sequence<Song\Id> */
+    private Sequence $songs;
 
     /**
-     * @param Set<Artist\Id> $artists
-     * @param Set<Album\Id> $albums
-     * @param Set<Song\Id> $songs
+     * @param Sequence<Artist\Id> $artists
+     * @param Sequence<Album\Id> $albums
+     * @param Sequence<Song\Id> $songs
      */
     public function __construct(
         string $term,
-        Set $artists,
-        Set $albums,
-        Set $songs
+        Sequence $artists,
+        Sequence $albums,
+        Sequence $songs
     ) {
-        assertSet(Artist\Id::class, $artists, 2);
-        assertSet(Album\Id::class, $albums, 3);
-        assertSet(Song\Id::class, $songs, 4);
+        assertSequence(Artist\Id::class, $artists, 2);
+        assertSequence(Album\Id::class, $albums, 3);
+        assertSequence(Song\Id::class, $songs, 4);
 
         $this->term = $term;
         $this->artists = $artists;
@@ -43,25 +43,25 @@ final class Search
     }
 
     /**
-     * @return Set<Artist\Id>
+     * @return Sequence<Artist\Id>
      */
-    public function artists(): Set
+    public function artists(): Sequence
     {
         return $this->artists;
     }
 
     /**
-     * @return Set<Album\Id>
+     * @return Sequence<Album\Id>
      */
-    public function albums(): Set
+    public function albums(): Sequence
     {
         return $this->albums;
     }
 
     /**
-     * @return Set<Song\Id>
+     * @return Sequence<Song\Id>
      */
-    public function songs(): Set
+    public function songs(): Sequence
     {
         return $this->songs;
     }

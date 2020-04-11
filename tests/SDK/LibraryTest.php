@@ -19,7 +19,10 @@ use Innmind\Http\{
     Message\Response,
 };
 use Innmind\Stream\Readable;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Sequence,
+};
 use function Innmind\Immutable\{
     unwrap,
     first,
@@ -171,7 +174,7 @@ JSON
 
         $artists = $library->artists();
 
-        $this->assertInstanceOf(Set::class, $artists);
+        $this->assertInstanceOf(Sequence::class, $artists);
         $this->assertSame(Artist::class, $artists->type());
         $artists = unwrap($artists);
         $this->assertCount(2, $artists);
