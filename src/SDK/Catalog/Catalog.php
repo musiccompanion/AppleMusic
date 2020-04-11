@@ -52,7 +52,7 @@ final class Catalog implements CatalogInterface
     public function artist(Artist\Id $id): Artist
     {
         /** @var array{data: array{0: array{attributes: array{name: string, url: string, genreNames: list<string>}, relationships: array{albums: array{data: list<array{id: int}>, next?: string}}}}} */
-        $resource = $this->get($this->url("artists/$id"));
+        $resource = $this->get($this->url("artists/{$id->toString()}"));
 
         return new Artist(
             $id,
@@ -69,7 +69,7 @@ final class Catalog implements CatalogInterface
     public function album(Album\Id $id): Album
     {
         /** @var array{data: array{0: array{attributes: array{artwork: array{width: int, height: int, url: string, bgColor: string, textColor1: string, textColor2: string, textColor3: string, textColor4: string}, name: string, isSingle: bool, url: string, isComplete: bool, genreNames: list<string>, isMasteredForItunes: bool, releaseDate: string, recordLabel: string, copyright: string, editorialNotes: array{standard: string, short: string}}, relationships: array{tracks: array{data: list<array{id: int}>}, artists: array{data: list<array{id: int}>}}}}} */
-        $resource = $this->get($this->url("albums/$id"));
+        $resource = $this->get($this->url("albums/{$id->toString()}"));
 
         return new Album(
             $id,
@@ -113,7 +113,7 @@ final class Catalog implements CatalogInterface
     public function song(Song\Id $id): Song
     {
         /** @var array{data: array{0: array{attributes: array{previews: list<array{url: string}>, artwork: array{width: int, height: int, url: string, bgColor: string, textColor1: string, textColor2: string, textColor3: string, textColor4: string}, url: string, discNumber: int, genreNames: list<string>, durationInMillis: int, releaseDate: string, name: string, isrc: string, trackNumber: int, composerName: string}, relationships: array{artists: array{data: list<array{id: int}>}, albums: array{data: list<array{id: int}>}}}}} */
-        $resource = $this->get($this->url("songs/$id"));
+        $resource = $this->get($this->url("songs/{$id->toString()}"));
 
         return new Song(
             $id,
@@ -287,6 +287,6 @@ final class Catalog implements CatalogInterface
 
     private function url(string $path): Url
     {
-        return Url::of("/v1/catalog/{$this->storefront}/$path");
+        return Url::of("/v1/catalog/{$this->storefront->toString()}/$path");
     }
 }

@@ -27,7 +27,7 @@ class IdTest extends TestCase
                 $string = 'r.'.$chars;
                 $id = new Id($string);
 
-                $this->assertSame($string, (string) $id);
+                $this->assertSame($string, $id->toString());
             });
     }
 

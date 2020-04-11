@@ -26,7 +26,7 @@ class LanguageTest extends TestCase
             ->then(function(string $char1, string $char2) {
                 $language = new Language($char1.$char2);
 
-                $this->assertSame($char1.$char2, (string) $language);
+                $this->assertSame($char1.$char2, $language->toString());
             });
     }
 
@@ -40,7 +40,7 @@ class LanguageTest extends TestCase
             ->then(function(string $char1, string $char2, $region1, $region2) {
                 $language = new Language($char1.$char2.'-'.$region1.$region2);
 
-                $this->assertSame($char1.$char2.'-'.$region1.$region2, (string) $language);
+                $this->assertSame($char1.$char2.'-'.$region1.$region2, $language->toString());
             });
     }
 
@@ -55,7 +55,7 @@ class LanguageTest extends TestCase
             ->then(function(string $code) {
                 $language = new Language($code);
 
-                $this->assertSame($code, (string) $language);
+                $this->assertSame($code, $language->toString());
             });
     }
 

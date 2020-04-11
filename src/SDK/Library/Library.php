@@ -94,7 +94,7 @@ final class Library implements LibraryInterface
      */
     public function albums(Artist\Id $artist): Set
     {
-        $url = $this->url("artists/$artist/albums?include=artists");
+        $url = $this->url("artists/{$artist->toString()}/albums?include=artists");
         /** @var Set<Album> */
         $albums = Set::of(Album::class);
 
@@ -136,7 +136,7 @@ final class Library implements LibraryInterface
      */
     public function songs(Album\Id $album): Set
     {
-        $url = $this->url("albums/$album/tracks?include=albums,artists");
+        $url = $this->url("albums/{$album->toString()}/tracks?include=albums,artists");
         /** @var Set<Song> */
         $songs = Set::of(Song::class);
 

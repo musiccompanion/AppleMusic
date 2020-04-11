@@ -25,7 +25,7 @@ class DurationTest extends TestCase
                 $duration = new Duration($number);
 
                 $this->assertSame($number, $duration->toInt());
-                $this->assertSame((string) $number, (string) $duration);
+                $this->assertSame((string) $number, $duration->toString());
             });
     }
 

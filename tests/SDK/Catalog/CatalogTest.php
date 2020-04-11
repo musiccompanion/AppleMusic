@@ -79,7 +79,7 @@ class CatalogTest extends TestCase
                     ->expects($this->at(0))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $id, $authorization) {
-                        return $request->url()->path()->toString() === "/v1/catalog/$storefront/artists/$id" &&
+                        return $request->url()->path()->toString() === "/v1/catalog/{$storefront->toString()}/artists/{$id->toString()}" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -196,13 +196,13 @@ JSON
 
                 $this->assertInstanceOf(Artist::class, $artist);
                 $this->assertSame($id, $artist->id());
-                $this->assertSame('Bruce Springsteen', (string) $artist->name());
+                $this->assertSame('Bruce Springsteen', $artist->name()->toString());
                 $this->assertSame(
                     'https://music.apple.com/fr/artist/bruce-springsteen/178834',
                     $artist->url()->toString()
                 );
                 $this->assertCount(1, $artist->genres());
-                $this->assertSame('Rock', (string) first($artist->genres()));
+                $this->assertSame('Rock', first($artist->genres())->toString());
                 $albums = unwrap($artist->albums());
                 $this->assertCount(2, $albums);
                 $this->assertSame(1459884961, \current($albums)->toInt());
@@ -229,7 +229,7 @@ JSON
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $id, $authorization) {
-                        return $request->url()->path()->toString() === "/v1/catalog/$storefront/albums/$id" &&
+                        return $request->url()->path()->toString() === "/v1/catalog/{$storefront->toString()}/albums/{$id->toString()}" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -813,7 +813,7 @@ JSON
                 $this->assertSame('#441016', $album->artwork()->textColor2()->toString());
                 $this->assertSame('#382e2a', $album->artwork()->textColor3()->toString());
                 $this->assertSame('#623436', $album->artwork()->textColor4()->toString());
-                $this->assertSame('Born In the U.S.A.', (string) $album->name());
+                $this->assertSame('Born In the U.S.A.', $album->name()->toString());
                 $this->assertFalse($album->single());
                 $this->assertSame(
                   'https://music.apple.com/fr/album/born-in-the-u-s-a/203708420',
@@ -821,12 +821,12 @@ JSON
                 );
                 $this->assertTrue($album->complete());
                 $this->assertCount(7, $album->genres());
-                $this->assertSame('Rock', (string) first($album->genres()));
+                $this->assertSame('Rock', first($album->genres())->toString());
                 $this->assertCount(12, $album->tracks());
                 $this->assertTrue($album->masteredForItunes());
                 $this->assertSame($release, $album->release());
-                $this->assertSame('Columbia', (string) $album->recordLabel());
-                $this->assertSame('℗ 1984 Bruce Springsteen', (string) $album->copyright());
+                $this->assertSame('Columbia', $album->recordLabel()->toString());
+                $this->assertSame('℗ 1984 Bruce Springsteen', $album->copyright()->toString());
                 $this->assertCount(1, $album->artists());
             });
     }
@@ -849,7 +849,7 @@ JSON
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $id, $authorization) {
-                        return $request->url()->path()->toString() === "/v1/catalog/$storefront/songs/$id" &&
+                        return $request->url()->path()->toString() === "/v1/catalog/{$storefront->toString()}/songs/{$id->toString()}" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -967,8 +967,8 @@ JSON
                 $this->assertCount(2, $song->genres());
                 $this->assertSame(279784, $song->duration()->toInt());
                 $this->assertSame($release, $song->release());
-                $this->assertSame('Born in the U.S.A. track', (string) $song->name());
-                $this->assertSame('USSM18400406', (string) $song->isrc());
+                $this->assertSame('Born in the U.S.A. track', $song->name()->toString());
+                $this->assertSame('USSM18400406', $song->isrc()->toString());
                 $this->assertSame(2, $song->trackNumber()->toInt());
                 $this->assertSame('Bruce Springsteen', $song->composer()->name());
                 $this->assertCount(1, $song->artists());
@@ -991,7 +991,7 @@ JSON
                     ->expects($this->at(0))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
-                        return $request->url()->toString() === "/v1/catalog/$storefront/genres" &&
+                        return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/genres" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -1005,7 +1005,7 @@ JSON
                     ->method('toString')
                     ->willReturn(<<<JSON
 {
-  "next": "/v1/catalog/$storefront/genres?offset=1",
+  "next": "/v1/catalog/{$storefront->toString()}/genres?offset=1",
   "data": [
     {
       "id": "34",
@@ -1023,7 +1023,7 @@ JSON
                     ->expects($this->at(1))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
-                        return $request->url()->toString() === "/v1/catalog/$storefront/genres?offset=1" &&
+                        return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/genres?offset=1" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -1057,9 +1057,9 @@ JSON
                 $this->assertSame(Genre::class, $genres->type());
                 $genres = unwrap($genres);
                 $this->assertCount(2, $genres);
-                $this->assertSame('Musique', (string) \current($genres));
+                $this->assertSame('Musique', \current($genres)->toString());
                 \next($genres);
-                $this->assertSame('Alternative', (string) \current($genres));
+                $this->assertSame('Alternative', \current($genres)->toString());
             });
     }
 
@@ -1085,7 +1085,7 @@ JSON
                     ->expects($this->at(0))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $term, $authorization): bool {
-                        return $request->url()->toString() === "/v1/catalog/$storefront/search?term=$term&types=artists,albums,songs&limit=25" &&
+                        return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?term=$term&types=artists,albums,songs&limit=25" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -1101,35 +1101,35 @@ JSON
 {
   "results": {
     "songs": {
-      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=songs",
-      "next": "/v1/catalog/$storefront/search?offset=1&term=foo&types=songs",
+      "href": "/v1/catalog/{$storefront->toString()}/search?limit=1&term=foo&types=songs",
+      "next": "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=songs",
       "data": [
         {
           "id": "482678717",
           "type": "songs",
-          "href": "/v1/catalog/$storefront/songs/482678717"
+          "href": "/v1/catalog/{$storefront->toString()}/songs/482678717"
         }
       ]
     },
     "albums": {
-      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=albums",
-      "next": "/v1/catalog/$storefront/search?offset=1&term=foo&types=albums",
+      "href": "/v1/catalog/{$storefront->toString()}/search?limit=1&term=foo&types=albums",
+      "next": "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=albums",
       "data": [
         {
           "id": "1468503258",
           "type": "albums",
-          "href": "/v1/catalog/$storefront/albums/1468503258"
+          "href": "/v1/catalog/{$storefront->toString()}/albums/1468503258"
         }
       ]
     },
     "artists": {
-      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=artists",
-      "next": "/v1/catalog/$storefront/search?offset=1&term=foo&types=artists",
+      "href": "/v1/catalog/{$storefront->toString()}/search?limit=1&term=foo&types=artists",
+      "next": "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=artists",
       "data": [
         {
           "id": "205748310",
           "type": "artists",
-          "href": "/v1/catalog/$storefront/artists/205748310"
+          "href": "/v1/catalog/{$storefront->toString()}/artists/205748310"
         }
       ]
     }
@@ -1141,7 +1141,7 @@ JSON
                     ->expects($this->at(1))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
-                        return $request->url()->toString() === "/v1/catalog/$storefront/search?offset=1&term=foo&types=artists" &&
+                        return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=artists" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -1157,12 +1157,12 @@ JSON
 {
   "results": {
     "artists": {
-      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=artists",
+      "href": "/v1/catalog/{$storefront->toString()}/search?limit=1&term=foo&types=artists",
       "data": [
         {
           "id": "205748311",
           "type": "artists",
-          "href": "/v1/catalog/$storefront/artists/205748311"
+          "href": "/v1/catalog/{$storefront->toString()}/artists/205748311"
         }
       ]
     }
@@ -1174,7 +1174,7 @@ JSON
                     ->expects($this->at(2))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
-                        return $request->url()->toString() === "/v1/catalog/$storefront/search?offset=1&term=foo&types=albums" &&
+                        return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=albums" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -1190,12 +1190,12 @@ JSON
 {
   "results": {
     "albums": {
-      "href": "/v1/catalog/$storefront/search?limit=1&term=foo&types=albums",
+      "href": "/v1/catalog/{$storefront->toString()}/search?limit=1&term=foo&types=albums",
       "data": [
         {
           "id": "1468503259",
           "type": "albums",
-          "href": "/v1/catalog/$storefront/albums/1468503259"
+          "href": "/v1/catalog/{$storefront->toString()}/albums/1468503259"
         }
       ]
     }
@@ -1207,7 +1207,7 @@ JSON
                     ->expects($this->at(3))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $authorization): bool {
-                        return $request->url()->toString() === "/v1/catalog/$storefront/search?offset=1&term=foo&types=songs" &&
+                        return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=songs" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
                     }))
@@ -1247,15 +1247,15 @@ JSON
                 $this->assertCount(2, $artists);
                 $this->assertCount(2, $albums);
                 $this->assertCount(2, $songs);
-                $this->assertSame('205748310', (string) \current($artists));
+                $this->assertSame('205748310', \current($artists)->toString());
                 \next($artists);
-                $this->assertSame('205748311', (string) \current($artists));
-                $this->assertSame('1468503258', (string) \current($albums));
+                $this->assertSame('205748311', \current($artists)->toString());
+                $this->assertSame('1468503258', \current($albums)->toString());
                 \next($albums);
-                $this->assertSame('1468503259', (string) \current($albums));
-                $this->assertSame('482678717', (string) \current($songs));
+                $this->assertSame('1468503259', \current($albums)->toString());
+                $this->assertSame('482678717', \current($songs)->toString());
                 \next($songs);
-                $this->assertSame('482678718', (string) \current($songs));
+                $this->assertSame('482678718', \current($songs)->toString());
             });
     }
 }

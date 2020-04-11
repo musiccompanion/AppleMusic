@@ -44,7 +44,7 @@ class ISRCTest extends TestCase
 
                 $isrc = new ISRC($string);
 
-                $this->assertSame($string, (string) $isrc);
+                $this->assertSame($string, $isrc->toString());
             });
     }
 

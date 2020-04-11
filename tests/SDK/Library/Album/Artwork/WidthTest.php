@@ -25,7 +25,7 @@ class WidthTest extends TestCase
                 $width = new Width($number);
 
                 $this->assertSame($number, $width->toInt());
-                $this->assertSame((string) $number, (string) $width);
+                $this->assertSame((string) $number, $width->toString());
             });
     }
 

@@ -25,7 +25,7 @@ class TrackNumberTest extends TestCase
                 $trackNumber = new TrackNumber($number);
 
                 $this->assertSame($number, $trackNumber->toInt());
-                $this->assertSame((string) $number, (string) $trackNumber);
+                $this->assertSame((string) $number, $trackNumber->toString());
             });
     }
 

@@ -100,9 +100,9 @@ JSON
         $storefront = $library->storefront();
 
         $this->assertInstanceOf(Storefront::class, $storefront);
-        $this->assertSame('fr', (string) $storefront->id());
-        $this->assertSame('France', (string) $storefront->name());
-        $this->assertSame('fr-FR', (string) $storefront->defaultLanguage());
+        $this->assertSame('fr', $storefront->id()->toString());
+        $this->assertSame('France', $storefront->name()->toString());
+        $this->assertSame('fr-FR', $storefront->defaultLanguage()->toString());
         $this->assertCount(2, $storefront->supportedLanguages());
     }
 
@@ -191,11 +191,11 @@ JSON
         $this->assertSame(Artist::class, $artists->type());
         $artists = unwrap($artists);
         $this->assertCount(2, $artists);
-        $this->assertSame('r.2S6SRHl', (string) \current($artists)->id());
-        $this->assertSame('"Weird Al" Yankovic', (string) \current($artists)->name());
+        $this->assertSame('r.2S6SRHl', \current($artists)->id()->toString());
+        $this->assertSame('"Weird Al" Yankovic', \current($artists)->name()->toString());
         \next($artists);
-        $this->assertSame('r.o860e82', (string) \current($artists)->id());
-        $this->assertSame('(hed) p.e.', (string) \current($artists)->name());
+        $this->assertSame('r.o860e82', \current($artists)->id()->toString());
+        $this->assertSame('(hed) p.e.', \current($artists)->name()->toString());
     }
 
     public function testAlbums()
@@ -212,7 +212,7 @@ JSON
                     ->expects($this->at(0))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
-                        return $request->url()->toString() === "/v1/me/library/artists/$artist/albums?include=artists" &&
+                        return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?include=artists" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization &&
                             $request->headers()->get('music-user-token') === $userToken;
@@ -227,7 +227,7 @@ JSON
                     ->method('toString')
                     ->willReturn(<<<JSON
 {
-  "next": "/v1/me/library/artists/{$artist}/albums?offset=1",
+  "next": "/v1/me/library/artists/{$artist->toString()}/albums?offset=1",
   "data": [
     {
       "id": "l.wXEf8fr",
@@ -270,7 +270,7 @@ JSON
                     ->expects($this->at(1))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
-                        return $request->url()->toString() === "/v1/me/library/artists/$artist/albums?offset=1&include=artists" &&
+                        return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization &&
                             $request->headers()->get('music-user-token') === $userToken;
@@ -335,16 +335,16 @@ JSON
                 $this->assertSame(Album::class, $albums->type());
                 $albums = unwrap($albums);
                 $this->assertCount(2, $albums);
-                $this->assertSame('l.wXEf8fr', (string) \current($albums)->id());
-                $this->assertSame('Skull & Bonus', (string) \current($albums)->name());
+                $this->assertSame('l.wXEf8fr', \current($albums)->id()->toString());
+                $this->assertSame('Skull & Bonus', \current($albums)->name()->toString());
                 $this->assertFalse(\current($albums)->hasArtwork());
                 $this->assertCount(1, \current($albums)->artists());
-                $this->assertSame('r.o860e82', (string) first(\current($albums)->artists()));
+                $this->assertSame('r.o860e82', first(\current($albums)->artists())->toString());
                 \next($albums);
-                $this->assertSame('l.gACheFi', (string) \current($albums)->id());
+                $this->assertSame('l.gACheFi', \current($albums)->id()->toString());
                 $this->assertTrue(\current($albums)->hasArtwork());
-                $this->assertSame('1200', (string) \current($albums)->artwork()->width());
-                $this->assertSame('1200', (string) \current($albums)->artwork()->height());
+                $this->assertSame('1200', \current($albums)->artwork()->width()->toString());
+                $this->assertSame('1200', \current($albums)->artwork()->height()->toString());
                 $this->assertSame(
                     'https://is2-ssl.mzstatic.com/image/thumb/Music/c5/98/81/mzi.ljuovcvg.jpg/{w}x{h}bb.jpeg',
                     \current($albums)->artwork()->url()->toString()
@@ -366,7 +366,7 @@ JSON
                     ->expects($this->at(0))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($album, $authorization, $userToken): bool {
-                        return $request->url()->toString() === "/v1/me/library/albums/$album/tracks?include=albums,artists" &&
+                        return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization &&
                             $request->headers()->get('music-user-token') === $userToken;
@@ -381,7 +381,7 @@ JSON
                     ->method('toString')
                     ->willReturn(<<<JSON
 {
-  "next": "/v1/me/library/albums/{$album}/tracks?offset=1",
+  "next": "/v1/me/library/albums/{$album->toString()}/tracks?offset=1",
   "data": [
     {
       "id": "i.mmpYYzeu4J0XGD",
@@ -444,7 +444,7 @@ JSON
                     ->expects($this->at(1))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($album, $authorization, $userToken): bool {
-                        return $request->url()->toString() === "/v1/me/library/albums/$album/tracks?offset=1&include=albums,artists" &&
+                        return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization &&
                             $request->headers()->get('music-user-token') === $userToken;
@@ -530,19 +530,19 @@ JSON
                 $this->assertSame(Song::class, $songs->type());
                 $songs = unwrap($songs);
                 $this->assertCount(2, $songs);
-                $this->assertSame('i.mmpYYzeu4J0XGD', (string) \current($songs)->id());
-                $this->assertSame('Judgement Day', (string) \current($songs)->name());
-                $this->assertSame('325459', (string) \current($songs)->duration());
-                $this->assertSame('1', (string) \current($songs)->trackNumber());
+                $this->assertSame('i.mmpYYzeu4J0XGD', \current($songs)->id()->toString());
+                $this->assertSame('Judgement Day', \current($songs)->name()->toString());
+                $this->assertSame('325459', \current($songs)->duration()->toString());
+                $this->assertSame('1', \current($songs)->trackNumber()->toString());
                 $this->assertCount(1, \current($songs)->genres());
-                $this->assertSame('Rapcore, Punk, Rap', (string) first(\current($songs)->genres()));
+                $this->assertSame('Rapcore, Punk, Rap', first(\current($songs)->genres())->toString());
                 $this->assertCount(1, \current($songs)->artists());
                 $this->assertCount(1, \current($songs)->albums());
-                $this->assertSame('r.o860e82', (string) first(\current($songs)->artists()));
-                $this->assertSame('l.wXEf8fr', (string) first(\current($songs)->albums()));
+                $this->assertSame('r.o860e82', first(\current($songs)->artists())->toString());
+                $this->assertSame('l.wXEf8fr', first(\current($songs)->albums())->toString());
                 \next($songs);
-                $this->assertSame('i.b1Jvv08sqZgz8A', (string) \current($songs)->id());
-                $this->assertSame('Takeover (feat. Axe Murder Boyz & DGAF)', (string) \current($songs)->name());
+                $this->assertSame('i.b1Jvv08sqZgz8A', \current($songs)->id()->toString());
+                $this->assertSame('Takeover (feat. Axe Murder Boyz & DGAF)', \current($songs)->name()->toString());
             });
     }
 }

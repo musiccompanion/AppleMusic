@@ -1646,10 +1646,10 @@ JSON
         $this->assertSame(Storefront::class, $all->type());
         $all = unwrap($all);
         $this->assertCount(115, $all);
-        $this->assertSame('ai', (string) \current($all)->id());
-        $this->assertSame('Anguilla', (string) \current($all)->name());
-        $this->assertSame('en-GB', (string) \current($all)->defaultLanguage());
+        $this->assertSame('ai', \current($all)->id()->toString());
+        $this->assertSame('Anguilla', \current($all)->name()->toString());
+        $this->assertSame('en-GB', \current($all)->defaultLanguage()->toString());
         \next($all);
-        $this->assertSame('ag', (string) \current($all)->id());
+        $this->assertSame('ag', \current($all)->id()->toString());
     }
 }
