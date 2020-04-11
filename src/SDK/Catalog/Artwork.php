@@ -7,8 +7,12 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Artwork\{
     Width,
     Height,
 };
-use Innmind\Url\Url;
+use Innmind\Url\{
+    Url,
+    Path,
+};
 use Innmind\Colour\RGBA;
+use Innmind\Immutable\Str;
 
 final class Artwork
 {
@@ -79,5 +83,15 @@ final class Artwork
     public function textColor4(): RGBA
     {
         return $this->textColor4;
+    }
+
+    public function ofSize(Width $width, Height $height): Url
+    {
+        $path = Str::of($this->url->path()->toString())
+            ->replace('{w}', (string) $width)
+            ->replace('{h}', (string) $height)
+            ->toString();
+
+        return $this->url->withPath(Path::of($path));
     }
 }
