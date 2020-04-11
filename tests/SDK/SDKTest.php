@@ -1,10 +1,14 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic;
+namespace Tests\MusicCompanion\AppleMusic\SDK;
 
 use MusicCompanion\AppleMusic\{
-    SDK,
+    SDK\SDK,
+    SDK as SDKInterface,
+    SDK\Storefronts,
+    SDK\Catalog,
+    SDK\Library,
     Key,
 };
 use Innmind\TimeContinuum\{
@@ -91,9 +95,10 @@ KEY
                     new Minute(1)
                 );
 
-                $this->assertInstanceOf(SDK\Storefronts::class, $sdk->storefronts());
-                $this->assertInstanceOf(SDK\Catalog::class, $sdk->catalog($storefront));
-                $this->assertInstanceOf(SDK\Library::class, $sdk->library($userToken));
+                $this->assertInstanceOf(SDKInterface::class, $sdk);
+                $this->assertInstanceOf(Storefronts::class, $sdk->storefronts());
+                $this->assertInstanceOf(Catalog::class, $sdk->catalog($storefront));
+                $this->assertInstanceOf(Library::class, $sdk->library($userToken));
                 $sdk->storefronts()->all(); // trigger the assertion on the transport
             });
     }

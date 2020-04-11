@@ -1,10 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK;
+namespace Tests\MusicCompanion\AppleMusic\SDK\Storefronts;
 
 use MusicCompanion\AppleMusic\SDK\{
-    Storefronts,
+    Storefronts\Storefronts,
+    Storefronts as StorefrontsInterface,
     Storefront,
 };
 use Innmind\HttpTransport\Transport;
@@ -20,6 +21,17 @@ use PHPUnit\Framework\TestCase;
 
 class StorefrontsTest extends TestCase
 {
+    public function testInterface()
+    {
+        $this->assertInstanceOf(
+            StorefrontsInterface::class,
+            new Storefronts(
+                $this->createMock(Transport::class),
+                Authorization::of('Bearer', 'jwt'),
+            ),
+        );
+    }
+
     public function testAll()
     {
         $storefronts = new Storefronts(
