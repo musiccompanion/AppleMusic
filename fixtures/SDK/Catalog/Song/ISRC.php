@@ -13,12 +13,12 @@ final class ISRC
      */
     public static function any(): Set
     {
-        $c = Set\Elements::of(...range('A', 'Z'));
-        $x = Set\Elements::of(...range('A', 'Z'), ...range(0, 9));
-        $y = Set\Elements::of(...range(0, 9));
-        $n = Set\Elements::of(...range(0, 9));
+        $c = Set\Elements::of(...\range('A', 'Z'));
+        $x = Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9));
+        $y = Set\Elements::of(...\range(0, 9));
+        $n = Set\Elements::of(...\range(0, 9));
 
-        return new Set\Composite(
+        return Set\Composite::immutable(
             static function(...$bits): Model {
                 return new Model(\implode('', $bits));
             },
@@ -33,7 +33,7 @@ final class ISRC
             $n,
             $n,
             $n,
-            $n
+            $n,
         );
     }
 }

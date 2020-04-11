@@ -4,8 +4,8 @@ declare(strict_types = 1);
 namespace MusicCompanion\AppleMusic;
 
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    PeriodInterface,
+    Clock,
+    Period,
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Stream\Readable;
@@ -13,7 +13,6 @@ use Innmind\Http\Header\{
     Header,
     Value\Value,
     Authorization,
-    AuthorizationValue,
 };
 use Lcobucci\JWT\{
     Builder,
@@ -24,14 +23,14 @@ use Lcobucci\JWT\{
 final class SDK
 {
     private Transport $transport;
-    private TimeContinuumInterface $clock;
+    private Clock $clock;
     private Authorization $authorization;
 
     public function __construct(
-        TimeContinuumInterface $clock,
+        Clock $clock,
         Transport $transport,
         Key $key,
-        PeriodInterface $tokenValidity
+        Period $tokenValidity
     ) {
         $jwt = (new Builder)
             ->withHeader('alg', 'ES256')
@@ -41,14 +40,12 @@ final class SDK
             ->withClaim('exp', (int) ($clock->now()->goForward($tokenValidity)->milliseconds() / 1000))
             ->getToken(
                 new Sha256,
-                new Signer\Key((string) $key->content())
+                new Signer\Key($key->content()->toString())
             );
 
         $this->clock = $clock;
         $this->transport = new SDK\HttpTransport\AppleMusic($transport);
-        $this->authorization = new Authorization(
-            new AuthorizationValue('Bearer', (string) $jwt)
-        );
+        $this->authorization = Authorization::of('Bearer', (string) $jwt);
     }
 
     public function storefronts(): SDK\Storefronts

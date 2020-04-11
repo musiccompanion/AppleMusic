@@ -3,21 +3,21 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK\Catalog;
 
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\assertSet;
 
 final class Search
 {
     private string $term;
-    private SetInterface $artists;
-    private SetInterface $albums;
-    private SetInterface $songs;
+    private Set $artists;
+    private Set $albums;
+    private Set $songs;
 
     public function __construct(
         string $term,
-        SetInterface $artists,
-        SetInterface $albums,
-        SetInterface $songs
+        Set $artists,
+        Set $albums,
+        Set $songs
     ) {
         assertSet(Artist\Id::class, $artists, 2);
         assertSet(Album\Id::class, $albums, 3);
@@ -35,25 +35,25 @@ final class Search
     }
 
     /**
-     * @return SetInterface<Artist\Id>
+     * @return Set<Artist\Id>
      */
-    public function artists(): SetInterface
+    public function artists(): Set
     {
         return $this->artists;
     }
 
     /**
-     * @return SetInterface<Album\Id>
+     * @return Set<Album\Id>
      */
-    public function albums(): SetInterface
+    public function albums(): Set
     {
         return $this->albums;
     }
 
     /**
-     * @return SetInterface<Song\Id>
+     * @return Set<Song\Id>
      */
-    public function songs(): SetInterface
+    public function songs(): Set
     {
         return $this->songs;
     }

@@ -13,11 +13,13 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Album\Artwork,
     Artist as ArtistSet,
 };
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
+use Fixtures\Innmind\Immutable\Set as ISet;
 
 class AlbumTest extends TestCase
 {
@@ -30,11 +32,10 @@ class AlbumTest extends TestCase
                 Id::any(),
                 Name::any(),
                 Artwork::any(),
-                Set\Set::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any())
             )
-            ->take(1000)
             ->then(function($id, $name, $artwork, $artists) {
-                $album = new Album($id, $name, $artwork, ...$artists);
+                $album = new Album($id, $name, $artwork, ...unwrap($artists));
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());
@@ -50,11 +51,10 @@ class AlbumTest extends TestCase
             ->forAll(
                 Id::any(),
                 Name::any(),
-                Set\Set::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any())
             )
-            ->take(1000)
             ->then(function($id, $name, $artists) {
-                $album = new Album($id, $name, null, ...$artists);
+                $album = new Album($id, $name, null, ...unwrap($artists));
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());

@@ -7,18 +7,18 @@ use MusicCompanion\AppleMusic\SDK\Library\Album\Artwork\{
     Width,
     Height,
 };
-use Innmind\Url\UrlInterface;
+use Innmind\Url\Url;
 
 final class Artwork
 {
     private Width $width;
     private Height $height;
-    private UrlInterface $url;
+    private Url $url;
 
     public function __construct(
         Width $width,
         Height $height,
-        UrlInterface $url
+        Url $url
     ) {
         $this->width = $width;
         $this->height = $height;
@@ -35,7 +35,7 @@ final class Artwork
         return $this->height;
     }
 
-    public function url(): UrlInterface
+    public function url(): Url
     {
         return $this->url;
     }

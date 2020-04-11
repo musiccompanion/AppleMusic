@@ -7,14 +7,14 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Artwork\{
     Width,
     Height,
 };
-use Innmind\Url\UrlInterface;
+use Innmind\Url\Url;
 use Innmind\Colour\RGBA;
 
 final class Artwork
 {
     private Width $width;
     private Height $height;
-    private UrlInterface $url;
+    private Url $url;
     private RGBA $backgroundColor;
     private RGBA $textColor1;
     private RGBA $textColor2;
@@ -24,7 +24,7 @@ final class Artwork
     public function __construct(
         Width $width,
         Height $height,
-        UrlInterface $url,
+        Url $url,
         RGBA $backgroundColor,
         RGBA $textColor1,
         RGBA $textColor2,
@@ -51,7 +51,7 @@ final class Artwork
         return $this->height;
     }
 
-    public function url(): UrlInterface
+    public function url(): Url
     {
         return $this->url;
     }

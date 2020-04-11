@@ -12,15 +12,16 @@ use Innmind\HttpTransport\{
 use Innmind\Http\{
     Message\Request\Request,
     Message\Response,
-    Message\Method\Method,
-    Message\StatusCode\StatusCode,
-    ProtocolVersion\ProtocolVersion,
+    Message\Method,
+    Message\StatusCode,
+    ProtocolVersion,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
+use Fixtures\Innmind\Url\Url;
 
 class AppleMusicTest extends TestCase
 {
@@ -30,10 +31,9 @@ class AppleMusicTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Url::of(),
-                Set\Integers::of(200, 208)
+                Url::any(),
+                Set\Integers::between(200, 208)
             )
-            ->take(100)
             ->then(function($url, $statusCode) {
                 $fulfill = new AppleMusic(
                     $inner = $this->createMock(Transport::class)
@@ -47,8 +47,8 @@ class AppleMusicTest extends TestCase
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($url, $initial): bool {
-                        return (string) $request->url()->scheme() === 'https' &&
-                            (string) $request->url()->authority() === 'api.music.apple.com' &&
+                        return $request->url()->scheme()->toString() === 'https' &&
+                            $request->url()->authority()->toString() === 'api.music.apple.com' &&
                             $request->url()->path() === $initial->url()->path() &&
                             $request->url()->query() === $initial->url()->query() &&
                             $request->method() === $initial->method() &&
@@ -70,10 +70,9 @@ class AppleMusicTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Url::of(),
-                Set\Integers::of(400, 418)
+                Url::any(),
+                Set\Integers::between(400, 418)
             )
-            ->take(100)
             ->then(function($url, $statusCode) {
                 $fulfill = new AppleMusic(
                     $inner = $this->createMock(Transport::class)
@@ -102,10 +101,9 @@ class AppleMusicTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Url::of(),
-                Set\Integers::of(500, 508)
+                Url::any(),
+                Set\Integers::between(500, 508)
             )
-            ->take(100)
             ->then(function($url, $statusCode) {
                 $fulfill = new AppleMusic(
                     $inner = $this->createMock(Transport::class)

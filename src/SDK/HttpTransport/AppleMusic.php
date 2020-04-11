@@ -21,7 +21,7 @@ final class AppleMusic implements Transport
     public function __construct(Transport $fulfill)
     {
         $this->fulfill = new ThrowOnErrorTransport($fulfill);
-        $this->url = Url::fromString('https://api.music.apple.com/');
+        $this->url = Url::of('https://api.music.apple.com/');
     }
 
     public function __invoke(Request $request): Response

@@ -19,13 +19,10 @@ class LanguageTest extends TestCase
 
     public function testAnyCountryCodeIsAccepted()
     {
-        $char = Set\Chars::of()->filter(static function($char): bool {
-            return \in_array($char, \range('a', 'z'), true);
-        });
+        $char = Set\Elements::of(...\range('a', 'z'));
 
         $this
             ->forAll($char, $char)
-            ->take(1000)
             ->then(function(string $char1, string $char2) {
                 $language = new Language($char1.$char2);
 
@@ -35,16 +32,11 @@ class LanguageTest extends TestCase
 
     public function testRegionalLanguageIsAccepted()
     {
-        $char = Set\Chars::of()->filter(static function($char): bool {
-            return \in_array($char, \range('a', 'z'), true);
-        });
-        $region = Set\Chars::of()->filter(static function($char): bool {
-            return \in_array($char, \range('A', 'Z'), true);
-        });
+        $char = Set\Elements::of(...\range('a', 'z'));
+        $region = Set\Elements::of(...\range('A', 'Z'));
 
         $this
             ->forAll($char, $char, $region, $region)
-            ->take(1000)
             ->then(function(string $char1, string $char2, $region1, $region2) {
                 $language = new Language($char1.$char2.'-'.$region1.$region2);
 
@@ -71,7 +63,7 @@ class LanguageTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Strings::of()->filter(static function($string): bool {
+                Set\Strings::any()->filter(static function($string): bool {
                     return !\preg_match('~^[a-z]{2}$~', $string);
                 })
             )

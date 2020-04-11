@@ -20,6 +20,7 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set as DataSet,
 };
+use Fixtures\Innmind\Immutable\Set as ISet;
 
 class SearchTest extends TestCase
 {
@@ -29,12 +30,11 @@ class SearchTest extends TestCase
     {
         $this
             ->forAll(
-                new DataSet\Strings,
-                new DataSet\Set(Artist\Id::class, ArtistSet\Id::any()),
-                new DataSet\Set(Album\Id::class, AlbumSet\Id::any()),
-                new DataSet\Set(Song\Id::class, SongSet\Id::any())
+                DataSet\Strings::any(),
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
+                ISet::of(Album\Id::class, AlbumSet\Id::any()),
+                ISet::of(Song\Id::class, SongSet\Id::any())
             )
-            ->take(100)
             ->then(function($term, $artists, $albums, $songs) {
                 $search = new Search($term, $artists, $albums, $songs);
 
@@ -49,19 +49,19 @@ class SearchTest extends TestCase
     {
         $this
             ->forAll(
-                new DataSet\Strings,
-                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
-                new DataSet\Set(Album\Id::class, AlbumSet\Id::any()),
-                new DataSet\Set(Song\Id::class, SongSet\Id::any())
+                DataSet\Strings::any(),
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                ISet::of(Album\Id::class, AlbumSet\Id::any()),
+                ISet::of(Song\Id::class, SongSet\Id::any())
             )
-            ->take(100)
+            ->disableShrinking()
             ->then(function($term, $artist, $albums, $songs) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 2 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Artist\Id>');
+                $this->expectExceptionMessage('Argument 2 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Artist\Id>');
 
                 new Search(
                     $term,
-                    new Set($artist),
+                    Set::of($artist),
                     $albums,
                     $songs
                 );
@@ -72,20 +72,20 @@ class SearchTest extends TestCase
     {
         $this
             ->forAll(
-                new DataSet\Strings,
-                new DataSet\Set(Artist\Id::class, ArtistSet\Id::any()),
-                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
-                new DataSet\Set(Song\Id::class, SongSet\Id::any())
+                DataSet\Strings::any(),
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                ISet::of(Song\Id::class, SongSet\Id::any())
             )
-            ->take(100)
+            ->disableShrinking()
             ->then(function($term, $artists, $album, $songs) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 3 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Album\Id>');
+                $this->expectExceptionMessage('Argument 3 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Album\Id>');
 
                 new Search(
                     $term,
                     $artists,
-                    new Set($album),
+                    Set::of($album),
                     $songs
                 );
             });
@@ -95,21 +95,21 @@ class SearchTest extends TestCase
     {
         $this
             ->forAll(
-                new DataSet\Strings,
-                new DataSet\Set(Artist\Id::class, ArtistSet\Id::any()),
-                new DataSet\Set(Album\Id::class, AlbumSet\Id::any()),
-                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any(),
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
+                ISet::of(Album\Id::class, AlbumSet\Id::any()),
+                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
             )
-            ->take(100)
+            ->disableShrinking()
             ->then(function($term, $artists, $albums, $song) {
                 $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 4 must be of type SetInterface<MusicCompanion\AppleMusic\SDK\Catalog\Song\Id>');
+                $this->expectExceptionMessage('Argument 4 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Song\Id>');
 
                 new Search(
                     $term,
                     $artists,
                     $albums,
-                    new Set($song)
+                    Set::of($song)
                 );
             });
     }

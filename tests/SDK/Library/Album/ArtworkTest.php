@@ -13,6 +13,7 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
+use Fixtures\Innmind\Url\Url;
 
 class ArtworkTest extends TestCase
 {
@@ -24,9 +25,8 @@ class ArtworkTest extends TestCase
             ->forAll(
                 Width::any(),
                 Height::any(),
-                Set\Url::of()
+                Url::any()
             )
-            ->take(1000)
             ->then(function($width, $height, $url) {
                 $artwork = new Artwork(
                     $width,

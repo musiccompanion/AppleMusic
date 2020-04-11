@@ -11,21 +11,15 @@ use MusicCompanion\AppleMusic\SDK\Library\{
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
     Header,
     Header\Authorization,
 };
-use Innmind\Url\{
-    UrlInterface,
-    Url,
-};
+use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class Library
 {
@@ -45,7 +39,7 @@ final class Library
 
     public function storefront(): Storefront
     {
-        $resource = $this->get(Url::fromString('/v1/me/storefront'));
+        $resource = $this->get(Url::of('/v1/me/storefront'));
 
         return new Storefront(
             new Storefront\Id($resource['data'][0]['id']),
@@ -61,13 +55,13 @@ final class Library
     }
 
     /**
-     * @return SetInterface<Artist>
+     * @return Set<Artist>
      */
-    public function artists(): SetInterface
+    public function artists(): Set
     {
         $url = $this->url('artists');
 
-        return LazySet::of(
+        return Set::lazy(
             Artist::class,
             function() use ($url) {
                 do {
@@ -82,17 +76,17 @@ final class Library
                     }
 
                     if (\array_key_exists('next', $resource)) {
-                        $url = Url::fromString($resource['next']);
+                        $url = Url::of($resource['next']);
                     }
-                } while ($url instanceof UrlInterface);
+                } while ($url instanceof Url);
             }
         );
     }
 
     /**
-     * @return SetInterface<Album>
+     * @return Set<Album>
      */
-    public function albums(Artist\Id $artist): SetInterface
+    public function albums(Artist\Id $artist): Set
     {
         $url = $this->url("artists/$artist/albums?include=artists");
         $albums = Set::of(Album::class);
@@ -108,7 +102,7 @@ final class Library
                     \array_key_exists('artwork', $album['attributes']) ? new Album\Artwork(
                         new Album\Artwork\Width($album['attributes']['artwork']['width']),
                         new Album\Artwork\Height($album['attributes']['artwork']['height']),
-                        Url::fromString($album['attributes']['artwork']['url'])
+                        Url::of($album['attributes']['artwork']['url'])
                     ) : null,
                     ...\array_reduce(
                         $album['relationships']['artists']['data'],
@@ -123,17 +117,17 @@ final class Library
             }
 
             if (\array_key_exists('next', $resource)) {
-                $url = Url::fromString($resource['next'].'&include=artists');
+                $url = Url::of($resource['next'].'&include=artists');
             }
-        } while ($url instanceof UrlInterface);
+        } while ($url instanceof Url);
 
         return $albums;
     }
 
     /**
-     * @return SetInterface<Song>
+     * @return Set<Song>
      */
-    public function songs(Album\Id $album): SetInterface
+    public function songs(Album\Id $album): Set
     {
         $url = $this->url("albums/$album/tracks?include=albums,artists");
         $songs = Set::of(Song::class);
@@ -188,14 +182,14 @@ final class Library
             }
 
             if (\array_key_exists('next', $resource)) {
-                $url = Url::fromString($resource['next'].'&include=albums,artists');
+                $url = Url::of($resource['next'].'&include=albums,artists');
             }
-        } while ($url instanceof UrlInterface);
+        } while ($url instanceof Url);
 
         return $songs;
     }
 
-    private function get(UrlInterface $url): array
+    private function get(Url $url): array
     {
         $response = ($this->fulfill)(new Request(
             $url,
@@ -207,11 +201,11 @@ final class Library
             )
         ));
 
-        return Json::decode((string) $response->body());
+        return Json::decode($response->body()->toString());
     }
 
-    private function url(string $path): UrlInterface
+    private function url(string $path): Url
     {
-        return Url::fromString("/v1/me/library/$path");
+        return Url::of("/v1/me/library/$path");
     }
 }

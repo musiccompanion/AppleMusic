@@ -13,15 +13,13 @@ final class Id
      */
     public static function any(): Set
     {
-        $char = Set\Chars::of()->filter(static function(string $char): bool {
-            return (bool) \preg_match('~^[a-zA-Z0-9]$~', $char);
-        });
+        $chars = Set\Regex::for('^[a-zA-Z0-9]{7}$');
 
-        return Set\Composite::of(
-            static function(string ...$chars): Model {
-                return new Model('r.'.\implode('', $chars));
+        return Set\Decorate::immutable(
+            static function(string $chars): Model {
+                return new Model('r.'.$chars);
             },
-            ...\array_fill(0, 7, $char)
+            $chars,
         )->take(100);
     }
 }

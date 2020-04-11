@@ -8,13 +8,17 @@ use MusicCompanion\AppleMusic\{
     Key,
 };
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    PointInTime\Earth\PointInTime,
-    Period\Earth\Minute,
+    Clock,
+    Earth\PointInTime\PointInTime,
+    Earth\Period\Minute,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\Http\Message\Response;
+use Innmind\Http\Message\{
+    Response,
+    StatusCode,
+};
 use Innmind\Stream\Readable;
+use function Innmind\Immutable\first;
 use Lcobucci\JWT\Parser;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Storefront;
 use PHPUnit\Framework\TestCase;
@@ -34,9 +38,8 @@ class SDKTest extends TestCase
                 Storefront\Id::any(),
                 new Set\Strings
             )
-            ->take(100)
             ->then(function($storefront, $userToken) {
-                $clock = $this->createMock(TimeContinuumInterface::class);
+                $clock = $this->createMock(Clock::class);
                 $transport = $this->createMock(Transport::class);
                 $key = new Key(
                     'AAAAAAAAAA',
@@ -45,7 +48,7 @@ class SDKTest extends TestCase
                 );
                 // this is a randomly generated key
                 $content
-                    ->method('__toString')
+                    ->method('toString')
                     ->willReturn(<<<KEY
 -----BEGIN PRIVATE KEY-----
 MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgSmB1mBZDN7uKBA4p
@@ -62,7 +65,7 @@ KEY
                     ->expects($this->any())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) {
-                        $jwt = $request->headers()->get('authorization')->values()->current()->parameter();
+                        $jwt = first($request->headers()->get('authorization')->values())->parameter();
                         $jwt = (new Parser)->parse($jwt);
 
                         return $jwt->getHeader('kid') === 'AAAAAAAAAA' &&
@@ -72,10 +75,13 @@ KEY
                     }))
                     ->willReturn($response = $this->createMock(Response::class));
                 $response
+                    ->method('statusCode')
+                    ->willReturn(new StatusCode(200));
+                $response
                     ->method('body')
                     ->willReturn($body = $this->createMock(Readable::class));
                 $body
-                    ->method('__toString')
+                    ->method('toString')
                     ->willReturn('{"data":[]}');
 
                 $sdk = new SDK(

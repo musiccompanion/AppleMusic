@@ -13,6 +13,8 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
+use Fixtures\Innmind\Url\Url;
+use Fixtures\Innmind\Colour\Colour;
 
 class ArtworkTest extends TestCase
 {
@@ -24,14 +26,13 @@ class ArtworkTest extends TestCase
             ->forAll(
                 Width::any(),
                 Height::any(),
-                Set\Url::of(),
-                Set\Colour::of(),
-                Set\Colour::of(),
-                Set\Colour::of(),
-                Set\Colour::of(),
-                Set\Colour::of()
+                Url::any(),
+                Colour::any(),
+                Colour::any(),
+                Colour::any(),
+                Colour::any(),
+                Colour::any()
             )
-            ->take(1000)
             ->then(function($width, $height, $url, $background, $text1, $text2, $text3, $text4) {
                 $artwork = new Artwork(
                     $width,

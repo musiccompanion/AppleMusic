@@ -10,9 +10,9 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Album\{
     Copyright,
     EditorialNotes,
 };
-use Innmind\Url\UrlInterface;
-use Innmind\TimeContinuum\PointInTimeInterface;
-use Innmind\Immutable\SetInterface;
+use Innmind\Url\Url;
+use Innmind\TimeContinuum\PointInTime;
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\assertSet;
 
 final class Album
@@ -21,32 +21,32 @@ final class Album
     private Artwork $artwork;
     private Name $name;
     private bool $single;
-    private UrlInterface $url;
+    private Url $url;
     private bool $complete;
-    private SetInterface $genres;
-    private SetInterface $tracks;
+    private Set $genres;
+    private Set $tracks;
     private bool $masteredForItunes;
-    private PointInTimeInterface $release;
+    private PointInTime $release;
     private RecordLabel $recordLabel;
     private Copyright $copyright;
     private EditorialNotes $editorialNotes;
-    private SetInterface $artists;
+    private Set $artists;
 
     public function __construct(
         Id $id,
         Artwork $artwork,
         Name $name,
         bool $single,
-        UrlInterface $url,
+        Url $url,
         bool $complete,
-        SetInterface $genres,
-        SetInterface $tracks,
+        Set $genres,
+        Set $tracks,
         bool $masteredForItunes,
-        PointInTimeInterface $release,
+        PointInTime $release,
         RecordLabel $recordLabel,
         Copyright $copyright,
         EditorialNotes $editorialNotes,
-        SetInterface $artists
+        Set $artists
     ) {
         assertSet(Genre::class, $genres, 7);
         assertSet(Song\Id::class, $tracks, 8);
@@ -88,7 +88,7 @@ final class Album
         return $this->single;
     }
 
-    public function url(): UrlInterface
+    public function url(): Url
     {
         return $this->url;
     }
@@ -99,17 +99,17 @@ final class Album
     }
 
     /**
-     * @return SetInterface<Genre>
+     * @return Set<Genre>
      */
-    public function genres(): SetInterface
+    public function genres(): Set
     {
         return $this->genres;
     }
 
     /**
-     * @return SetInterface<Song\Id>
+     * @return Set<Song\Id>
      */
-    public function tracks(): SetInterface
+    public function tracks(): Set
     {
         return $this->tracks;
     }
@@ -119,7 +119,7 @@ final class Album
         return $this->masteredForItunes;
     }
 
-    public function release(): PointInTimeInterface
+    public function release(): PointInTime
     {
         return $this->release;
     }
@@ -140,9 +140,9 @@ final class Album
     }
 
     /**
-     * @return SetInterface<Artist\Id>
+     * @return Set<Artist\Id>
      */
-    public function artists(): SetInterface
+    public function artists(): Set
     {
         return $this->artists;
     }

@@ -20,7 +20,7 @@ class DiscNumberTest extends TestCase
     public function testRealNumbersExceptZeroAreAccepted()
     {
         $this
-            ->forAll(new Set\NaturalNumbersExceptZero)
+            ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
                 $discNumber = new DiscNumber($number);
 
@@ -31,7 +31,7 @@ class DiscNumberTest extends TestCase
     public function testNumbersBelowOneAreRejected()
     {
         $this
-            ->forAll(Set\Integers::of(null, 1))
+            ->forAll(Set\Integers::below(1))
             ->then(function(int $negative) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);

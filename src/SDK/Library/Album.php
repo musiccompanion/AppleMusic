@@ -8,10 +8,7 @@ use MusicCompanion\AppleMusic\SDK\Library\Album\{
     Name,
     Artwork,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class Album
 {
@@ -53,9 +50,9 @@ final class Album
     }
 
     /**
-     * @return SetInterface<Artist\Id>
+     * @return Set<Artist\Id>
      */
-    public function artists(): SetInterface
+    public function artists(): Set
     {
         return $this->artists;
     }

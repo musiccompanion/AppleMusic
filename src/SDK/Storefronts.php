@@ -7,16 +7,13 @@ use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Header\Authorization,
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
 };
 use Innmind\Url\Url;
 use Innmind\Json\Json;
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class Storefronts
 {
@@ -30,12 +27,12 @@ final class Storefronts
     }
 
     /**
-     * @return SetInterface<Storefront>
+     * @return Set<Storefront>
      */
-    public function all(): SetInterface
+    public function all(): Set
     {
         $response = ($this->fulfill)(new Request(
-            Url::fromString('/v1/storefronts'),
+            Url::of('/v1/storefronts'),
             Method::get(),
             new ProtocolVersion(2, 0),
             Headers::of(
@@ -43,7 +40,7 @@ final class Storefronts
             )
         ));
 
-        $resource = Json::decode((string) $response->body());
+        $resource = Json::decode($response->body()->toString());
         $storefronts = Set::of(Storefront::class);
 
         foreach ($resource['data'] as $storefront) {

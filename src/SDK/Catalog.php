@@ -11,35 +11,29 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
     Search,
 };
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Header\Authorization,
     Message\Request\Request,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
-    Headers\Headers,
+    Message\Method,
+    ProtocolVersion,
+    Headers,
 };
-use Innmind\Url\{
-    UrlInterface,
-    Url,
-};
+use Innmind\Url\Url;
 use Innmind\Colour\RGBA;
 use Innmind\Json\Json;
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class Catalog
 {
-    private TimeContinuumInterface $clock;
+    private Clock $clock;
     private Transport $fulfill;
     private Authorization $authorization;
     private Storefront\Id $storefront;
 
     public function __construct(
-        TimeContinuumInterface $clock,
+        Clock $clock,
         Transport $fulfill,
         Authorization $authorization,
         Storefront\Id $storefront
@@ -57,7 +51,7 @@ final class Catalog
         return new Artist(
             $id,
             new Artist\Name($resource['data'][0]['attributes']['name']),
-            Url::fromString($resource['data'][0]['attributes']['url']),
+            Url::of($resource['data'][0]['attributes']['url']),
             Set::of(Genre::class, ...\array_map(
                 static function(string $genre): Genre {
                     return new Genre($genre);
@@ -77,16 +71,16 @@ final class Catalog
             new Artwork(
                 new Artwork\Width($resource['data'][0]['attributes']['artwork']['width']),
                 new Artwork\Height($resource['data'][0]['attributes']['artwork']['height']),
-                Url::fromString($resource['data'][0]['attributes']['artwork']['url']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['bgColor']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor1']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor2']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor3']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor4'])
+                Url::of($resource['data'][0]['attributes']['artwork']['url']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['bgColor']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor1']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor2']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor3']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor4'])
             ),
             new Album\Name($resource['data'][0]['attributes']['name']),
             $resource['data'][0]['attributes']['isSingle'],
-            Url::fromString($resource['data'][0]['attributes']['url']),
+            Url::of($resource['data'][0]['attributes']['url']),
             $resource['data'][0]['attributes']['isComplete'],
             Set::of(Genre::class, ...\array_map(
                 static function(string $genre): Genre {
@@ -123,23 +117,23 @@ final class Catalog
 
         return new Song(
             $id,
-            Set::of(UrlInterface::class, ...\array_map(
-                static function(array $preview): UrlInterface {
-                    return Url::fromString($preview['url']);
+            Set::of(Url::class, ...\array_map(
+                static function(array $preview): Url {
+                    return Url::of($preview['url']);
                 },
                 $resource['data'][0]['attributes']['previews']
             )),
             new Artwork(
                 new Artwork\Width($resource['data'][0]['attributes']['artwork']['width']),
                 new Artwork\Height($resource['data'][0]['attributes']['artwork']['height']),
-                Url::fromString($resource['data'][0]['attributes']['artwork']['url']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['bgColor']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor1']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor2']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor3']),
-                RGBA::fromString($resource['data'][0]['attributes']['artwork']['textColor4'])
+                Url::of($resource['data'][0]['attributes']['artwork']['url']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['bgColor']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor1']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor2']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor3']),
+                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor4'])
             ),
-            Url::fromString($resource['data'][0]['attributes']['url']),
+            Url::of($resource['data'][0]['attributes']['url']),
             new Song\DiscNumber($resource['data'][0]['attributes']['discNumber']),
             Set::of(Genre::class, ...\array_map(
                 static function(string $genre): Genre {
@@ -169,9 +163,9 @@ final class Catalog
     }
 
     /**
-     * @return SetInterface<Album\Id>
+     * @return Set<Album\Id>
      */
-    private function artistAlbums(array $resources): SetInterface
+    private function artistAlbums(array $resources): Set
     {
         $albums = Set::of(Album\Id::class);
 
@@ -180,7 +174,7 @@ final class Catalog
         }
 
         if (\array_key_exists('next', $resources)) {
-            $resources = $this->get(Url::fromString($resources['next']));
+            $resources = $this->get(Url::of($resources['next']));
 
             $albums = $albums->merge($this->artistAlbums($resources));
         }
@@ -189,9 +183,9 @@ final class Catalog
     }
 
     /**
-     * @return SetInterface<Genre>
+     * @return Set<Genre>
      */
-    public function genres(): SetInterface
+    public function genres(): Set
     {
         $url = $this->url('genres');
         $genres = Set::of(Genre::class);
@@ -207,9 +201,9 @@ final class Catalog
             }
 
             if (\array_key_exists('next', $resource)) {
-                $url = Url::fromString($resource['next']);
+                $url = Url::of($resource['next']);
             }
-        } while ($url instanceof UrlInterface);
+        } while ($url instanceof Url);
 
         return $genres;
     }
@@ -219,7 +213,7 @@ final class Catalog
         $url = $this->url("search?term=$term&types=artists,albums,songs&limit=25");
         $resource = $this->get($url);
 
-        $artists = LazySet::of(
+        $artists = Set::lazy(
             Artist\Id::class,
             function() use ($resource) {
                 do {
@@ -231,12 +225,12 @@ final class Catalog
                         return;
                     }
 
-                    $resource = $this->get(Url::fromString($resource['results']['artists']['next']));
+                    $resource = $this->get(Url::of($resource['results']['artists']['next']));
                 } while (true);
             }
         );
 
-        $albums = LazySet::of(
+        $albums = Set::lazy(
             Album\Id::class,
             function() use ($resource) {
                 do {
@@ -248,12 +242,12 @@ final class Catalog
                         return;
                     }
 
-                    $resource = $this->get(Url::fromString($resource['results']['albums']['next']));
+                    $resource = $this->get(Url::of($resource['results']['albums']['next']));
                 } while (true);
             }
         );
 
-        $songs = LazySet::of(
+        $songs = Set::lazy(
             Song\Id::class,
             function() use ($resource) {
                 do {
@@ -265,7 +259,7 @@ final class Catalog
                         return;
                     }
 
-                    $resource = $this->get(Url::fromString($resource['results']['songs']['next']));
+                    $resource = $this->get(Url::of($resource['results']['songs']['next']));
                 } while (true);
             }
         );
@@ -273,7 +267,7 @@ final class Catalog
         return new Search($term, $artists, $albums, $songs);
     }
 
-    private function get(UrlInterface $url): array
+    private function get(Url $url): array
     {
         $response = ($this->fulfill)(new Request(
             $url,
@@ -282,11 +276,11 @@ final class Catalog
             Headers::of($this->authorization)
         ));
 
-        return Json::decode((string) $response->body());
+        return Json::decode($response->body()->toString());
     }
 
-    private function url(string $path): UrlInterface
+    private function url(string $path): Url
     {
-        return Url::fromString("/v1/catalog/{$this->storefront}/$path");
+        return Url::of("/v1/catalog/{$this->storefront}/$path");
     }
 }

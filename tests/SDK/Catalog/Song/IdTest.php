@@ -20,7 +20,7 @@ class IdTest extends TestCase
     public function testRealNumbersAreAccepted()
     {
         $this
-            ->forAll(new Set\NaturalNumbers)
+            ->forAll(Set\NaturalNumbers::any())
             ->then(function(int $number) {
                 $id = new Id($number);
 
@@ -32,7 +32,7 @@ class IdTest extends TestCase
     public function testNegativeNumbersAreRejected()
     {
         $this
-            ->forAll(Set\Integers::of(null, 0))
+            ->forAll(Set\Integers::below(0))
             ->then(function(int $negative) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);

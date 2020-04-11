@@ -8,6 +8,7 @@ use MusicCompanion\AppleMusic\SDK\Library\{
     Artist as ArtistModel,
 };
 use Innmind\BlackBox\Set;
+use Fixtures\Innmind\Immutable\Set as ISet;
 
 final class Album
 {
@@ -16,14 +17,14 @@ final class Album
      */
     public static function any(): Set
     {
-        return new Set\Composite(
+        return Set\Composite::immutable(
             static function($id, $name, $artwork, $artists): Model {
                 return new Model($id, $name, $artwork, ...$artists);
             },
             Album\Id::any(),
             Album\Name::any(),
             Album\Artwork::any(),
-            Set\Set::of(ArtistModel\Id::class, Artist\Id::any())
+            ISet::of(ArtistModel\Id::class, Artist\Id::any()),
         );
     }
 }

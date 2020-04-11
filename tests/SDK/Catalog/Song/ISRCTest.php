@@ -39,7 +39,6 @@ class ISRCTest extends TestCase
                 $n,
                 $n
             )
-            ->take(1000)
             ->then(function(...$bits) {
                 $string = implode('', $bits);
 

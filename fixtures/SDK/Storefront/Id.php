@@ -13,16 +13,14 @@ final class Id
      */
     public static function any(): Set
     {
-        $char = Set\Chars::of()->filter(static function($char): bool {
-            return \in_array($char, \range('a', 'z'), true);
-        });
+        $char = Set\Elements::of(...\range('a', 'z'));
 
-        return Set\Composite::of(
+        return Set\Composite::immutable(
             static function(string $char1, string $char2): Model {
                 return new Model($char1.$char2);
             },
             $char,
-            $char
+            $char,
         )->take(100);
     }
 }
