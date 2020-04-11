@@ -16,9 +16,15 @@ final class Artist
     private Id $id;
     private Name $name;
     private Url $url;
+    /** @var Set<Genre> */
     private Set $genres;
+    /** @var Set<Album\Id> */
     private Set $albums;
 
+    /**
+     * @param Set<Genre> $genres
+     * @param Set<Album\Id> $albums
+     */
     public function __construct(
         Id $id,
         Name $name,

@@ -20,10 +20,12 @@ use function Innmind\Immutable\assertSet;
 final class Song
 {
     private Id $id;
+    /** @var Set<Url> */
     private Set $previews;
     private Artwork $artwork;
     private Url $url;
     private DiscNumber $discNumber;
+    /** @var Set<Genre> */
     private Set $genres;
     private Duration $duration;
     private PointInTime $release;
@@ -31,9 +33,17 @@ final class Song
     private ISRC $isrc;
     private TrackNumber $trackNumber;
     private Composer $composer;
+    /** @var Set<Artist\Id> */
     private Set $artists;
+    /** @var Set<Album\Id> */
     private Set $albums;
 
+    /**
+     * @param Set<Url> $previews
+     * @param Set<Genre> $genres
+     * @param Set<Artist\Id> $artists
+     * @param Set<Album\Id> $albums
+     */
     public function __construct(
         Id $id,
         Set $previews,

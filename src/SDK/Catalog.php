@@ -46,6 +46,7 @@ final class Catalog
 
     public function artist(Artist\Id $id): Artist
     {
+        /** @var array{data: array{0: array{attributes: array{name: string, url: string, genreNames: list<string>}, relationships: array{albums: array{data: list<array{id: int}>, next?: string}}}}} */
         $resource = $this->get($this->url("artists/$id"));
 
         return new Artist(
@@ -64,6 +65,7 @@ final class Catalog
 
     public function album(Album\Id $id): Album
     {
+        /** @var array{data: array{0: array{attributes: array{artwork: array{width: int, height: int, url: string, bgColor: string, textColor1: string, textColor2: string, textColor3: string, textColor4: string}, name: string, isSingle: bool, url: string, isComplete: bool, genreNames: list<string>, isMasteredForItunes: bool, releaseDate: string, recordLabel: string, copyright: string, editorialNotes: array{standard: string, short: string}}, relationships: array{tracks: array{data: list<array{id: int}>}, artists: array{data: list<array{id: int}>}}}}} */
         $resource = $this->get($this->url("albums/$id"));
 
         return new Album(
@@ -113,6 +115,7 @@ final class Catalog
 
     public function song(Song\Id $id): Song
     {
+        /** @var array{data: array{0: array{attributes: array{previews: list<array{url: string}>, artwork: array{width: int, height: int, url: string, bgColor: string, textColor1: string, textColor2: string, textColor3: string, textColor4: string}, url: string, discNumber: int, genreNames: list<string>, durationInMillis: int, releaseDate: string, name: string, isrc: string, trackNumber: int, composerName: string}, relationships: array{artists: array{data: list<array{id: int}>}, albums: array{data: list<array{id: int}>}}}}} */
         $resource = $this->get($this->url("songs/$id"));
 
         return new Song(
@@ -163,10 +166,13 @@ final class Catalog
     }
 
     /**
+     * @param array{data: list<array{id: int}>, next?: string} $resources
+     *
      * @return Set<Album\Id>
      */
     private function artistAlbums(array $resources): Set
     {
+        /** @var Set<Album\Id> */
         $albums = Set::of(Album\Id::class);
 
         foreach ($resources['data'] as $album) {
@@ -174,6 +180,7 @@ final class Catalog
         }
 
         if (\array_key_exists('next', $resources)) {
+            /** @var array{data: list<array{id: int}>, next?: string} */
             $resources = $this->get(Url::of($resources['next']));
 
             $albums = $albums->merge($this->artistAlbums($resources));
@@ -188,9 +195,11 @@ final class Catalog
     public function genres(): Set
     {
         $url = $this->url('genres');
+        /** @var Set<Genre> */
         $genres = Set::of(Genre::class);
 
         do {
+            /** @var array{data: list<array{attributes: array{name: string}}>, next?: string} */
             $resource = $this->get($url);
             $url = null;
 
@@ -211,11 +220,13 @@ final class Catalog
     public function search(string $term): Search
     {
         $url = $this->url("search?term=$term&types=artists,albums,songs&limit=25");
+        /** @var array{results: array{artists: array{data: list<array{id: int}>, next?: string}, albums: array{data: list<array{id: int}>, next?: string}, songs: array{data: list<array{id: int}>, next?: string}}} */
         $resource = $this->get($url);
 
+        /** @var Set<Artist\Id> */
         $artists = Set::lazy(
             Artist\Id::class,
-            function() use ($resource) {
+            function() use ($resource): \Generator {
                 do {
                     foreach ($resource['results']['artists']['data'] as $artist) {
                         yield new Artist\Id((int) $artist['id']);
@@ -225,14 +236,16 @@ final class Catalog
                         return;
                     }
 
+                    /** @var array{results: array{artists: array{data: list<array{id: int}>, next?: string}}} */
                     $resource = $this->get(Url::of($resource['results']['artists']['next']));
                 } while (true);
             }
         );
 
+        /** @var Set<Album\Id> */
         $albums = Set::lazy(
             Album\Id::class,
-            function() use ($resource) {
+            function() use ($resource): \Generator {
                 do {
                     foreach ($resource['results']['albums']['data'] as $album) {
                         yield new Album\Id((int) $album['id']);
@@ -242,14 +255,16 @@ final class Catalog
                         return;
                     }
 
+                    /** @var array{results: array{albums: array{data: list<array{id: int}>, next?: string}}} */
                     $resource = $this->get(Url::of($resource['results']['albums']['next']));
                 } while (true);
             }
         );
 
+        /** @var Set<Song\Id> */
         $songs = Set::lazy(
             Song\Id::class,
-            function() use ($resource) {
+            function() use ($resource): \Generator {
                 do {
                     foreach ($resource['results']['songs']['data'] as $song) {
                         yield new Song\Id((int) $song['id']);
@@ -259,6 +274,7 @@ final class Catalog
                         return;
                     }
 
+                    /** @var array{results: array{songs: array{data: list<array{id: int}>, next?: string}}} */
                     $resource = $this->get(Url::of($resource['results']['songs']['next']));
                 } while (true);
             }
@@ -276,6 +292,7 @@ final class Catalog
             Headers::of($this->authorization)
         ));
 
+        /** @var array */
         return Json::decode($response->body()->toString());
     }
 

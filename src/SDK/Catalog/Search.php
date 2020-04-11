@@ -9,10 +9,18 @@ use function Innmind\Immutable\assertSet;
 final class Search
 {
     private string $term;
+    /** @var Set<Artist\Id> */
     private Set $artists;
+    /** @var Set<Album\Id> */
     private Set $albums;
+    /** @var Set<Song\Id> */
     private Set $songs;
 
+    /**
+     * @param Set<Artist\Id> $artists
+     * @param Set<Album\Id> $albums
+     * @param Set<Song\Id> $songs
+     */
     public function __construct(
         string $term,
         Set $artists,

@@ -23,15 +23,23 @@ final class Album
     private bool $single;
     private Url $url;
     private bool $complete;
+    /** @var Set<Genre> */
     private Set $genres;
+    /** @var Set<Song\Id> */
     private Set $tracks;
     private bool $masteredForItunes;
     private PointInTime $release;
     private RecordLabel $recordLabel;
     private Copyright $copyright;
     private EditorialNotes $editorialNotes;
+    /** @var Set<Artist\Id> */
     private Set $artists;
 
+    /**
+     * @param Set<Genre> $genres
+     * @param Set<Song\Id> $tracks
+     * @param Set<Artist\Id> $artists
+     */
     public function __construct(
         Id $id,
         Artwork $artwork,

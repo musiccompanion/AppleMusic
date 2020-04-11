@@ -40,7 +40,9 @@ final class Storefronts
             )
         ));
 
+        /** @var array{data: list<array{id: string, attributes: array{name: string, defaultLanguageTag: string, supportedLanguageTags: list<string>}}>} */
         $resource = Json::decode($response->body()->toString());
+        /** @var Set<Storefront> */
         $storefronts = Set::of(Storefront::class);
 
         foreach ($resource['data'] as $storefront) {

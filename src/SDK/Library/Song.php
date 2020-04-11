@@ -19,10 +19,18 @@ final class Song
     private Name $name;
     private Duration $duration;
     private TrackNumber $trackNumber;
+    /** @var Set<Genre> */
     private Set $genres;
+    /** @var Set<Album\Id> */
     private Set $albums;
+    /** @var Set<Artist\Id> */
     private Set $artists;
 
+    /**
+     * @param Set<Genre> $genres
+     * @param Set<Album\Id> $albums
+     * @param Set<Artist\Id> $artists
+     */
     public function __construct(
         Id $id,
         Name $name,

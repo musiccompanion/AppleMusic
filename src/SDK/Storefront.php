@@ -15,6 +15,7 @@ final class Storefront
     private Id $id;
     private Name $name;
     private Language $defaultLanguage;
+    /** @var Set<Language> */
     private Set $supportedLanguages;
 
     public function __construct(
@@ -26,6 +27,7 @@ final class Storefront
         $this->id = $id;
         $this->name = $name;
         $this->defaultLanguage = $defaultLanguage;
+        /** @var Set<Language> */
         $this->supportedLanguages = Set::of(Language::class, ...$supportedLanguages);
     }
 

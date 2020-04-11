@@ -62,7 +62,7 @@ final class SDK
         );
     }
 
-    public function catalog(SDK\Storefront\Id $storefront): SDk\Catalog
+    public function catalog(SDK\Storefront\Id $storefront): SDK\Catalog
     {
         return new SDK\Catalog(
             $this->clock,

@@ -39,6 +39,7 @@ final class Library
 
     public function storefront(): Storefront
     {
+        /** @var array{data: array{0: array{id: string, attributes: array{name: string, defaultLanguageTag: string, supportedLanguageTags: list<string>}}}} */
         $resource = $this->get(Url::of('/v1/me/storefront'));
 
         return new Storefront(
@@ -61,10 +62,12 @@ final class Library
     {
         $url = $this->url('artists');
 
+        /** @var Set<Artist> */
         return Set::lazy(
             Artist::class,
-            function() use ($url) {
+            function() use ($url): \Generator {
                 do {
+                    /** @var array{data: list<array{id: string, attributes: array{name: string}}>, next?: string} */
                     $resource = $this->get($url);
                     $url = null;
 
@@ -89,9 +92,11 @@ final class Library
     public function albums(Artist\Id $artist): Set
     {
         $url = $this->url("artists/$artist/albums?include=artists");
+        /** @var Set<Album> */
         $albums = Set::of(Album::class);
 
         do {
+            /** @var array{data: list<array{id: string, attributes: array{name: string, artwork?: array{width: int, height: int, url: string}}, relationships: array{artists: array{data: list<array{id: string}>}}}>, next?: string} */
             $resource = $this->get($url);
             $url = null;
 
@@ -104,15 +109,14 @@ final class Library
                         new Album\Artwork\Height($album['attributes']['artwork']['height']),
                         Url::of($album['attributes']['artwork']['url'])
                     ) : null,
-                    ...\array_reduce(
-                        $album['relationships']['artists']['data'],
-                        static function(array $artists, array $artist): array {
-                            $artists[] = new Artist\Id($artist['id']);
+                    ...\array_map(
+                        static function(array $artist): Artist\Id {
+                            /** @var array{id: string} $artist */
 
-                            return $artists;
+                            return new Artist\Id($artist['id']);
                         },
-                        []
-                    )
+                        $album['relationships']['artists']['data'],
+                    ),
                 ));
             }
 
@@ -130,54 +134,67 @@ final class Library
     public function songs(Album\Id $album): Set
     {
         $url = $this->url("albums/$album/tracks?include=albums,artists");
+        /** @var Set<Song> */
         $songs = Set::of(Song::class);
 
         do {
+            /** @var array{data: list<array{id: string, attributes: array{name: string, durationInMillis: int, trackNumber: int, genreNames: list<string>}, relationships: array{albums: array{data: list<array{id: string}>}, artists: array{data: list<array{id: string}>}}}>, next?: string} */
             $resource = $this->get($url);
             $url = null;
 
             foreach ($resource['data'] as $song) {
+                /** @var Set<Song\Genre> */
+                $genres = Set::of(
+                    Song\Genre::class,
+                    ...\array_reduce(
+                        $song['attributes']['genreNames'],
+                        static function(array $genres, string $genre): array {
+                            $genres[] = new Song\Genre($genre);
+
+                            return $genres;
+                        },
+                        []
+                    )
+                );
+                /** @var Set<Album\Id> */
+                $albums = Set::of(
+                    Album\Id::class,
+                    ...\array_reduce(
+                        $song['relationships']['albums']['data'],
+                        static function(array $albums, array $album): array {
+                            /** @var array{id: string} $album */
+
+                            $albums[] = new Album\Id($album['id']);
+
+                            return $albums;
+                        },
+                        []
+                    )
+                );
+                /** @var Set<Artist\Id> */
+                $artists = Set::of(
+                    Artist\Id::class,
+                    ...\array_reduce(
+                        $song['relationships']['artists']['data'],
+                        static function(array $artists, array $artist): array {
+                            /** @var array{id: string} $artist */
+
+                            $artists[] = new Artist\Id($artist['id']);
+
+                            return $artists;
+                        },
+                        []
+                    )
+                );
+
                 $songs = $songs->add(new Song(
                     new Song\Id($song['id']),
                     new Song\Name($song['attributes']['name']),
                     new Song\Duration($song['attributes']['durationInMillis']),
                     new Song\TrackNumber($song['attributes']['trackNumber']),
-                    Set::of(
-                        Song\Genre::class,
-                        ...\array_reduce(
-                            $song['attributes']['genreNames'],
-                            static function(array $genres, string $genre): array {
-                                $genres[] = new Song\Genre($genre);
-
-                                return $genres;
-                            },
-                            []
-                        )
-                    ),
-                    Set::of(
-                        Album\Id::class,
-                        ...\array_reduce(
-                            $song['relationships']['albums']['data'],
-                            static function(array $albums, array $album): array {
-                                $albums[] = new Album\Id($album['id']);
-
-                                return $albums;
-                            },
-                            []
-                        )
-                    ),
-                    Set::of(
-                        Artist\Id::class,
-                        ...\array_reduce(
-                            $song['relationships']['artists']['data'],
-                            static function(array $artists, array $artist): array {
-                                $artists[] = new Artist\Id($artist['id']);
-
-                                return $artists;
-                            },
-                            []
-                        )
-                    )
+                    $genres,
+                    $albums,
+                    $artists,
                 ));
             }
 
@@ -201,6 +218,7 @@ final class Library
             )
         ));
 
+        /** @var array */
         return Json::decode($response->body()->toString());
     }
 

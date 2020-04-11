@@ -15,6 +15,7 @@ final class Album
     private Id $id;
     private Name $name;
     private ?Artwork $artwork;
+    /** @var Set<Artist\Id> */
     private Set $artists;
 
     public function __construct(
@@ -26,6 +27,7 @@ final class Album
         $this->id = $id;
         $this->name = $name;
         $this->artwork = $artwork;
+        /** @var Set<Artist\Id> */
         $this->artists = Set::of(Artist\Id::class, ...$artists);
     }
 
@@ -44,8 +46,10 @@ final class Album
         return $this->artwork instanceof Artwork;
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function artwork(): Artwork
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->artwork;
     }
 
