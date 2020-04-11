@@ -30,7 +30,7 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
       - name: Install Dependencies
-        run: composer install --no-progress
+        run: composer install --no-progress --prefer-source
       - name: PHPUnit
         run: vendor/bin/phpunit --coverage-clover=coverage.clover
       - uses: codecov/codecov-action@v1
