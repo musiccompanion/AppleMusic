@@ -60,7 +60,7 @@ class ArtistTest extends TestCase
                 Id::any(),
                 Name::any(),
                 DataSet\Url::of(),
-                new DataSet\Strings
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
             )
             ->take(1000)
             ->then(function($id, $name, $url, string $type) {
@@ -84,7 +84,7 @@ class ArtistTest extends TestCase
                 Id::any(),
                 Name::any(),
                 DataSet\Url::of(),
-                new DataSet\Strings
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
             )
             ->take(1000)
             ->then(function($id, $name, $url, string $type) {

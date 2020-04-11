@@ -96,7 +96,7 @@ class AlbumTest extends TestCase
                 DataSet\Elements::of(true, false),
                 DataSet\Url::of(),
                 DataSet\Elements::of(true, false),
-                new DataSet\Strings,
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
                 DataSet\Elements::of(true, false),
                 DataSet\PointInTime::of(),
                 RecordLabel::any(),
@@ -137,7 +137,7 @@ class AlbumTest extends TestCase
                 DataSet\Elements::of(true, false),
                 DataSet\Url::of(),
                 DataSet\Elements::of(true, false),
-                new DataSet\Strings,
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
                 DataSet\Elements::of(true, false),
                 DataSet\PointInTime::of(),
                 RecordLabel::any(),
@@ -183,7 +183,7 @@ class AlbumTest extends TestCase
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any(),
-                new DataSet\Strings
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
             )
             ->take(1000)
             ->then(function($id, $artwork, $name, $single, $url, $complete, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {

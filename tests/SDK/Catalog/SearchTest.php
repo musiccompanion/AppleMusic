@@ -50,7 +50,7 @@ class SearchTest extends TestCase
         $this
             ->forAll(
                 new DataSet\Strings,
-                new DataSet\Strings,
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
                 new DataSet\Set(Album\Id::class, AlbumSet\Id::any()),
                 new DataSet\Set(Song\Id::class, SongSet\Id::any())
             )
@@ -74,7 +74,7 @@ class SearchTest extends TestCase
             ->forAll(
                 new DataSet\Strings,
                 new DataSet\Set(Artist\Id::class, ArtistSet\Id::any()),
-                new DataSet\Strings,
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
                 new DataSet\Set(Song\Id::class, SongSet\Id::any())
             )
             ->take(100)
@@ -98,7 +98,7 @@ class SearchTest extends TestCase
                 new DataSet\Strings,
                 new DataSet\Set(Artist\Id::class, ArtistSet\Id::any()),
                 new DataSet\Set(Album\Id::class, AlbumSet\Id::any()),
-                new DataSet\Strings
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
             )
             ->take(100)
             ->then(function($term, $artists, $albums, $song) {

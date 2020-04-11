@@ -69,7 +69,7 @@ class SongTest extends TestCase
                 Name::any(),
                 Duration::any(),
                 TrackNumber::any(),
-                new DataSet\Strings,
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
                 DataSet\Set::of(Album\Id::class, AlbumSet\Id::any()),
                 DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any())
             )
@@ -99,7 +99,7 @@ class SongTest extends TestCase
                 Duration::any(),
                 TrackNumber::any(),
                 DataSet\Set::of(Song\Genre::class, Genre::any()),
-                new DataSet\Strings,
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
                 DataSet\Set::of(Artist\Id::class, ArtistSet\Id::any())
             )
             ->take(1000)
@@ -129,7 +129,7 @@ class SongTest extends TestCase
                 TrackNumber::any(),
                 DataSet\Set::of(Song\Genre::class, Genre::any()),
                 DataSet\Set::of(Album\Id::class, AlbumSet\Id::any()),
-                new DataSet\Strings
+                DataSet\Strings::of()->filter(fn($s) => strpos($s, '?') === false),
             )
             ->take(1000)
             ->then(function($id, $name, $duration, $trackNumber, $genres, $albums, $artist) {
