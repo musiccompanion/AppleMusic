@@ -12,7 +12,7 @@ final class Id
 
     public function __construct(string $value)
     {
-        if (!Str::of($value)->matches('~^i\.[a-zA-Z0-9]{14}$~')) {
+        if (!Str::of($value)->matches('~^i\.[a-zA-Z0-9]+$~')) {
             throw new DomainException($value);
         }
 

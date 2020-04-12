@@ -18,8 +18,14 @@ final class Artwork
             static function($width, $height, $url): Model {
                 return new Model($width, $height, $url);
             },
-            Artwork\Width::any(),
-            Artwork\Height::any(),
+            new Set\Either(
+                Artwork\Width::any(),
+                Set\Elements::of(null),
+            ),
+            new Set\Either(
+                Artwork\Height::any(),
+                Set\Elements::of(null),
+            ),
             Url::any(),
         );
     }

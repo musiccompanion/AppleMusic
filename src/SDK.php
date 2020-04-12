@@ -5,6 +5,7 @@ namespace MusicCompanion\AppleMusic;
 
 interface SDK
 {
+    public function jwt(): string;
     public function storefronts(): SDK\Storefronts;
     public function library(string $userToken): SDK\Library;
     public function catalog(SDK\Storefront\Id $storefront): SDK\Catalog;

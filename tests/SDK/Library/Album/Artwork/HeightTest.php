@@ -7,6 +7,7 @@ use MusicCompanion\AppleMusic\{
     SDK\Library\Album\Artwork\Height,
     Exception\DomainException,
 };
+use Fixtures\MusicCompanion\AppleMusic\SDK\Library\Album\Artwork\Height as HeightSet;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -27,6 +28,18 @@ class HeightTest extends TestCase
                 $this->assertSame($number, $height->toInt());
                 $this->assertSame((string) $number, $height->toString());
             });
+    }
+
+    public function testOf()
+    {
+        $this
+            ->forAll(HeightSet::any())
+            ->then(function($height) {
+                $this->assertInstanceOf(Height::class, Height::of($height->toInt()));
+                $this->assertSame($height->toInt(), Height::of($height->toInt())->toInt());
+            });
+
+        $this->assertNull(Height::of(null));
     }
 
     public function testNegativeNumbersAreNotAccepted()

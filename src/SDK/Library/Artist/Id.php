@@ -12,7 +12,7 @@ final class Id
 
     public function __construct(string $value)
     {
-        if (!Str::of($value)->matches('~^r\.[a-zA-Z0-9]{7}$~')) {
+        if (!Str::of($value)->matches('~^r\.[a-zA-Z0-9]+$~')) {
             throw new DomainException($value);
         }
 

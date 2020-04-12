@@ -15,13 +15,13 @@ use Innmind\Immutable\Str;
 
 final class Artwork
 {
-    private Width $width;
-    private Height $height;
+    private ?Width $width;
+    private ?Height $height;
     private Url $url;
 
     public function __construct(
-        Width $width,
-        Height $height,
+        ?Width $width,
+        ?Height $height,
         Url $url
     ) {
         $this->width = $width;
@@ -29,13 +29,27 @@ final class Artwork
         $this->url = $url;
     }
 
+    public function widthKnown(): bool
+    {
+        return $this->width instanceof Width;
+    }
+
+    /** @psalm-suppress InvalidNullableReturnType */
     public function width(): Width
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->width;
     }
 
+    public function heightKnown(): bool
+    {
+        return $this->height instanceof Height;
+    }
+
+    /** @psalm-suppress InvalidNullableReturnType */
     public function height(): Height
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->height;
     }
 
