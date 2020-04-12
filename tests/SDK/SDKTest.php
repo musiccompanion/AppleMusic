@@ -69,7 +69,8 @@ KEY
                     ->expects($this->any())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) {
-                        $jwt = first($request->headers()->get('authorization')->values())->parameter();
+                        $header = first($request->headers()->get('authorization')->values())->toString();
+                        $jwt = substr($header, 7); // remove Bearer
                         $jwt = (new Parser)->parse($jwt);
 
                         return $jwt->getHeader('kid') === 'AAAAAAAAAA' &&

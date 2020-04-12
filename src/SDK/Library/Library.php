@@ -17,7 +17,6 @@ use Innmind\Http\{
     ProtocolVersion,
     Headers,
     Header,
-    Header\Authorization,
 };
 use Innmind\Url\Url;
 use Innmind\Json\Json;
@@ -29,12 +28,12 @@ use Innmind\Immutable\{
 final class Library implements LibraryInterface
 {
     private Transport $fulfill;
-    private Authorization $authorization;
+    private Header $authorization;
     private Header $userToken;
 
     public function __construct(
         Transport $fulfill,
-        Authorization $authorization,
+        Header $authorization,
         Header $userToken
     ) {
         $this->fulfill = $fulfill;
