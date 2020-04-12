@@ -13,7 +13,7 @@ final class Id
      */
     public static function any(): Set
     {
-        $chars = Set\Regex::for('^[a-zA-Z0-9]{14}$');
+        $chars = Set\Regex::for('^[a-zA-Z0-9]+$');
 
         return Set\Decorate::immutable(
             static function(string $chars): Model {

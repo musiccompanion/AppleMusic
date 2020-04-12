@@ -19,7 +19,7 @@ class IdTest extends TestCase
 
     public function testStringsOfSpecifiedFormatAreAccepted()
     {
-        $chars = Set\Regex::for('^[a-zA-Z0-9]{6,7}$');
+        $chars = Set\Regex::for('^[a-zA-Z0-9]+$');
 
         $this
             ->forAll($chars)
