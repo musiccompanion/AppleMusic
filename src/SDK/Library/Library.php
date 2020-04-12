@@ -107,8 +107,8 @@ final class Library implements LibraryInterface
                     new Album\Id($album['id']),
                     new Album\Name($album['attributes']['name']),
                     \array_key_exists('artwork', $album['attributes']) ? new Album\Artwork(
-                        new Album\Artwork\Width($album['attributes']['artwork']['width']),
-                        new Album\Artwork\Height($album['attributes']['artwork']['height']),
+                        Album\Artwork\Width::of($album['attributes']['artwork']['width']),
+                        Album\Artwork\Height::of($album['attributes']['artwork']['height']),
                         Url::of($album['attributes']['artwork']['url']),
                     ) : null,
                     ...\array_map(
