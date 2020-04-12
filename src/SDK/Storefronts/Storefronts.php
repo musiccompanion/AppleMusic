@@ -9,7 +9,7 @@ use MusicCompanion\AppleMusic\SDK\{
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Header\Authorization,
+    Header,
     Message\Request\Request,
     Message\Method,
     ProtocolVersion,
@@ -22,9 +22,9 @@ use Innmind\Immutable\Set;
 final class Storefronts implements StorefrontsInterface
 {
     private Transport $fulfill;
-    private Authorization $authorization;
+    private Header $authorization;
 
-    public function __construct(Transport $fulfill, Authorization $authorization)
+    public function __construct(Transport $fulfill, Header $authorization)
     {
         $this->fulfill = $fulfill;
         $this->authorization = $authorization;

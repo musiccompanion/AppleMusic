@@ -16,7 +16,6 @@ use Innmind\Stream\Readable;
 use Innmind\Http\Header\{
     Header,
     Value\Value,
-    Authorization,
 };
 use Lcobucci\JWT\{
     Builder,
@@ -28,7 +27,7 @@ final class SDK implements SDKInterface
 {
     private Transport $transport;
     private Clock $clock;
-    private Authorization $authorization;
+    private Header $authorization;
 
     public function __construct(
         Clock $clock,
@@ -49,7 +48,10 @@ final class SDK implements SDKInterface
 
         $this->clock = $clock;
         $this->transport = new HttpTransport\AppleMusic($transport);
-        $this->authorization = Authorization::of('Bearer', (string) $jwt);
+        $this->authorization = new Header(
+            'Authorization',
+            new Value('Bearer '.(string) $jwt),
+        );
     }
 
     public function storefronts(): Storefronts

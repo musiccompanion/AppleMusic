@@ -16,7 +16,7 @@ use MusicCompanion\AppleMusic\SDK\{
 use Innmind\TimeContinuum\Clock;
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
-    Header\Authorization,
+    Header,
     Message\Request\Request,
     Message\Method,
     ProtocolVersion,
@@ -34,13 +34,13 @@ final class Catalog implements CatalogInterface
 {
     private Clock $clock;
     private Transport $fulfill;
-    private Authorization $authorization;
+    private Header $authorization;
     private Storefront\Id $storefront;
 
     public function __construct(
         Clock $clock,
         Transport $fulfill,
-        Authorization $authorization,
+        Header $authorization,
         Storefront\Id $storefront
     ) {
         $this->clock = $clock;
