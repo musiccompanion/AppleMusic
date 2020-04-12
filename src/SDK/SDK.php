@@ -28,6 +28,7 @@ final class SDK implements SDKInterface
     private Transport $transport;
     private Clock $clock;
     private Header $authorization;
+    private string $jwt;
 
     public function __construct(
         Clock $clock,
@@ -48,10 +49,16 @@ final class SDK implements SDKInterface
 
         $this->clock = $clock;
         $this->transport = new HttpTransport\AppleMusic($transport);
+        $this->jwt = (string) $jwt;
         $this->authorization = new Header(
             'Authorization',
-            new Value('Bearer '.(string) $jwt),
+            new Value('Bearer '.$this->jwt),
         );
+    }
+
+    public function jwt(): string
+    {
+        return $this->jwt;
     }
 
     public function storefronts(): Storefronts
