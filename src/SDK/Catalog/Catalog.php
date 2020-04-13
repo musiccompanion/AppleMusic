@@ -68,40 +68,46 @@ final class Catalog implements CatalogInterface
 
     public function album(Album\Id $id): Album
     {
-        /** @var array{data: array{0: array{attributes: array{artwork: array{width: int, height: int, url: string, bgColor: string, textColor1: string, textColor2: string, textColor3: string, textColor4: string}, name: string, isSingle: bool, url: string, isComplete: bool, genreNames: list<string>, isMasteredForItunes: bool, releaseDate: string, recordLabel: string, copyright: string, editorialNotes: array{standard: string, short: string}}, relationships: array{tracks: array{data: list<array{id: int}>}, artists: array{data: list<array{id: int}>}}}}} */
+        /** @var array{data: array{0: array{attributes: array{artwork?: array{width: int, height: int, url: string, bgColor?: string, textColor1?: string, textColor2?: string, textColor3?: string, textColor4?: string}, name: string, isSingle: bool, url: string, isComplete: bool, genreNames: list<string>, isMasteredForItunes: bool, releaseDate: string, recordLabel: string, copyright?: string, editorialNotes?: array{standard: string, short: string}}, relationships: array{tracks: array{data: list<array{id: int}>}, artists: array{data: list<array{id: int}>}}}}} */
         $resource = $this->get($this->url("albums/{$id->toString()}"));
+        $attributes = $resource['data'][0]['attributes'];
+        $bgColor = $attributes['artwork']['bgColor'] ?? null;
+        $textColor1 = $attributes['artwork']['textColor1'] ?? null;
+        $textColor2 = $attributes['artwork']['textColor2'] ?? null;
+        $textColor3 = $attributes['artwork']['textColor3'] ?? null;
+        $textColor4 = $attributes['artwork']['textColor4'] ?? null;
 
         return new Album(
             $id,
-            new Artwork(
-                new Artwork\Width($resource['data'][0]['attributes']['artwork']['width']),
-                new Artwork\Height($resource['data'][0]['attributes']['artwork']['height']),
-                Url::of($resource['data'][0]['attributes']['artwork']['url']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['bgColor']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor1']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor2']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor3']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor4']),
-            ),
-            new Album\Name($resource['data'][0]['attributes']['name']),
-            $resource['data'][0]['attributes']['isSingle'],
-            Url::of($resource['data'][0]['attributes']['url']),
-            $resource['data'][0]['attributes']['isComplete'],
+            \array_key_exists('artwork', $attributes) ? new Artwork(
+                new Artwork\Width($attributes['artwork']['width']),
+                new Artwork\Height($attributes['artwork']['height']),
+                Url::of($attributes['artwork']['url']),
+                \is_string($bgColor) ? RGBA::of($bgColor) : null,
+                \is_string($textColor1) ? RGBA::of($textColor1) : null,
+                \is_string($textColor2) ? RGBA::of($textColor2) : null,
+                \is_string($textColor3) ? RGBA::of($textColor3) : null,
+                \is_string($textColor4) ? RGBA::of($textColor4) : null,
+            ) : null,
+            new Album\Name($attributes['name']),
+            $attributes['isSingle'],
+            Url::of($attributes['url']),
+            $attributes['isComplete'],
             Set::of(Genre::class, ...\array_map(
                 static fn(string $genre): Genre => new Genre($genre),
-                $resource['data'][0]['attributes']['genreNames'],
+                $attributes['genreNames'],
             )),
             Set::of(Song\Id::class, ...\array_map(
                 static fn(array $song): Song\Id => new Song\Id((int) $song['id']),
                 $resource['data'][0]['relationships']['tracks']['data'],
             )),
-            $resource['data'][0]['attributes']['isMasteredForItunes'],
-            $this->clock->at($resource['data'][0]['attributes']['releaseDate']),
-            new Album\RecordLabel($resource['data'][0]['attributes']['recordLabel']),
-            new Album\Copyright($resource['data'][0]['attributes']['copyright']),
+            $attributes['isMasteredForItunes'],
+            $this->clock->at($attributes['releaseDate']),
+            new Album\RecordLabel($attributes['recordLabel']),
+            new Album\Copyright($attributes['copyright'] ?? ''),
             new Album\EditorialNotes(
-                $resource['data'][0]['attributes']['editorialNotes']['standard'],
-                $resource['data'][0]['attributes']['editorialNotes']['short'],
+                $attributes['editorialNotes']['standard'] ?? '',
+                $attributes['editorialNotes']['short'] ?? '',
             ),
             Set::of(Artist\Id::class, ...\array_map(
                 static fn(array $artist): Artist\Id => new Artist\Id((int) $artist['id']),
@@ -112,37 +118,43 @@ final class Catalog implements CatalogInterface
 
     public function song(Song\Id $id): Song
     {
-        /** @var array{data: array{0: array{attributes: array{previews: list<array{url: string}>, artwork: array{width: int, height: int, url: string, bgColor: string, textColor1: string, textColor2: string, textColor3: string, textColor4: string}, url: string, discNumber: int, genreNames: list<string>, durationInMillis: int, releaseDate: string, name: string, isrc: string, trackNumber: int, composerName: string}, relationships: array{artists: array{data: list<array{id: int}>}, albums: array{data: list<array{id: int}>}}}}} */
+        /** @var array{data: array{0: array{attributes: array{previews: list<array{url: string}>, artwork: array{width: int, height: int, url: string, bgColor?: string, textColor1?: string, textColor2?: string, textColor3?: string, textColor4?: string}, url: string, discNumber: int, genreNames: list<string>, durationInMillis?: int, releaseDate: string, name: string, isrc: string, trackNumber: int, composerName?: string}, relationships: array{artists: array{data: list<array{id: int}>}, albums: array{data: list<array{id: int}>}}}}} */
         $resource = $this->get($this->url("songs/{$id->toString()}"));
+        $attributes = $resource['data'][0]['attributes'];
+        $bgColor = $attributes['artwork']['bgColor'] ?? null;
+        $textColor1 = $attributes['artwork']['textColor1'] ?? null;
+        $textColor2 = $attributes['artwork']['textColor2'] ?? null;
+        $textColor3 = $attributes['artwork']['textColor3'] ?? null;
+        $textColor4 = $attributes['artwork']['textColor4'] ?? null;
 
         return new Song(
             $id,
             Set::of(Url::class, ...\array_map(
                 static fn(array $preview): Url => Url::of($preview['url']),
-                $resource['data'][0]['attributes']['previews'],
+                $attributes['previews'],
             )),
             new Artwork(
-                new Artwork\Width($resource['data'][0]['attributes']['artwork']['width']),
-                new Artwork\Height($resource['data'][0]['attributes']['artwork']['height']),
-                Url::of($resource['data'][0]['attributes']['artwork']['url']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['bgColor']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor1']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor2']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor3']),
-                RGBA::of($resource['data'][0]['attributes']['artwork']['textColor4']),
+                new Artwork\Width($attributes['artwork']['width']),
+                new Artwork\Height($attributes['artwork']['height']),
+                Url::of($attributes['artwork']['url']),
+                \is_string($bgColor) ? RGBA::of($bgColor) : null,
+                \is_string($textColor1) ? RGBA::of($textColor1) : null,
+                \is_string($textColor2) ? RGBA::of($textColor2) : null,
+                \is_string($textColor3) ? RGBA::of($textColor3) : null,
+                \is_string($textColor4) ? RGBA::of($textColor4) : null,
             ),
-            Url::of($resource['data'][0]['attributes']['url']),
-            new Song\DiscNumber($resource['data'][0]['attributes']['discNumber']),
+            Url::of($attributes['url']),
+            new Song\DiscNumber($attributes['discNumber']),
             Set::of(Genre::class, ...\array_map(
                 static fn(string $genre): Genre => new Genre($genre),
-                $resource['data'][0]['attributes']['genreNames'],
+                $attributes['genreNames'],
             )),
-            new Song\Duration($resource['data'][0]['attributes']['durationInMillis']),
-            $this->clock->at($resource['data'][0]['attributes']['releaseDate']),
-            new Song\Name($resource['data'][0]['attributes']['name']),
-            new Song\ISRC($resource['data'][0]['attributes']['isrc']),
-            new Song\TrackNumber($resource['data'][0]['attributes']['trackNumber']),
-            new Song\Composer($resource['data'][0]['attributes']['composerName']),
+            Song\Duration::of($attributes['durationInMillis'] ?? null),
+            $this->clock->at($attributes['releaseDate']),
+            new Song\Name($attributes['name']),
+            new Song\ISRC($attributes['isrc']),
+            new Song\TrackNumber($attributes['trackNumber']),
+            new Song\Composer($attributes['composerName'] ?? ''),
             Set::of(Artist\Id::class, ...\array_map(
                 static fn(array $artist): Artist\Id => new Artist\Id((int) $artist['id']),
                 $resource['data'][0]['relationships']['artists']['data'],
@@ -184,8 +196,9 @@ final class Catalog implements CatalogInterface
 
     public function search(string $term): Search
     {
-        $url = $this->url("search?term=$term&types=artists,albums,songs&limit=25");
-        /** @var array{results: array{artists: array{data: list<array{id: int}>, next?: string}, albums: array{data: list<array{id: int}>, next?: string}, songs: array{data: list<array{id: int}>, next?: string}}} */
+        $encodedTerm = \urlencode($term);
+        $url = $this->url("search?term=$encodedTerm&types=artists,albums,songs&limit=25");
+        /** @var array{results: array{artists?: array{data: list<array{id: int}>, next?: string}, albums?: array{data: list<array{id: int}>, next?: string}, songs?: array{data: list<array{id: int}>, next?: string}}} */
         $resource = $this->get($url);
 
         /** @var Sequence<Artist\Id> */
@@ -193,16 +206,18 @@ final class Catalog implements CatalogInterface
             Artist\Id::class,
             function() use ($resource): \Generator {
                 do {
-                    foreach ($resource['results']['artists']['data'] as $artist) {
+                    $artists = $resource['results']['artists'] ?? [];
+
+                    foreach ($artists['data'] ?? [] as $artist) {
                         yield new Artist\Id((int) $artist['id']);
                     }
 
-                    if (!\array_key_exists('next', $resource['results']['artists'])) {
+                    if (!\array_key_exists('next', $artists)) {
                         return;
                     }
 
                     /** @var array{results: array{artists: array{data: list<array{id: int}>, next?: string}}} */
-                    $resource = $this->get(Url::of($resource['results']['artists']['next']));
+                    $resource = $this->get(Url::of($artists['next']));
                 } while (true);
             },
         );
@@ -212,16 +227,18 @@ final class Catalog implements CatalogInterface
             Album\Id::class,
             function() use ($resource): \Generator {
                 do {
-                    foreach ($resource['results']['albums']['data'] as $album) {
+                    $albums = $resource['results']['albums'] ?? [];
+
+                    foreach ($albums['data'] ?? [] as $album) {
                         yield new Album\Id((int) $album['id']);
                     }
 
-                    if (!\array_key_exists('next', $resource['results']['albums'])) {
+                    if (!\array_key_exists('next', $albums)) {
                         return;
                     }
 
                     /** @var array{results: array{albums: array{data: list<array{id: int}>, next?: string}}} */
-                    $resource = $this->get(Url::of($resource['results']['albums']['next']));
+                    $resource = $this->get(Url::of($albums['next']));
                 } while (true);
             },
         );
@@ -231,16 +248,18 @@ final class Catalog implements CatalogInterface
             Song\Id::class,
             function() use ($resource): \Generator {
                 do {
-                    foreach ($resource['results']['songs']['data'] as $song) {
+                    $songs = $resource['results']['songs'] ?? [];
+
+                    foreach ($songs['data'] ?? [] as $song) {
                         yield new Song\Id((int) $song['id']);
                     }
 
-                    if (!\array_key_exists('next', $resource['results']['songs'])) {
+                    if (!\array_key_exists('next', $songs)) {
                         return;
                     }
 
                     /** @var array{results: array{songs: array{data: list<array{id: int}>, next?: string}}} */
-                    $resource = $this->get(Url::of($resource['results']['songs']['next']));
+                    $resource = $this->get(Url::of($songs['next']));
                 } while (true);
             },
         );

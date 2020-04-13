@@ -19,21 +19,21 @@ final class Artwork
     private Width $width;
     private Height $height;
     private Url $url;
-    private RGBA $backgroundColor;
-    private RGBA $textColor1;
-    private RGBA $textColor2;
-    private RGBA $textColor3;
-    private RGBA $textColor4;
+    private ?RGBA $backgroundColor;
+    private ?RGBA $textColor1;
+    private ?RGBA $textColor2;
+    private ?RGBA $textColor3;
+    private ?RGBA $textColor4;
 
     public function __construct(
         Width $width,
         Height $height,
         Url $url,
-        RGBA $backgroundColor,
-        RGBA $textColor1,
-        RGBA $textColor2,
-        RGBA $textColor3,
-        RGBA $textColor4
+        ?RGBA $backgroundColor,
+        ?RGBA $textColor1,
+        ?RGBA $textColor2,
+        ?RGBA $textColor3,
+        ?RGBA $textColor4
     ) {
         $this->width = $width;
         $this->height = $height;
@@ -60,27 +60,27 @@ final class Artwork
         return $this->url;
     }
 
-    public function backgroundColor(): RGBA
+    public function backgroundColor(): ?RGBA
     {
         return $this->backgroundColor;
     }
 
-    public function textColor1(): RGBA
+    public function textColor1(): ?RGBA
     {
         return $this->textColor1;
     }
 
-    public function textColor2(): RGBA
+    public function textColor2(): ?RGBA
     {
         return $this->textColor2;
     }
 
-    public function textColor3(): RGBA
+    public function textColor3(): ?RGBA
     {
         return $this->textColor3;
     }
 
-    public function textColor4(): RGBA
+    public function textColor4(): ?RGBA
     {
         return $this->textColor4;
     }

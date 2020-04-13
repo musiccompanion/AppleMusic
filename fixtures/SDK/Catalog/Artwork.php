@@ -22,11 +22,26 @@ final class Artwork
             Artwork\Width::any(),
             Artwork\Height::any(),
             Url::any(),
-            Colour::any(),
-            Colour::any(),
-            Colour::any(),
-            Colour::any(),
-            Colour::any(),
+            new Set\Either(
+                Colour::any(),
+                Set\Elements::of(null),
+            ),
+            new Set\Either(
+                Colour::any(),
+                Set\Elements::of(null),
+            ),
+            new Set\Either(
+                Colour::any(),
+                Set\Elements::of(null),
+            ),
+            new Set\Either(
+                Colour::any(),
+                Set\Elements::of(null),
+            ),
+            new Set\Either(
+                Colour::any(),
+                Set\Elements::of(null),
+            ),
         );
     }
 }

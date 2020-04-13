@@ -17,7 +17,7 @@ final class Song
 {
     private Id $id;
     private Name $name;
-    private Duration $duration;
+    private ?Duration $duration;
     private TrackNumber $trackNumber;
     /** @var Set<Genre> */
     private Set $genres;
@@ -34,7 +34,7 @@ final class Song
     public function __construct(
         Id $id,
         Name $name,
-        Duration $duration,
+        ?Duration $duration,
         TrackNumber $trackNumber,
         Set $genres,
         Set $albums,
@@ -63,8 +63,15 @@ final class Song
         return $this->name;
     }
 
+    public function durationKnown(): bool
+    {
+        return $this->duration instanceof Duration;
+    }
+
+    /** @psalm-suppress InvalidNullableReturnType */
     public function duration(): Duration
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->duration;
     }
 
