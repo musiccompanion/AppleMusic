@@ -112,7 +112,7 @@ final class Catalog implements CatalogInterface
             )),
             $attributes['isMasteredForItunes'],
             $this->clock->at($releaseDate),
-            new Album\RecordLabel($attributes['recordLabel']),
+            new Album\RecordLabel($attributes['recordLabel'] ?? ''),
             new Album\Copyright($attributes['copyright'] ?? ''),
             new Album\EditorialNotes(
                 $attributes['editorialNotes']['standard'] ?? '',
