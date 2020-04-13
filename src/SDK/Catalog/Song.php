@@ -27,7 +27,7 @@ final class Song
     private DiscNumber $discNumber;
     /** @var Set<Genre> */
     private Set $genres;
-    private Duration $duration;
+    private ?Duration $duration;
     private PointInTime $release;
     private Name $name;
     private ISRC $isrc;
@@ -51,7 +51,7 @@ final class Song
         Url $url,
         DiscNumber $discNumber,
         Set $genres,
-        Duration $duration,
+        ?Duration $duration,
         PointInTime $release,
         Name $name,
         ISRC $isrc,
@@ -117,8 +117,15 @@ final class Song
         return $this->genres;
     }
 
+    public function durationKnown(): bool
+    {
+        return $this->duration instanceof Duration;
+    }
+
+    /** @psalm-suppress InvalidNullableReturnType */
     public function duration(): Duration
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->duration;
     }
 

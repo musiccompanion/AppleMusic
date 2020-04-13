@@ -18,7 +18,7 @@ use function Innmind\Immutable\assertSet;
 final class Album
 {
     private Id $id;
-    private Artwork $artwork;
+    private ?Artwork $artwork;
     private Name $name;
     private bool $single;
     private Url $url;
@@ -42,7 +42,7 @@ final class Album
      */
     public function __construct(
         Id $id,
-        Artwork $artwork,
+        ?Artwork $artwork,
         Name $name,
         bool $single,
         Url $url,
@@ -81,8 +81,15 @@ final class Album
         return $this->id;
     }
 
+    public function hasArtwork(): bool
+    {
+        return $this->artwork instanceof Artwork;
+    }
+
+    /** @psalm-suppress InvalidNullableReturnType */
     public function artwork(): Artwork
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->artwork;
     }
 

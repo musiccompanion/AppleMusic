@@ -140,7 +140,7 @@ final class Library implements LibraryInterface
         $songs = Set::of(Song::class);
 
         do {
-            /** @var array{data: list<array{id: string, attributes: array{name: string, durationInMillis: int, trackNumber: int, genreNames: list<string>}, relationships: array{albums: array{data: list<array{id: string}>}, artists: array{data: list<array{id: string}>}}}>, next?: string} */
+            /** @var array{data: list<array{id: string, attributes: array{name: string, durationInMillis?: int, trackNumber: int, genreNames: list<string>}, relationships: array{albums: array{data: list<array{id: string}>}, artists: array{data: list<array{id: string}>}}}>, next?: string} */
             $resource = $this->get($url);
             $url = null;
 
@@ -181,7 +181,7 @@ final class Library implements LibraryInterface
                 $songs = ($songs)(new Song(
                     new Song\Id($song['id']),
                     new Song\Name($song['attributes']['name']),
-                    new Song\Duration($song['attributes']['durationInMillis']),
+                    Song\Duration::of($song['attributes']['durationInMillis'] ?? null),
                     new Song\TrackNumber($song['attributes']['trackNumber']),
                     $genres,
                     $albums,

@@ -26,7 +26,10 @@ final class Album
                 return new Model($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists);
             },
             Album\Id::any(),
-            Artwork::any(),
+            new Set\Either(
+                Artwork::any(),
+                Set\Elements::of(null),
+            ),
             Album\Name::any(),
             Set\Elements::of(true, false),
             Url::any(),
