@@ -86,6 +86,10 @@ final class Catalog implements CatalogInterface
             $releaseDate .= '-01-01';
         }
 
+        if (Str::of($releaseDate)->matches('~^\d{4}-\d{2}-\d{2}$~')) {
+            $releaseDate .= ' 00:00:00';
+        }
+
         return new Album(
             $id,
             \array_key_exists('artwork', $attributes) ? new Artwork(
