@@ -184,8 +184,8 @@ final class Catalog implements CatalogInterface
 
     public function search(string $term): Search
     {
-        $term = \urlencode($term);
-        $url = $this->url("search?term=$term&types=artists,albums,songs&limit=25");
+        $encodedTerm = \urlencode($term);
+        $url = $this->url("search?term=$encodedTerm&types=artists,albums,songs&limit=25");
         /** @var array{results: array{artists?: array{data: list<array{id: int}>, next?: string}, albums?: array{data: list<array{id: int}>, next?: string}, songs?: array{data: list<array{id: int}>, next?: string}}} */
         $resource = $this->get($url);
 

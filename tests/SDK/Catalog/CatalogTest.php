@@ -1085,6 +1085,8 @@ JSON
                     ->expects($this->at(0))
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $term, $authorization): bool {
+                        $term = \urlencode($term);
+
                         return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?term=$term&types=artists,albums,songs&limit=25" &&
                             $request->method()->toString() === 'GET' &&
                             $request->headers()->get('authorization') === $authorization;
