@@ -15,6 +15,8 @@ use MusicCompanion\AppleMusic\SDK\{
 use Innmind\TimeContinuum\{
     Clock,
     PointInTime,
+    Earth,
+    Format,
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
@@ -792,7 +794,7 @@ JSON
                 $clock
                     ->expects($this->once())
                     ->method('at')
-                    ->with('1984-06-04')
+                    ->with('1984-06-04 00:00:00')
                     ->willReturn($release = $this->createMock(PointInTime::class));
 
                 $album = $catalog->album($id);

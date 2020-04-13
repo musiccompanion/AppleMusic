@@ -28,6 +28,7 @@ use Innmind\Json\Json;
 use Innmind\Immutable\{
     Set,
     Sequence,
+    Str,
 };
 
 final class Catalog implements CatalogInterface
@@ -76,6 +77,18 @@ final class Catalog implements CatalogInterface
         $textColor2 = $attributes['artwork']['textColor2'] ?? null;
         $textColor3 = $attributes['artwork']['textColor3'] ?? null;
         $textColor4 = $attributes['artwork']['textColor4'] ?? null;
+        $releaseDate = $attributes['releaseDate'];
+
+        if (Str::of($releaseDate)->matches('~^\d{4}$~')) {
+            // like in the case of this EP https://music.apple.com/fr/album/rip-it-up-ep/213587444
+            // only the year is provided, and Apple Music interprets this as
+            // january 1st
+            $releaseDate .= '-01-01';
+        }
+
+        if (Str::of($releaseDate)->matches('~^\d{4}-\d{2}-\d{2}$~')) {
+            $releaseDate .= ' 00:00:00';
+        }
 
         return new Album(
             $id,
@@ -102,8 +115,8 @@ final class Catalog implements CatalogInterface
                 $resource['data'][0]['relationships']['tracks']['data'],
             )),
             $attributes['isMasteredForItunes'],
-            $this->clock->at($attributes['releaseDate']),
-            new Album\RecordLabel($attributes['recordLabel']),
+            $this->clock->at($releaseDate),
+            new Album\RecordLabel($attributes['recordLabel'] ?? ''),
             new Album\Copyright($attributes['copyright'] ?? ''),
             new Album\EditorialNotes(
                 $attributes['editorialNotes']['standard'] ?? '',
