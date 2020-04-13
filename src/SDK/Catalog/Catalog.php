@@ -194,16 +194,18 @@ final class Catalog implements CatalogInterface
             Artist\Id::class,
             function() use ($resource): \Generator {
                 do {
-                    foreach ($resource['results']['artists']['data'] ?? [] as $artist) {
+                    $artists = $resource['results']['artists'] ?? [];
+
+                    foreach ($artists['data'] ?? [] as $artist) {
                         yield new Artist\Id((int) $artist['id']);
                     }
 
-                    if (!\array_key_exists('next', $resource['results']['artists'] ?? [])) {
+                    if (!\array_key_exists('next', $artists)) {
                         return;
                     }
 
                     /** @var array{results: array{artists: array{data: list<array{id: int}>, next?: string}}} */
-                    $resource = $this->get(Url::of($resource['results']['artists']['next']));
+                    $resource = $this->get(Url::of($artists['next']));
                 } while (true);
             },
         );
@@ -213,16 +215,18 @@ final class Catalog implements CatalogInterface
             Album\Id::class,
             function() use ($resource): \Generator {
                 do {
-                    foreach ($resource['results']['albums']['data'] ?? [] as $album) {
+                    $albums = $resource['results']['albums'] ?? [];
+
+                    foreach ($albums['data'] ?? [] as $album) {
                         yield new Album\Id((int) $album['id']);
                     }
 
-                    if (!\array_key_exists('next', $resource['results']['albums'] ?? [])) {
+                    if (!\array_key_exists('next', $albums)) {
                         return;
                     }
 
                     /** @var array{results: array{albums: array{data: list<array{id: int}>, next?: string}}} */
-                    $resource = $this->get(Url::of($resource['results']['albums']['next']));
+                    $resource = $this->get(Url::of($albums['next']));
                 } while (true);
             },
         );
@@ -232,16 +236,18 @@ final class Catalog implements CatalogInterface
             Song\Id::class,
             function() use ($resource): \Generator {
                 do {
-                    foreach ($resource['results']['songs']['data'] ?? [] as $song) {
+                    $songs = $resource['results']['songs'] ?? [];
+
+                    foreach ($songs['data'] ?? [] as $song) {
                         yield new Song\Id((int) $song['id']);
                     }
 
-                    if (!\array_key_exists('next', $resource['results']['songs'] ?? [])) {
+                    if (!\array_key_exists('next', $songs)) {
                         return;
                     }
 
                     /** @var array{results: array{songs: array{data: list<array{id: int}>, next?: string}}} */
-                    $resource = $this->get(Url::of($resource['results']['songs']['next']));
+                    $resource = $this->get(Url::of($songs['next']));
                 } while (true);
             },
         );
