@@ -1074,9 +1074,6 @@ JSON
             )
             ->take(100)
             ->then(function($storefront, $term) {
-                $term = json_encode($term);
-                $term = substr($term, 1, -1);
-
                 $catalog = new Catalog(
                     $this->createMock(Clock::class),
                     $fulfill = $this->createMock(Transport::class),
