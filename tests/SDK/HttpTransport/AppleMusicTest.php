@@ -3,7 +3,11 @@ declare(strict_types = 1);
 
 namespace Tests\MusicCompanion\AppleMusic\SDK\HttpTransport;
 
-use MusicCompanion\AppleMusic\SDK\HttpTransport\AppleMusic;
+use MusicCompanion\AppleMusic\{
+    SDK\HttpTransport\AppleMusic,
+    Exception\InvalidToken,
+    Exception\InvalidUserToken,
+};
 use Innmind\HttpTransport\{
     Transport,
     Exception\ClientError,
@@ -71,7 +75,7 @@ class AppleMusicTest extends TestCase
         $this
             ->forAll(
                 Url::any(),
-                Set\Integers::between(400, 418)
+                Set\Elements::of(400, 402, ...\range(404, 418)),
             )
             ->then(function($url, $statusCode) {
                 $fulfill = new AppleMusic(
@@ -92,6 +96,62 @@ class AppleMusicTest extends TestCase
                     ->willReturn(new StatusCode($statusCode));
 
                 $this->expectException(ClientError::class);
+
+                $fulfill($initial);
+            });
+    }
+
+    public function testThrowWhenInvalidToken()
+    {
+        $this
+            ->forAll(Url::any())
+            ->then(function($url) {
+                $fulfill = new AppleMusic(
+                    $inner = $this->createMock(Transport::class)
+                );
+                $initial = new Request(
+                    $url,
+                    Method::get(),
+                    new ProtocolVersion(2, 0)
+                );
+                $inner
+                    ->expects($this->once())
+                    ->method('__invoke')
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->any())
+                    ->method('statusCode')
+                    ->willReturn(new StatusCode(401));
+
+                $this->expectException(InvalidToken::class);
+
+                $fulfill($initial);
+            });
+    }
+
+    public function testThrowWhenInvalidUserToken()
+    {
+        $this
+            ->forAll(Url::any())
+            ->then(function($url) {
+                $fulfill = new AppleMusic(
+                    $inner = $this->createMock(Transport::class)
+                );
+                $initial = new Request(
+                    $url,
+                    Method::get(),
+                    new ProtocolVersion(2, 0)
+                );
+                $inner
+                    ->expects($this->once())
+                    ->method('__invoke')
+                    ->willReturn($response = $this->createMock(Response::class));
+                $response
+                    ->expects($this->any())
+                    ->method('statusCode')
+                    ->willReturn(new StatusCode(403));
+
+                $this->expectException(InvalidUserToken::class);
 
                 $fulfill($initial);
             });
