@@ -15,7 +15,7 @@
         "issues": "http://github.com/MusicCompanion/AppleMusic/issues"
     },
     "require": {
-        "php": "~7.4",
+        "php": "~7.4|~8.0",
         "innmind/immutable": "~3.5",
         "innmind/url": "~3.3",
         "innmind/colour": "~3.1",
