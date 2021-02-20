@@ -98,7 +98,7 @@ class AlbumTest extends TestCase
                 DataSet\Elements::of(true, false),
                 Url::any(),
                 DataSet\Elements::of(true, false),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
                 DataSet\Elements::of(true, false),
                 PointInTime::any(),
                 RecordLabel::any(),
@@ -139,7 +139,7 @@ class AlbumTest extends TestCase
                 DataSet\Elements::of(true, false),
                 Url::any(),
                 DataSet\Elements::of(true, false),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
                 DataSet\Elements::of(true, false),
                 PointInTime::any(),
                 RecordLabel::any(),
@@ -185,7 +185,7 @@ class AlbumTest extends TestCase
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any(),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
             )
             ->disableShrinking()
             ->then(function($id, $artwork, $name, $single, $url, $complete, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {

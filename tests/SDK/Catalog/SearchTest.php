@@ -50,7 +50,7 @@ class SearchTest extends TestCase
         $this
             ->forAll(
                 DataSet\Strings::any(),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
                 ISequence::of(Album\Id::class, AlbumSet\Id::any()),
                 ISequence::of(Song\Id::class, SongSet\Id::any())
             )
@@ -74,7 +74,7 @@ class SearchTest extends TestCase
             ->forAll(
                 DataSet\Strings::any(),
                 ISequence::of(Artist\Id::class, ArtistSet\Id::any()),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
                 ISequence::of(Song\Id::class, SongSet\Id::any())
             )
             ->disableShrinking()
@@ -98,7 +98,7 @@ class SearchTest extends TestCase
                 DataSet\Strings::any(),
                 ISequence::of(Artist\Id::class, ArtistSet\Id::any()),
                 ISequence::of(Album\Id::class, AlbumSet\Id::any()),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
             )
             ->disableShrinking()
             ->then(function($term, $artists, $albums, $song) {

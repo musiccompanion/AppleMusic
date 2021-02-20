@@ -1,6 +1,6 @@
 # Apple Music SDK (non official)
 
-[![Build Status](https://github.com/MusicCompanion/AppleMusic/workflows/CI/badge.svg)](https://github.com/MusicCompanion/AppleMusic/actions?query=workflow%3ACI)
+[![Build Status](https://github.com/MusicCompanion/AppleMusic/workflows/CI/badge.svg?branch=master)](https://github.com/MusicCompanion/AppleMusic/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/MusicCompanion/AppleMusic/branch/develop/graph/badge.svg)](https://codecov.io/gh/MusicCompanion/AppleMusic)
 [![Type Coverage](https://shepherd.dev/github/MusicCompanion/AppleMusic/coverage.svg)](https://shepherd.dev/github/MusicCompanion/AppleMusic)
 

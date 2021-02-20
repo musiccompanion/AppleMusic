@@ -23,7 +23,10 @@ use Innmind\Http\Message\{
 };
 use Innmind\Stream\Readable;
 use function Innmind\Immutable\first;
-use Lcobucci\JWT\Parser;
+use Lcobucci\JWT\{
+    Token\Parser,
+    Encoding\JoseEncoder,
+};
 use Fixtures\MusicCompanion\AppleMusic\SDK\Storefront;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -64,19 +67,19 @@ KEY
                     );
                 $clock
                     ->method('now')
-                    ->willReturn(new PointInTime('2019-01-01T00:00:00'));
+                    ->willReturn(new PointInTime('2019-01-01T00:00:00+00:00'));
                 $transport
                     ->expects($this->any())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) {
                         $header = first($request->headers()->get('authorization')->values())->toString();
-                        $jwt = substr($header, 7); // remove Bearer
-                        $jwt = (new Parser)->parse($jwt);
+                        $jwt = \substr($header, 7); // remove Bearer
+                        $jwt = (new Parser(new JoseEncoder))->parse($jwt);
 
-                        return $jwt->getHeader('kid') === 'AAAAAAAAAA' &&
-                            $jwt->getClaim('iss') === 'BBBBBBBBBB' &&
-                            $jwt->getClaim('iat') === 1546300800 &&
-                            $jwt->getClaim('exp') === 1546300860;
+                        return $jwt->headers()->get('kid') === 'AAAAAAAAAA' &&
+                            $jwt->claims()->get('iss') === 'BBBBBBBBBB' &&
+                            $jwt->claims()->get('iat')->format(\DateTime::ATOM) === '2019-01-01T00:00:00+00:00' &&
+                            $jwt->claims()->get('exp')->format(\DateTime::ATOM) === '2019-01-01T00:01:00+00:00';
                     }))
                     ->willReturn($response = $this->createMock(Response::class));
                 $response

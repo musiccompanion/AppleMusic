@@ -10,17 +10,17 @@ use MusicCompanion\AppleMusic\{
 use Innmind\TimeContinuum\{
     Clock,
     Period,
+    Earth\Format\ISO8601,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\Stream\Readable;
 use Innmind\Http\Header\{
     Header,
     Value\Value,
 };
 use Lcobucci\JWT\{
-    Builder,
+    Configuration,
     Signer\Ecdsa\Sha256,
-    Signer,
+    Signer\Key\InMemory,
 };
 
 final class SDK implements SDKInterface
@@ -36,20 +36,29 @@ final class SDK implements SDKInterface
         Key $key,
         Period $tokenValidity
     ) {
-        $jwt = (new Builder)
+        $config = Configuration::forSymmetricSigner(
+            Sha256::create(),
+            InMemory::plainText($key->content()->toString()),
+        );
+        $jwt = $config
+            ->builder()
             ->withHeader('alg', 'ES256')
             ->withHeader('kid', $key->id())
-            ->withClaim('iss', $key->teamId())
-            ->withClaim('iat', (int) ($clock->now()->milliseconds() / 1000))
-            ->withClaim('exp', (int) ($clock->now()->goForward($tokenValidity)->milliseconds() / 1000))
+            ->issuedBy($key->teamId())
+            ->issuedAt(new \DateTimeImmutable(
+                $clock->now()->format(new ISO8601),
+            ))
+            ->expiresAt(new \DateTimeImmutable(
+                $clock->now()->goForward($tokenValidity)->format(new ISO8601),
+            ))
             ->getToken(
-                new Sha256,
-                new Signer\Key($key->content()->toString()),
+                $config->signer(),
+                $config->signingKey(),
             );
 
         $this->clock = $clock;
         $this->transport = new HttpTransport\AppleMusic($transport);
-        $this->jwt = (string) $jwt;
+        $this->jwt = $jwt->toString();
         $this->authorization = new Header(
             'Authorization',
             new Value('Bearer '.$this->jwt),

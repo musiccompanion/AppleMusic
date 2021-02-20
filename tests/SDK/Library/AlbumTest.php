@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicComapnion\AppleMusic\SDK\Library;
+namespace Tests\MusicCompanion\AppleMusic\SDK\Library;
 
 use MusicCompanion\AppleMusic\SDK\Library\{
     Album,

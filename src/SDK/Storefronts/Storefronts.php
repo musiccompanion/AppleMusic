@@ -35,6 +35,7 @@ final class Storefronts implements StorefrontsInterface
      */
     public function all(): Set
     {
+        /** @psalm-suppress MixedArgumentTypeCoercion */
         $response = ($this->fulfill)(new Request(
             Url::of('/v1/storefronts'),
             Method::get(),

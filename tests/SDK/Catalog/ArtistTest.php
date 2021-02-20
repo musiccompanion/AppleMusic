@@ -61,7 +61,7 @@ class ArtistTest extends TestCase
                 Id::any(),
                 Name::any(),
                 Url::any(),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
             )
             ->disableShrinking()
             ->then(function($id, $name, $url, string $type) {
@@ -85,7 +85,7 @@ class ArtistTest extends TestCase
                 Id::any(),
                 Name::any(),
                 Url::any(),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
             )
             ->disableShrinking()
             ->then(function($id, $name, $url, string $type) {

@@ -22,8 +22,8 @@ class KeyTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Elements::of(...range('A', 'Z'), ...range(0, 9)),
-                Set\Elements::of(...range('A', 'Z'), ...range(0, 9))
+                Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
+                Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9))
             )
             ->then(function($id, $teamId) {
                 $id = \implode(\array_pad([], 10, $id));
@@ -46,7 +46,7 @@ class KeyTest extends TestCase
         $this
             ->forAll(
                 new Set\Strings,
-                Set\Elements::of(...range('A', 'Z'), ...range(0, 9))
+                Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9))
             )
             ->then(function($id, $teamId) {
                 $teamId = \implode(\array_pad([], 10, $teamId));
@@ -66,7 +66,7 @@ class KeyTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Elements::of(...range('A', 'Z'), ...range(0, 9)),
+                Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
                 new Set\Strings
             )
             ->then(function($id, $teamId) {
