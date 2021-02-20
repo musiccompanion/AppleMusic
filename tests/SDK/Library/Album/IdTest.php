@@ -19,7 +19,20 @@ class IdTest extends TestCase
 
     public function testStringsOfSpecifiedFormatAreAccepted()
     {
-        $chars = Set\Regex::for('^[a-zA-Z0-9]+$');
+        $chars = Set\Decorate::immutable(
+            static fn(array $chars) => \implode('', $chars),
+            Set\Sequence::of(
+                Set\Decorate::immutable(
+                    static fn($ord) => \chr($ord),
+                    new Set\Either(
+                        Set\Integers::between(48, 57), // 0-9
+                        Set\Integers::between(65, 90), // A-Z
+                        Set\Integers::between(97, 122), // a-z
+                    ),
+                ),
+                Set\Integers::between(1, 15),
+            ),
+        );
 
         $this
             ->forAll($chars)
