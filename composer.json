@@ -21,7 +21,7 @@
         "innmind/colour": "~3.1",
         "innmind/operating-system": "~2.0",
         "innmind/json": "^1.1",
-        "lcobucci/jwt": "^3.3"
+        "lcobucci/jwt": "~4.0"
     },
     "autoload": {
         "psr-4": {

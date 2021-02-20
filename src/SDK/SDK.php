@@ -18,9 +18,9 @@ use Innmind\Http\Header\{
     Value\Value,
 };
 use Lcobucci\JWT\{
-    Builder,
+    Configuration,
     Signer\Ecdsa\Sha256,
-    Signer,
+    Signer\Key\InMemory,
 };
 
 final class SDK implements SDKInterface
@@ -36,7 +36,12 @@ final class SDK implements SDKInterface
         Key $key,
         Period $tokenValidity
     ) {
-        $jwt = (new Builder)
+        $config = Configuration::forSymmetricSigner(
+            Sha256::create(),
+            InMemory::plainText($key->content()->toString()),
+        );
+        $jwt = $config
+            ->builder()
             ->withHeader('alg', 'ES256')
             ->withHeader('kid', $key->id())
             ->issuedBy($key->teamId())
@@ -47,13 +52,13 @@ final class SDK implements SDKInterface
                 $clock->now()->goForward($tokenValidity)->format(new ISO8601),
             ))
             ->getToken(
-                new Sha256,
-                new Signer\Key($key->content()->toString()),
+                $config->signer(),
+                $config->signingKey(),
             );
 
         $this->clock = $clock;
         $this->transport = new HttpTransport\AppleMusic($transport);
-        $this->jwt = (string) $jwt;
+        $this->jwt = $jwt->toString();
         $this->authorization = new Header(
             'Authorization',
             new Value('Bearer '.$this->jwt),
