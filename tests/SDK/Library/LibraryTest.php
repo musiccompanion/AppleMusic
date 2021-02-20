@@ -114,16 +114,27 @@ JSON
             $userToken = new Header('Music-User-Token', new Value('token'))
         );
         $fulfill
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('__invoke')
-            ->with($this->callback(static function($request) use ($authorization, $userToken): bool {
-                return $request->url()->toString() === '/v1/me/library/artists' &&
-                    $request->method()->toString() === 'GET' &&
-                    $request->headers()->get('authorization') === $authorization &&
-                    $request->headers()->get('music-user-token') === $userToken;
-            }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
+            ->withConsecutive(
+                [$this->callback(static function($request) use ($authorization, $userToken): bool {
+                    return $request->url()->toString() === '/v1/me/library/artists' &&
+                        $request->method()->toString() === 'GET' &&
+                        $request->headers()->get('authorization') === $authorization &&
+                        $request->headers()->get('music-user-token') === $userToken;
+                })],
+                [$this->callback(static function($request) use ($authorization, $userToken): bool {
+                    return $request->url()->toString() === '/v1/me/library/artists?offset=25' &&
+                        $request->method()->toString() === 'GET' &&
+                        $request->headers()->get('authorization') === $authorization &&
+                        $request->headers()->get('music-user-token') === $userToken;
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $response1 = $this->createMock(Response::class),
+                $response2 = $this->createMock(Response::class),
+            ));
+        $response1
             ->expects($this->once())
             ->method('body')
             ->willReturn($body = $this->createMock(Readable::class));
@@ -149,17 +160,7 @@ JSON
 }
 JSON
             );
-        $fulfill
-            ->expects($this->at(1))
-            ->method('__invoke')
-            ->with($this->callback(static function($request) use ($authorization, $userToken): bool {
-                return $request->url()->toString() === '/v1/me/library/artists?offset=25' &&
-                    $request->method()->toString() === 'GET' &&
-                    $request->headers()->get('authorization') === $authorization &&
-                    $request->headers()->get('music-user-token') === $userToken;
-            }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
+        $response2
             ->expects($this->once())
             ->method('body')
             ->willReturn($body = $this->createMock(Readable::class));
@@ -209,16 +210,27 @@ JSON
                     $userToken = new Header('Music-User-Token', new Value('token'))
                 );
                 $fulfill
-                    ->expects($this->at(0))
+                    ->expects($this->exactly(2))
                     ->method('__invoke')
-                    ->with($this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
-                        return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?include=artists" &&
-                            $request->method()->toString() === 'GET' &&
-                            $request->headers()->get('authorization') === $authorization &&
-                            $request->headers()->get('music-user-token') === $userToken;
-                    }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
+                    ->withConsecutive(
+                        [$this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
+                            return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?include=artists" &&
+                                $request->method()->toString() === 'GET' &&
+                                $request->headers()->get('authorization') === $authorization &&
+                                $request->headers()->get('music-user-token') === $userToken;
+                        })],
+                        [$this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
+                            return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists" &&
+                                $request->method()->toString() === 'GET' &&
+                                $request->headers()->get('authorization') === $authorization &&
+                                $request->headers()->get('music-user-token') === $userToken;
+                        })],
+                    )
+                    ->will($this->onConsecutiveCalls(
+                        $response1 = $this->createMock(Response::class),
+                        $response2 = $this->createMock(Response::class),
+                    ));
+                $response1
                     ->expects($this->once())
                     ->method('body')
                     ->willReturn($body = $this->createMock(Readable::class));
@@ -266,17 +278,7 @@ JSON
 }
 JSON
                     );
-                $fulfill
-                    ->expects($this->at(1))
-                    ->method('__invoke')
-                    ->with($this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
-                        return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists" &&
-                            $request->method()->toString() === 'GET' &&
-                            $request->headers()->get('authorization') === $authorization &&
-                            $request->headers()->get('music-user-token') === $userToken;
-                    }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
+                $response2
                     ->expects($this->once())
                     ->method('body')
                     ->willReturn($body = $this->createMock(Readable::class));
@@ -363,16 +365,27 @@ JSON
                     $userToken = new Header('Music-User-Token', new Value('token'))
                 );
                 $fulfill
-                    ->expects($this->at(0))
+                    ->expects($this->exactly(2))
                     ->method('__invoke')
-                    ->with($this->callback(static function($request) use ($album, $authorization, $userToken): bool {
-                        return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists" &&
-                            $request->method()->toString() === 'GET' &&
-                            $request->headers()->get('authorization') === $authorization &&
-                            $request->headers()->get('music-user-token') === $userToken;
-                    }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
+                    ->withConsecutive(
+                        [$this->callback(static function($request) use ($album, $authorization, $userToken): bool {
+                            return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists" &&
+                                $request->method()->toString() === 'GET' &&
+                                $request->headers()->get('authorization') === $authorization &&
+                                $request->headers()->get('music-user-token') === $userToken;
+                        })],
+                        [$this->callback(static function($request) use ($album, $authorization, $userToken): bool {
+                            return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists" &&
+                                $request->method()->toString() === 'GET' &&
+                                $request->headers()->get('authorization') === $authorization &&
+                                $request->headers()->get('music-user-token') === $userToken;
+                        })],
+                    )
+                    ->will($this->onConsecutiveCalls(
+                        $response1 = $this->createMock(Response::class),
+                        $response2 = $this->createMock(Response::class),
+                    ));
+                $response1
                     ->expects($this->once())
                     ->method('body')
                     ->willReturn($body = $this->createMock(Readable::class));
@@ -440,17 +453,7 @@ JSON
 }
 JSON
                     );
-                $fulfill
-                    ->expects($this->at(1))
-                    ->method('__invoke')
-                    ->with($this->callback(static function($request) use ($album, $authorization, $userToken): bool {
-                        return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists" &&
-                            $request->method()->toString() === 'GET' &&
-                            $request->headers()->get('authorization') === $authorization &&
-                            $request->headers()->get('music-user-token') === $userToken;
-                    }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
+                $response2
                     ->expects($this->once())
                     ->method('body')
                     ->willReturn($body = $this->createMock(Readable::class));
