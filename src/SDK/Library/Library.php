@@ -199,6 +199,7 @@ final class Library implements LibraryInterface
 
     private function get(Url $url): array
     {
+        /** @psalm-suppress MixedArgumentTypeCoercion */
         $response = ($this->fulfill)(new Request(
             $url,
             Method::get(),

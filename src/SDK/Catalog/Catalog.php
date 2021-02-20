@@ -90,6 +90,7 @@ final class Catalog implements CatalogInterface
             $releaseDate .= ' 00:00:00';
         }
 
+        /** @psalm-suppress RedundantCastGivenDocblockType */
         return new Album(
             $id,
             \array_key_exists('artwork', $attributes) ? new Artwork(
@@ -140,6 +141,7 @@ final class Catalog implements CatalogInterface
         $textColor3 = $attributes['artwork']['textColor3'] ?? null;
         $textColor4 = $attributes['artwork']['textColor4'] ?? null;
 
+        /** @psalm-suppress RedundantCastGivenDocblockType */
         return new Song(
             $id,
             Set::of(Url::class, ...\array_map(
@@ -222,6 +224,7 @@ final class Catalog implements CatalogInterface
                     $artists = $resource['results']['artists'] ?? [];
 
                     foreach ($artists['data'] ?? [] as $artist) {
+                        /** @psalm-suppress RedundantCastGivenDocblockType */
                         yield new Artist\Id((int) $artist['id']);
                     }
 
@@ -243,6 +246,7 @@ final class Catalog implements CatalogInterface
                     $albums = $resource['results']['albums'] ?? [];
 
                     foreach ($albums['data'] ?? [] as $album) {
+                        /** @psalm-suppress RedundantCastGivenDocblockType */
                         yield new Album\Id((int) $album['id']);
                     }
 
@@ -264,6 +268,7 @@ final class Catalog implements CatalogInterface
                     $songs = $resource['results']['songs'] ?? [];
 
                     foreach ($songs['data'] ?? [] as $song) {
+                        /** @psalm-suppress RedundantCastGivenDocblockType */
                         yield new Song\Id((int) $song['id']);
                     }
 
@@ -291,6 +296,7 @@ final class Catalog implements CatalogInterface
         $albums = Set::of(Album\Id::class);
 
         foreach ($resources['data'] as $album) {
+            /** @psalm-suppress RedundantCastGivenDocblockType */
             $albums = ($albums)(new Album\Id((int) $album['id']));
         }
 
@@ -306,6 +312,7 @@ final class Catalog implements CatalogInterface
 
     private function get(Url $url): array
     {
+        /** @psalm-suppress MixedArgumentTypeCoercion */
         $response = ($this->fulfill)(new Request(
             $url,
             Method::get(),
