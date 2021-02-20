@@ -78,8 +78,8 @@ KEY
 
                         return $jwt->headers()->get('kid') === 'AAAAAAAAAA' &&
                             $jwt->claims()->get('iss') === 'BBBBBBBBBB' &&
-                            $jwt->claims()->get('iat') == new \DateTimeImmutable('2019-01-01T00:00:00+00:00') &&
-                            $jwt->claims()->get('exp') == new \DateTimeImmutable('2019-01-01T00:01:00+00:00');
+                            $jwt->claims()->get('iat')->format(\DateTime::ATOM) === '2019-01-01T00:00:00+00:00' &&
+                            $jwt->claims()->get('exp')->format(\DateTime::ATOM) === '2019-01-01T00:01:00+00:00';
                     }))
                     ->willReturn($response = $this->createMock(Response::class));
                 $response
