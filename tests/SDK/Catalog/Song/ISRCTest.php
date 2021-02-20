@@ -19,10 +19,10 @@ class ISRCTest extends TestCase
 
     public function testOnlyISO3901StringsAreAccepted()
     {
-        $c = Set\Elements::of(...range('A', 'Z'));
-        $x = Set\Elements::of(...range('A', 'Z'), ...range(0, 9));
-        $y = Set\Elements::of(...range(0, 9));
-        $n = Set\Elements::of(...range(0, 9));
+        $c = Set\Elements::of(...\range('A', 'Z'));
+        $x = Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9));
+        $y = Set\Elements::of(...\range(0, 9));
+        $n = Set\Elements::of(...\range(0, 9));
 
         $this
             ->forAll(
@@ -40,7 +40,7 @@ class ISRCTest extends TestCase
                 $n
             )
             ->then(function(...$bits) {
-                $string = implode('', $bits);
+                $string = \implode('', $bits);
 
                 $isrc = new ISRC($string);
 

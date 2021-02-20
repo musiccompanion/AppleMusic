@@ -69,7 +69,7 @@ class SongTest extends TestCase
                 Name::any(),
                 Duration::any(),
                 TrackNumber::any(),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
                 ISet::of(Album\Id::class, AlbumSet\Id::any()),
                 ISet::of(Artist\Id::class, ArtistSet\Id::any())
             )
@@ -99,7 +99,7 @@ class SongTest extends TestCase
                 Duration::any(),
                 TrackNumber::any(),
                 ISet::of(Song\Genre::class, Genre::any()),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
                 ISet::of(Artist\Id::class, ArtistSet\Id::any())
             )
             ->disableShrinking()
@@ -129,7 +129,7 @@ class SongTest extends TestCase
                 TrackNumber::any(),
                 ISet::of(Song\Genre::class, Genre::any()),
                 ISet::of(Album\Id::class, AlbumSet\Id::any()),
-                DataSet\Strings::any()->filter(fn($s) => strpos($s, '?') === false),
+                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
             )
             ->disableShrinking()
             ->then(function($id, $name, $duration, $trackNumber, $genres, $albums, $artist) {

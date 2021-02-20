@@ -70,7 +70,7 @@ KEY
                     ->method('__invoke')
                     ->with($this->callback(static function($request) {
                         $header = first($request->headers()->get('authorization')->values())->toString();
-                        $jwt = substr($header, 7); // remove Bearer
+                        $jwt = \substr($header, 7); // remove Bearer
                         $jwt = (new Parser)->parse($jwt);
 
                         return $jwt->getHeader('kid') === 'AAAAAAAAAA' &&

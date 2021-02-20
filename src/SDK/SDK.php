@@ -13,7 +13,6 @@ use Innmind\TimeContinuum\{
     Earth\Format\ISO8601,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\Stream\Readable;
 use Innmind\Http\Header\{
     Header,
     Value\Value,
