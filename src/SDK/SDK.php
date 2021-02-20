@@ -10,6 +10,7 @@ use MusicCompanion\AppleMusic\{
 use Innmind\TimeContinuum\{
     Clock,
     Period,
+    Earth\Format\ISO8601,
 };
 use Innmind\HttpTransport\Transport;
 use Innmind\Stream\Readable;
@@ -39,9 +40,13 @@ final class SDK implements SDKInterface
         $jwt = (new Builder)
             ->withHeader('alg', 'ES256')
             ->withHeader('kid', $key->id())
-            ->withClaim('iss', $key->teamId())
-            ->withClaim('iat', (int) ($clock->now()->milliseconds() / 1000))
-            ->withClaim('exp', (int) ($clock->now()->goForward($tokenValidity)->milliseconds() / 1000))
+            ->issuedBy($key->teamId())
+            ->issuedAt(new \DateTimeImmutable(
+                $clock->now()->format(new ISO8601),
+            ))
+            ->expiresAt(new \DateTimeImmutable(
+                $clock->now()->goForward($tokenValidity)->format(new ISO8601),
+            ))
             ->getToken(
                 new Sha256,
                 new Signer\Key($key->content()->toString()),
