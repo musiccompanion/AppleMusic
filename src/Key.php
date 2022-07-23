@@ -7,6 +7,9 @@ use MusicCompanion\AppleMusic\Exception\DomainException;
 use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\Str;
 
+/**
+ * @psalm-immutable
+ */
 final class Key
 {
     private string $id;
