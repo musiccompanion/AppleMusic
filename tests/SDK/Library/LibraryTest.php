@@ -56,7 +56,7 @@ class LibraryTest extends TestCase
         $library = new Library(
             $fulfill = $this->createMock(Transport::class),
             $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-            $userToken = new Header('Music-User-Token', new Value('token'))
+            $userToken = new Header('Music-User-Token', new Value('token')),
         );
         $fulfill
             ->expects($this->once())
@@ -111,7 +111,7 @@ JSON
         $library = new Library(
             $fulfill = $this->createMock(Transport::class),
             $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-            $userToken = new Header('Music-User-Token', new Value('token'))
+            $userToken = new Header('Music-User-Token', new Value('token')),
         );
         $fulfill
             ->expects($this->exactly(2))
@@ -207,7 +207,7 @@ JSON
                 $library = new Library(
                     $fulfill = $this->createMock(Transport::class),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $userToken = new Header('Music-User-Token', new Value('token'))
+                    $userToken = new Header('Music-User-Token', new Value('token')),
                 );
                 $fulfill
                     ->expects($this->exactly(2))
@@ -349,7 +349,7 @@ JSON
                 $this->assertSame('1200', \current($albums)->artwork()->height()->toString());
                 $this->assertSame(
                     'https://is2-ssl.mzstatic.com/image/thumb/Music/c5/98/81/mzi.ljuovcvg.jpg/{w}x{h}bb.jpeg',
-                    \current($albums)->artwork()->url()->toString()
+                    \current($albums)->artwork()->url()->toString(),
                 );
             });
     }
@@ -362,7 +362,7 @@ JSON
                 $library = new Library(
                     $fulfill = $this->createMock(Transport::class),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $userToken = new Header('Music-User-Token', new Value('token'))
+                    $userToken = new Header('Music-User-Token', new Value('token')),
                 );
                 $fulfill
                     ->expects($this->exactly(2))

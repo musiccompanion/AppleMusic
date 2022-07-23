@@ -34,7 +34,7 @@ final class Library implements LibraryInterface
     public function __construct(
         Transport $fulfill,
         Header $authorization,
-        Header $userToken
+        Header $userToken,
     ) {
         $this->fulfill = $fulfill;
         $this->authorization = $authorization;

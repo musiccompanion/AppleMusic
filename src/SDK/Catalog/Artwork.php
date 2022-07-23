@@ -33,7 +33,7 @@ final class Artwork
         ?RGBA $textColor1,
         ?RGBA $textColor2,
         ?RGBA $textColor3,
-        ?RGBA $textColor4
+        ?RGBA $textColor4,
     ) {
         $this->width = $width;
         $this->height = $height;

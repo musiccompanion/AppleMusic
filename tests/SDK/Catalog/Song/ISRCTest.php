@@ -37,7 +37,7 @@ class ISRCTest extends TestCase
                 $n,
                 $n,
                 $n,
-                $n
+                $n,
             )
             ->then(function(...$bits) {
                 $string = \implode('', $bits);

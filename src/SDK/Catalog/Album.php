@@ -54,7 +54,7 @@ final class Album
         RecordLabel $recordLabel,
         Copyright $copyright,
         EditorialNotes $editorialNotes,
-        Set $artists
+        Set $artists,
     ) {
         assertSet(Genre::class, $genres, 7);
         assertSet(Song\Id::class, $tracks, 8);

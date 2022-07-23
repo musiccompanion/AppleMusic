@@ -39,7 +39,7 @@ class SongTest extends TestCase
                 TrackNumber::any(),
                 ISet::of(Song\Genre::class, Genre::any()),
                 ISet::of(Album\Id::class, AlbumSet\Id::any()),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $duration, $trackNumber, $genres, $albums, $artists) {
                 $song = new Song(
@@ -49,7 +49,7 @@ class SongTest extends TestCase
                     $trackNumber,
                     $genres,
                     $albums,
-                    $artists
+                    $artists,
                 );
 
                 $this->assertSame($id, $song->id());
@@ -71,7 +71,7 @@ class SongTest extends TestCase
                 TrackNumber::any(),
                 DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
                 ISet::of(Album\Id::class, AlbumSet\Id::any()),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
             )
             ->disableShrinking()
             ->then(function($id, $name, $duration, $trackNumber, $genre, $albums, $artists) {
@@ -85,7 +85,7 @@ class SongTest extends TestCase
                     $trackNumber,
                     Set::of($genre),
                     $albums,
-                    $artists
+                    $artists,
                 );
             });
     }
@@ -100,7 +100,7 @@ class SongTest extends TestCase
                 TrackNumber::any(),
                 ISet::of(Song\Genre::class, Genre::any()),
                 DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
             )
             ->disableShrinking()
             ->then(function($id, $name, $duration, $trackNumber, $genres, $album, $artists) {
@@ -114,7 +114,7 @@ class SongTest extends TestCase
                     $trackNumber,
                     $genres,
                     Set::of($album),
-                    $artists
+                    $artists,
                 );
             });
     }
@@ -143,7 +143,7 @@ class SongTest extends TestCase
                     $trackNumber,
                     $genres,
                     $albums,
-                    Set::of($artist)
+                    Set::of($artist),
                 );
             });
     }

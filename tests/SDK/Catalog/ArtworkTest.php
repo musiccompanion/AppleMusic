@@ -32,7 +32,7 @@ class ArtworkTest extends TestCase
                 Colour::any(),
                 Colour::any(),
                 Colour::any(),
-                Colour::any()
+                Colour::any(),
             )
             ->then(function($width, $height, $url, $background, $text1, $text2, $text3, $text4) {
                 $artwork = new Artwork(
@@ -43,7 +43,7 @@ class ArtworkTest extends TestCase
                     $text1,
                     $text2,
                     $text3,
-                    $text4
+                    $text4,
                 );
 
                 $this->assertSame($width, $artwork->width());
@@ -67,7 +67,7 @@ class ArtworkTest extends TestCase
                 Colour::any(),
                 Colour::any(),
                 Colour::any(),
-                Colour::any()
+                Colour::any(),
             )
             ->then(function($width, $height, $background, $text1, $text2, $text3, $text4) {
                 $artwork = new Artwork(
@@ -78,7 +78,7 @@ class ArtworkTest extends TestCase
                     $text1,
                     $text2,
                     $text3,
-                    $text4
+                    $text4,
                 );
 
                 $url = $artwork->ofSize(

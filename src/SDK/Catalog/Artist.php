@@ -30,7 +30,7 @@ final class Artist
         Name $name,
         Url $url,
         Set $genres,
-        Set $albums
+        Set $albums,
     ) {
         assertSet(Genre::class, $genres, 3);
         assertSet(Album\Id::class, $albums, 4);

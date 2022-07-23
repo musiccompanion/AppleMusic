@@ -58,7 +58,7 @@ final class Song
         TrackNumber $trackNumber,
         Composer $composer,
         Set $artists,
-        Set $albums
+        Set $albums,
     ) {
         assertSet(Url::class, $previews, 2);
         assertSet(Genre::class, $genres, 6);

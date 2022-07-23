@@ -42,7 +42,7 @@ final class Catalog implements CatalogInterface
         Clock $clock,
         Transport $fulfill,
         Header $authorization,
-        Storefront\Id $storefront
+        Storefront\Id $storefront,
     ) {
         $this->clock = $clock;
         $this->fulfill = $fulfill;

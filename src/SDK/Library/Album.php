@@ -22,7 +22,7 @@ final class Album
         Id $id,
         Name $name,
         ?Artwork $artwork,
-        Artist\Id ...$artists
+        Artist\Id ...$artists,
     ) {
         $this->id = $id;
         $this->name = $name;

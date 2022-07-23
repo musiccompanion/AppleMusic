@@ -43,7 +43,7 @@ class SDKTest extends TestCase
         $this
             ->forAll(
                 Storefront\Id::any(),
-                new Set\Strings
+                new Set\Strings,
             )
             ->then(function($storefront, $userToken) {
                 $clock = $this->createMock(Clock::class);
@@ -51,7 +51,7 @@ class SDKTest extends TestCase
                 $key = new Key(
                     'AAAAAAAAAA',
                     'BBBBBBBBBB',
-                    $content = $this->createMock(Readable::class)
+                    $content = $this->createMock(Readable::class),
                 );
                 // this is a randomly generated key
                 $content
@@ -96,7 +96,7 @@ KEY
                     $clock,
                     $transport,
                     $key,
-                    new Minute(1)
+                    new Minute(1),
                 );
 
                 $this->assertInstanceOf(SDKInterface::class, $sdk);

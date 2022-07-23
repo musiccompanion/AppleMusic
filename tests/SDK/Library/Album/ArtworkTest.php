@@ -26,13 +26,13 @@ class ArtworkTest extends TestCase
             ->forAll(
                 Width::any(),
                 Height::any(),
-                Url::any()
+                Url::any(),
             )
             ->then(function($width, $height, $url) {
                 $artwork = new Artwork(
                     $width,
                     $height,
-                    $url
+                    $url,
                 );
 
                 $this->assertSame($width, $artwork->width());

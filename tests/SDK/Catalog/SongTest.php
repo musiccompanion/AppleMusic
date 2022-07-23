@@ -54,7 +54,7 @@ class SongTest extends TestCase
                 TrackNumber::any(),
                 Composer::any(),
                 ISet::of(Artist\Id::class, ArtistSet\Id::any()),
-                ISet::of(Album\Id::class, AlbumSet\Id::any())
+                ISet::of(Album\Id::class, AlbumSet\Id::any()),
             )
             ->then(function($id, $previews, $artwork, $url, $discNumber, $genres, $duration, $release, $name, $isrc, $trackNumber, $composer, $artists, $albums) {
                 $song = new Song(
@@ -71,7 +71,7 @@ class SongTest extends TestCase
                     $trackNumber,
                     $composer,
                     $artists,
-                    $albums
+                    $albums,
                 );
 
                 $this->assertSame($id, $song->id());

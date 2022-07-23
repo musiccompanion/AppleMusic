@@ -38,7 +38,7 @@ final class Song
         TrackNumber $trackNumber,
         Set $genres,
         Set $albums,
-        Set $artists
+        Set $artists,
     ) {
         assertSet(Genre::class, $genres, 5);
         assertSet(Album\Id::class, $albums, 6);

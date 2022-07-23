@@ -33,7 +33,7 @@ class SearchTest extends TestCase
                 DataSet\Strings::any(),
                 ISequence::of(Artist\Id::class, ArtistSet\Id::any()),
                 ISequence::of(Album\Id::class, AlbumSet\Id::any()),
-                ISequence::of(Song\Id::class, SongSet\Id::any())
+                ISequence::of(Song\Id::class, SongSet\Id::any()),
             )
             ->then(function($term, $artists, $albums, $songs) {
                 $search = new Search($term, $artists, $albums, $songs);
@@ -52,7 +52,7 @@ class SearchTest extends TestCase
                 DataSet\Strings::any(),
                 DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
                 ISequence::of(Album\Id::class, AlbumSet\Id::any()),
-                ISequence::of(Song\Id::class, SongSet\Id::any())
+                ISequence::of(Song\Id::class, SongSet\Id::any()),
             )
             ->disableShrinking()
             ->then(function($term, $artist, $albums, $songs) {
@@ -63,7 +63,7 @@ class SearchTest extends TestCase
                     $term,
                     Sequence::of($artist),
                     $albums,
-                    $songs
+                    $songs,
                 );
             });
     }
@@ -75,7 +75,7 @@ class SearchTest extends TestCase
                 DataSet\Strings::any(),
                 ISequence::of(Artist\Id::class, ArtistSet\Id::any()),
                 DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-                ISequence::of(Song\Id::class, SongSet\Id::any())
+                ISequence::of(Song\Id::class, SongSet\Id::any()),
             )
             ->disableShrinking()
             ->then(function($term, $artists, $album, $songs) {
@@ -86,7 +86,7 @@ class SearchTest extends TestCase
                     $term,
                     $artists,
                     Sequence::of($album),
-                    $songs
+                    $songs,
                 );
             });
     }
@@ -109,7 +109,7 @@ class SearchTest extends TestCase
                     $term,
                     $artists,
                     $albums,
-                    Sequence::of($song)
+                    Sequence::of($song),
                 );
             });
     }

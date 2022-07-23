@@ -25,7 +25,7 @@ final class Search
         string $term,
         Sequence $artists,
         Sequence $albums,
-        Sequence $songs
+        Sequence $songs,
     ) {
         assertSequence(Artist\Id::class, $artists, 2);
         assertSequence(Album\Id::class, $albums, 3);

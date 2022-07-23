@@ -35,7 +35,7 @@ class ArtistTest extends TestCase
                 Name::any(),
                 Url::any(),
                 ISet::of(Genre::class, GenreSet::any()),
-                ISet::of(Album\Id::class, AlbumSet\Id::any())
+                ISet::of(Album\Id::class, AlbumSet\Id::any()),
             )
             ->then(function($id, $name, $url, $genres, $albums) {
                 $artist = new Artist(
@@ -43,7 +43,7 @@ class ArtistTest extends TestCase
                     $name,
                     $url,
                     $genres,
-                    $albums
+                    $albums,
                 );
 
                 $this->assertSame($id, $artist->id());
@@ -73,7 +73,7 @@ class ArtistTest extends TestCase
                     $name,
                     $url,
                     Set::of($type),
-                    Set::of(Album\Id::class)
+                    Set::of(Album\Id::class),
                 );
             });
     }
@@ -97,7 +97,7 @@ class ArtistTest extends TestCase
                     $name,
                     $url,
                     Set::of(Genre::class),
-                    Set::of($type)
+                    Set::of($type),
                 );
             });
     }

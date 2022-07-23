@@ -32,7 +32,7 @@ class AlbumTest extends TestCase
                 Id::any(),
                 Name::any(),
                 Artwork::any(),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $artwork, $artists) {
                 $album = new Album($id, $name, $artwork, ...unwrap($artists));
@@ -51,7 +51,7 @@ class AlbumTest extends TestCase
             ->forAll(
                 Id::any(),
                 Name::any(),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $artists) {
                 $album = new Album($id, $name, null, ...unwrap($artists));

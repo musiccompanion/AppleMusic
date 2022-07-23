@@ -26,7 +26,7 @@ class StorefrontTest extends TestCase
                 Name::any(),
                 Language::any(),
                 Language::any(),
-                Language::any()
+                Language::any(),
             )
             ->then(function($id, $name, $defaultLanguage, $supportedLanguage1, $supportedLanguage2) {
                 $storefront = new Storefront(
@@ -34,7 +34,7 @@ class StorefrontTest extends TestCase
                     $name,
                     $defaultLanguage,
                     $supportedLanguage1,
-                    $supportedLanguage2
+                    $supportedLanguage2,
                 );
 
                 $this->assertSame($id, $storefront->id());
@@ -44,7 +44,7 @@ class StorefrontTest extends TestCase
                 $this->assertSame(Storefront\Language::class, (string) $storefront->supportedLanguages()->type());
                 $this->assertSame(
                     [$supportedLanguage1, $supportedLanguage2],
-                    unwrap($storefront->supportedLanguages())
+                    unwrap($storefront->supportedLanguages()),
                 );
             });
     }

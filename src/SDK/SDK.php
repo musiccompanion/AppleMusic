@@ -34,7 +34,7 @@ final class SDK implements SDKInterface
         Clock $clock,
         Transport $transport,
         Key $key,
-        Period $tokenValidity
+        Period $tokenValidity,
     ) {
         $config = Configuration::forSymmetricSigner(
             Sha256::create(),

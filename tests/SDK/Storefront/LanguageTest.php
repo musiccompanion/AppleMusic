@@ -50,7 +50,7 @@ class LanguageTest extends TestCase
             ->forAll(Set\Elements::of(
                 'zh-Hans-CN',
                 'zh-Hant-HK',
-                'zh-Hant-TW'
+                'zh-Hant-TW',
             ))
             ->then(function(string $code) {
                 $language = new Language($code);
@@ -65,7 +65,7 @@ class LanguageTest extends TestCase
             ->forAll(
                 Set\Strings::any()->filter(static function($string): bool {
                     return !\preg_match('~^[a-z]{2}$~', $string);
-                })
+                }),
             )
             ->then(function(string $string) {
                 $this->expectException(DomainException::class);

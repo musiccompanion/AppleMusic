@@ -36,16 +36,16 @@ class AppleMusicTest extends TestCase
         $this
             ->forAll(
                 Url::any(),
-                Set\Integers::between(200, 208)
+                Set\Integers::between(200, 208),
             )
             ->then(function($url, $statusCode) {
                 $fulfill = new AppleMusic(
-                    $inner = $this->createMock(Transport::class)
+                    $inner = $this->createMock(Transport::class),
                 );
                 $initial = new Request(
                     $url,
                     Method::get(),
-                    new ProtocolVersion(2, 0)
+                    new ProtocolVersion(2, 0),
                 );
                 $inner
                     ->expects($this->once())
@@ -79,12 +79,12 @@ class AppleMusicTest extends TestCase
             )
             ->then(function($url, $statusCode) {
                 $fulfill = new AppleMusic(
-                    $inner = $this->createMock(Transport::class)
+                    $inner = $this->createMock(Transport::class),
                 );
                 $initial = new Request(
                     $url,
                     Method::get(),
-                    new ProtocolVersion(2, 0)
+                    new ProtocolVersion(2, 0),
                 );
                 $inner
                     ->expects($this->once())
@@ -107,12 +107,12 @@ class AppleMusicTest extends TestCase
             ->forAll(Url::any())
             ->then(function($url) {
                 $fulfill = new AppleMusic(
-                    $inner = $this->createMock(Transport::class)
+                    $inner = $this->createMock(Transport::class),
                 );
                 $initial = new Request(
                     $url,
                     Method::get(),
-                    new ProtocolVersion(2, 0)
+                    new ProtocolVersion(2, 0),
                 );
                 $inner
                     ->expects($this->once())
@@ -135,12 +135,12 @@ class AppleMusicTest extends TestCase
             ->forAll(Url::any())
             ->then(function($url) {
                 $fulfill = new AppleMusic(
-                    $inner = $this->createMock(Transport::class)
+                    $inner = $this->createMock(Transport::class),
                 );
                 $initial = new Request(
                     $url,
                     Method::get(),
-                    new ProtocolVersion(2, 0)
+                    new ProtocolVersion(2, 0),
                 );
                 $inner
                     ->expects($this->once())
@@ -162,16 +162,16 @@ class AppleMusicTest extends TestCase
         $this
             ->forAll(
                 Url::any(),
-                Set\Integers::between(500, 508)
+                Set\Integers::between(500, 508),
             )
             ->then(function($url, $statusCode) {
                 $fulfill = new AppleMusic(
-                    $inner = $this->createMock(Transport::class)
+                    $inner = $this->createMock(Transport::class),
                 );
                 $initial = new Request(
                     $url,
                     Method::get(),
-                    new ProtocolVersion(2, 0)
+                    new ProtocolVersion(2, 0),
                 );
                 $inner
                     ->expects($this->once())

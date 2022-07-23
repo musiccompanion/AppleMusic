@@ -22,7 +22,7 @@ final class Artwork
     public function __construct(
         ?Width $width,
         ?Height $height,
-        Url $url
+        Url $url,
     ) {
         $this->width = $width;
         $this->height = $height;

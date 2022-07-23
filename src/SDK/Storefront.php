@@ -22,7 +22,7 @@ final class Storefront
         Id $id,
         Name $name,
         Language $defaultLanguage,
-        Language ...$supportedLanguages
+        Language ...$supportedLanguages,
     ) {
         $this->id = $id;
         $this->name = $name;

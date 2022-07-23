@@ -51,7 +51,7 @@ class AlbumTest extends TestCase
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any(),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
             )
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $album = new Album(
@@ -68,7 +68,7 @@ class AlbumTest extends TestCase
                     $recordLabel,
                     $copyright,
                     $editorialNotes,
-                    $artists
+                    $artists,
                 );
 
                 $this->assertSame($id, $album->id());
@@ -103,7 +103,7 @@ class AlbumTest extends TestCase
                 PointInTime::any(),
                 RecordLabel::any(),
                 Copyright::any(),
-                EditorialNotes::any()
+                EditorialNotes::any(),
             )
             ->disableShrinking()
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
@@ -124,7 +124,7 @@ class AlbumTest extends TestCase
                     $recordLabel,
                     $copyright,
                     $editorialNotes,
-                    Set::of(Artist\Id::class)
+                    Set::of(Artist\Id::class),
                 );
             });
     }
@@ -144,7 +144,7 @@ class AlbumTest extends TestCase
                 PointInTime::any(),
                 RecordLabel::any(),
                 Copyright::any(),
-                EditorialNotes::any()
+                EditorialNotes::any(),
             )
             ->disableShrinking()
             ->then(function($id, $artwork, $name, $single, $url, $complete, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
@@ -165,7 +165,7 @@ class AlbumTest extends TestCase
                     $recordLabel,
                     $copyright,
                     $editorialNotes,
-                    Set::of(Artist\Id::class)
+                    Set::of(Artist\Id::class),
                 );
             });
     }
@@ -206,7 +206,7 @@ class AlbumTest extends TestCase
                     $recordLabel,
                     $copyright,
                     $editorialNotes,
-                    Set::of($artists)
+                    Set::of($artists),
                 );
             });
     }

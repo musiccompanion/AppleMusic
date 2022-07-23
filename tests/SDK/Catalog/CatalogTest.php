@@ -68,14 +68,14 @@ class CatalogTest extends TestCase
         $this
             ->forAll(
                 StorefrontSet\Id::any(),
-                ArtistSet\Id::any()
+                ArtistSet\Id::any(),
             )
             ->then(function($storefront, $id) {
                 $catalog = new Catalog(
                     $this->createMock(Clock::class),
                     $fulfill = $this->createMock(Transport::class),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront
+                    $storefront,
                 );
                 $fulfill
                     ->expects($this->exactly(2))
@@ -202,7 +202,7 @@ JSON
                 $this->assertSame('Bruce Springsteen', $artist->name()->toString());
                 $this->assertSame(
                     'https://music.apple.com/fr/artist/bruce-springsteen/178834',
-                    $artist->url()->toString()
+                    $artist->url()->toString(),
                 );
                 $this->assertCount(1, $artist->genres());
                 $this->assertSame('Rock', first($artist->genres())->toString());
@@ -219,14 +219,14 @@ JSON
         $this
             ->forAll(
                 StorefrontSet\Id::any(),
-                AlbumSet\Id::any()
+                AlbumSet\Id::any(),
             )
             ->then(function($storefront, $id) {
                 $catalog = new Catalog(
                     $clock = $this->createMock(Clock::class),
                     $fulfill = $this->createMock(Transport::class),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront
+                    $storefront,
                 );
                 $fulfill
                     ->expects($this->once())
@@ -806,11 +806,11 @@ JSON
                 $this->assertSame(6000, $album->artwork()->height()->toInt());
                 $this->assertSame(
                     'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg',
-                    $album->artwork()->url()->toString()
+                    $album->artwork()->url()->toString(),
                 );
                 $this->assertSame(
                     '#d9c8b6',
-                    $album->artwork()->backgroundColor()->toString()
+                    $album->artwork()->backgroundColor()->toString(),
                 );
                 $this->assertSame('#100707', $album->artwork()->textColor1()->toString());
                 $this->assertSame('#441016', $album->artwork()->textColor2()->toString());
@@ -819,8 +819,8 @@ JSON
                 $this->assertSame('Born In the U.S.A.', $album->name()->toString());
                 $this->assertFalse($album->single());
                 $this->assertSame(
-                  'https://music.apple.com/fr/album/born-in-the-u-s-a/203708420',
-                  $album->url()->toString()
+                    'https://music.apple.com/fr/album/born-in-the-u-s-a/203708420',
+                    $album->url()->toString(),
                 );
                 $this->assertTrue($album->complete());
                 $this->assertCount(7, $album->genres());
@@ -839,14 +839,14 @@ JSON
         $this
             ->forAll(
                 StorefrontSet\Id::any(),
-                SongSet\Id::any()
+                SongSet\Id::any(),
             )
             ->then(function($storefront, $id) {
                 $catalog = new Catalog(
                     $clock = $this->createMock(Clock::class),
                     $fulfill = $this->createMock(Transport::class),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront
+                    $storefront,
                 );
                 $fulfill
                     ->expects($this->once())
@@ -946,17 +946,17 @@ JSON
                 $this->assertCount(1, $song->previews());
                 $this->assertSame(
                     'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview71/v4/c4/e7/0d/c4e70dda-9011-caf6-bc47-e80c93412dba/mzaf_702934268268391713.plus.aac.p.m4a',
-                    first($song->previews())->toString()
+                    first($song->previews())->toString(),
                 );
                 $this->assertSame(6000, $song->artwork()->width()->toInt());
                 $this->assertSame(6000, $song->artwork()->height()->toInt());
                 $this->assertSame(
                     'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg',
-                    $song->artwork()->url()->toString()
+                    $song->artwork()->url()->toString(),
                 );
                 $this->assertSame(
                     '#d9c8b6',
-                    $song->artwork()->backgroundColor()->toString()
+                    $song->artwork()->backgroundColor()->toString(),
                 );
                 $this->assertSame('#100707', $song->artwork()->textColor1()->toString());
                 $this->assertSame('#441016', $song->artwork()->textColor2()->toString());
@@ -964,7 +964,7 @@ JSON
                 $this->assertSame('#623436', $song->artwork()->textColor4()->toString());
                 $this->assertSame(
                     'https://music.apple.com/us/album/born-in-the-u-s-a/203708420?i=203708455',
-                    $song->url()->toString()
+                    $song->url()->toString(),
                 );
                 $this->assertSame(1, $song->discNumber()->toInt());
                 $this->assertCount(2, $song->genres());
@@ -988,7 +988,7 @@ JSON
                     $this->createMock(Clock::class),
                     $fulfill = $this->createMock(Transport::class),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront
+                    $storefront,
                 );
                 $fulfill
                     ->expects($this->exactly(2))
@@ -1072,7 +1072,7 @@ JSON
         $this
             ->forAll(
                 StorefrontSet\Id::any(),
-                new DataSet\Strings
+                new DataSet\Strings,
             )
             ->take(100)
             ->then(function($storefront, $term) {
@@ -1080,7 +1080,7 @@ JSON
                     $this->createMock(Clock::class),
                     $fulfill = $this->createMock(Transport::class),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront
+                    $storefront,
                 );
                 $fulfill
                     ->expects($this->exactly(4))

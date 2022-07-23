@@ -36,7 +36,7 @@ class StorefrontsTest extends TestCase
     {
         $storefronts = new Storefronts(
             $send = $this->createMock(Transport::class),
-            $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt'))
+            $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
         );
         $send
             ->expects($this->once())
