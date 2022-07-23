@@ -1,11 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK\Library;
+namespace Tests\MusicCompanion\AppleMusic\SDK;
 
 use MusicCompanion\AppleMusic\SDK\{
-    Library\Library,
-    Library as LibraryInterface,
+    Library,
     Library\Artist,
     Library\Album,
     Library\Song,
@@ -38,18 +37,6 @@ use Innmind\BlackBox\PHPUnit\BlackBox;
 class LibraryTest extends TestCase
 {
     use BlackBox;
-
-    public function testInterface()
-    {
-        $this->assertInstanceOf(
-            LibraryInterface::class,
-            new Library(
-                $this->createMock(Transport::class),
-                Authorization::of('Bearer', 'jwt'),
-                new Header('Music-User-Token', new Value('token')),
-            ),
-        );
-    }
 
     public function testStorefront()
     {

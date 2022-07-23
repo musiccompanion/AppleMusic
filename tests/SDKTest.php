@@ -1,11 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK;
+namespace Tests\MusicCompanion\AppleMusic;
 
 use MusicCompanion\AppleMusic\{
-    SDK\SDK,
-    SDK as SDKInterface,
+    SDK,
     SDK\Storefronts,
     SDK\Catalog,
     SDK\Library,
@@ -99,7 +98,6 @@ KEY
                     new Minute(1),
                 );
 
-                $this->assertInstanceOf(SDKInterface::class, $sdk);
                 $this->assertInstanceOf(Storefronts::class, $sdk->storefronts());
                 $this->assertInstanceOf(Catalog::class, $sdk->catalog($storefront));
                 $this->assertInstanceOf(Library::class, $sdk->library($userToken));

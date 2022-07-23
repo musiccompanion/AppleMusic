@@ -1,11 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog;
+namespace Tests\MusicCompanion\AppleMusic\SDK;
 
 use MusicCompanion\AppleMusic\SDK\{
-    Catalog\Catalog,
-    Catalog as CatalogInterface,
+    Catalog,
     Catalog\Artist,
     Catalog\Album,
     Catalog\Song,
@@ -45,23 +44,6 @@ use Innmind\BlackBox\{
 class CatalogTest extends TestCase
 {
     use BlackBox;
-
-    public function testInterface()
-    {
-        $this
-            ->forAll(StorefrontSet\Id::any())
-            ->then(function($storefront) {
-                $this->assertInstanceOf(
-                    CatalogInterface::class,
-                    new Catalog(
-                        $this->createMock(Clock::class),
-                        $this->createMock(Transport::class),
-                        Authorization::of('Bearer', 'jwt'),
-                        $storefront,
-                    ),
-                );
-            });
-    }
 
     public function testArtist()
     {
