@@ -10,6 +10,7 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog\Song,
     Catalog\Genre,
     Catalog\Search,
+    HttpTransport,
 };
 use Innmind\TimeContinuum\{
     Clock,
@@ -60,7 +61,9 @@ class CatalogTest extends TestCase
             ->then(function($storefront, $id) {
                 $catalog = new Catalog(
                     $this->createMock(Clock::class),
-                    $fulfill = $this->createMock(Transport::class),
+                    new HttpTransport(
+                        $fulfill = $this->createMock(Transport::class),
+                    ),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
@@ -240,7 +243,9 @@ JSON
             ->then(function($storefront, $id) {
                 $catalog = new Catalog(
                     $clock = $this->createMock(Clock::class),
-                    $fulfill = $this->createMock(Transport::class),
+                    new HttpTransport(
+                        $fulfill = $this->createMock(Transport::class),
+                    ),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
@@ -879,7 +884,9 @@ JSON
             ->then(function($storefront, $id) {
                 $catalog = new Catalog(
                     $clock = $this->createMock(Clock::class),
-                    $fulfill = $this->createMock(Transport::class),
+                    new HttpTransport(
+                        $fulfill = $this->createMock(Transport::class),
+                    ),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
@@ -1037,7 +1044,9 @@ JSON
             ->then(function($storefront) {
                 $catalog = new Catalog(
                     $this->createMock(Clock::class),
-                    $fulfill = $this->createMock(Transport::class),
+                    new HttpTransport(
+                        $fulfill = $this->createMock(Transport::class),
+                    ),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
@@ -1062,7 +1071,7 @@ JSON
                     ->method('__invoke')
                     ->withConsecutive(
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
-                            return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/genres" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/genres" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,
@@ -1070,7 +1079,7 @@ JSON
                                 );
                         })],
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
-                            return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/genres?offset=1" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/genres?offset=1" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,
@@ -1148,7 +1157,9 @@ JSON
             ->then(function($storefront, $term) {
                 $catalog = new Catalog(
                     $this->createMock(Clock::class),
-                    $fulfill = $this->createMock(Transport::class),
+                    new HttpTransport(
+                        $fulfill = $this->createMock(Transport::class),
+                    ),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
@@ -1191,7 +1202,7 @@ JSON
                         [$this->callback(static function($request) use ($storefront, $term, $authorization): bool {
                             $term = \urlencode($term);
 
-                            return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?term=$term&types=artists,albums,songs&limit=25" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?term=$term&types=artists,albums,songs&limit=25" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,
@@ -1199,7 +1210,7 @@ JSON
                                 );
                         })],
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
-                            return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=artists" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=artists" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,
@@ -1207,7 +1218,7 @@ JSON
                                 );
                         })],
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
-                            return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=albums" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=albums" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,
@@ -1215,7 +1226,7 @@ JSON
                                 );
                         })],
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
-                            return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=songs" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=songs" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,

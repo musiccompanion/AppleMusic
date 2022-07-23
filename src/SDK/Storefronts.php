@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK;
 
-use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Header,
     Message\Request\Request,
@@ -17,10 +16,10 @@ use Innmind\Immutable\Set;
 
 final class Storefronts
 {
-    private Transport $fulfill;
+    private HttpTransport $fulfill;
     private Header $authorization;
 
-    public function __construct(Transport $fulfill, Header $authorization)
+    public function __construct(HttpTransport $fulfill, Header $authorization)
     {
         $this->fulfill = $fulfill;
         $this->authorization = $authorization;
@@ -40,7 +39,7 @@ final class Storefronts
                 $this->authorization,
             ),
         ))->match(
-            static fn($success) => $success->response(),
+            static fn($response) => $response,
             static fn() => throw new \RuntimeException,
         );
 

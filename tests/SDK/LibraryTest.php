@@ -9,6 +9,7 @@ use MusicCompanion\AppleMusic\SDK\{
     Library\Album,
     Library\Song,
     Storefront,
+    HttpTransport,
 };
 use Innmind\HttpTransport\{
     Transport,
@@ -43,7 +44,9 @@ class LibraryTest extends TestCase
     public function testStorefront()
     {
         $library = new Library(
-            $fulfill = $this->createMock(Transport::class),
+            new HttpTransport(
+                $fulfill = $this->createMock(Transport::class),
+            ),
             $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
             $userToken = new Header('Music-User-Token', new Value('token')),
         );
@@ -59,7 +62,7 @@ class LibraryTest extends TestCase
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request) use ($authorization, $userToken): bool {
-                return $request->url()->toString() === '/v1/me/storefront' &&
+                return $request->url()->toString() === 'https://api.music.apple.com/v1/me/storefront' &&
                     $request->method()->toString() === 'GET' &&
                     $authorization === $request->headers()->get('authorization')->match(
                         static fn($header) => $header,
@@ -111,7 +114,9 @@ JSON
     public function testArtists()
     {
         $library = new Library(
-            $fulfill = $this->createMock(Transport::class),
+            new HttpTransport(
+                $fulfill = $this->createMock(Transport::class),
+            ),
             $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
             $userToken = new Header('Music-User-Token', new Value('token')),
         );
@@ -136,7 +141,7 @@ JSON
             ->method('__invoke')
             ->withConsecutive(
                 [$this->callback(static function($request) use ($authorization, $userToken): bool {
-                    return $request->url()->toString() === '/v1/me/library/artists' &&
+                    return $request->url()->toString() === 'https://api.music.apple.com/v1/me/library/artists' &&
                         $request->method()->toString() === 'GET' &&
                         $authorization === $request->headers()->get('authorization')->match(
                             static fn($header) => $header,
@@ -148,7 +153,7 @@ JSON
                         );
                 })],
                 [$this->callback(static function($request) use ($authorization, $userToken): bool {
-                    return $request->url()->toString() === '/v1/me/library/artists?offset=25' &&
+                    return $request->url()->toString() === 'https://api.music.apple.com/v1/me/library/artists?offset=25' &&
                         $request->method()->toString() === 'GET' &&
                         $authorization === $request->headers()->get('authorization')->match(
                             static fn($header) => $header,
@@ -232,7 +237,9 @@ JSON
             ->forAll(ArtistSet\Id::any())
             ->then(function($artist) {
                 $library = new Library(
-                    $fulfill = $this->createMock(Transport::class),
+                    new HttpTransport(
+                        $fulfill = $this->createMock(Transport::class),
+                    ),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $userToken = new Header('Music-User-Token', new Value('token')),
                 );
@@ -257,7 +264,7 @@ JSON
                     ->method('__invoke')
                     ->withConsecutive(
                         [$this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
-                            return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?include=artists" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?include=artists" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,
@@ -269,7 +276,7 @@ JSON
                                 );
                         })],
                         [$this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
-                            return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,
@@ -421,7 +428,9 @@ JSON
             ->forAll(AlbumSet\Id::any())
             ->then(function($album) {
                 $library = new Library(
-                    $fulfill = $this->createMock(Transport::class),
+                    new HttpTransport(
+                        $fulfill = $this->createMock(Transport::class),
+                    ),
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $userToken = new Header('Music-User-Token', new Value('token')),
                 );
@@ -446,7 +455,7 @@ JSON
                     ->method('__invoke')
                     ->withConsecutive(
                         [$this->callback(static function($request) use ($album, $authorization, $userToken): bool {
-                            return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,
@@ -458,7 +467,7 @@ JSON
                                 );
                         })],
                         [$this->callback(static function($request) use ($album, $authorization, $userToken): bool {
-                            return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists" &&
+                            return $request->url()->toString() === "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists" &&
                                 $request->method()->toString() === 'GET' &&
                                 $authorization === $request->headers()->get('authorization')->match(
                                     static fn($header) => $header,

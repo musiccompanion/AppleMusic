@@ -9,7 +9,6 @@ use MusicCompanion\AppleMusic\SDK\{
     Library\Song,
     Storefront,
 };
-use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
     Message\Method,
@@ -26,12 +25,12 @@ use Innmind\Immutable\{
 
 final class Library
 {
-    private Transport $fulfill;
+    private HttpTransport $fulfill;
     private Header $authorization;
     private Header $userToken;
 
     public function __construct(
-        Transport $fulfill,
+        HttpTransport $fulfill,
         Header $authorization,
         Header $userToken,
     ) {
@@ -201,7 +200,7 @@ final class Library
                 $this->userToken,
             ),
         ))->match(
-            static fn($success) => $success->response(),
+            static fn($response) => $response,
             static fn() => throw new \RuntimeException,
         );
 

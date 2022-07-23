@@ -13,7 +13,6 @@ use MusicCompanion\AppleMusic\SDK\{
     Storefront,
 };
 use Innmind\TimeContinuum\Clock;
-use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Header,
     Message\Request\Request,
@@ -33,13 +32,13 @@ use Innmind\Immutable\{
 final class Catalog
 {
     private Clock $clock;
-    private Transport $fulfill;
+    private HttpTransport $fulfill;
     private Header $authorization;
     private Storefront\Id $storefront;
 
     public function __construct(
         Clock $clock,
-        Transport $fulfill,
+        HttpTransport $fulfill,
         Header $authorization,
         Storefront\Id $storefront,
     ) {
@@ -318,7 +317,7 @@ final class Catalog
             ProtocolVersion::v20,
             Headers::of($this->authorization),
         ))->match(
-            static fn($success) => $success->response(),
+            static fn($response) => $response,
             static fn() => throw new \RuntimeException,
         );
 

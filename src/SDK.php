@@ -21,7 +21,7 @@ use Lcobucci\JWT\{
 
 final class SDK
 {
-    private Transport $transport;
+    private SDK\HttpTransport $transport;
     private Clock $clock;
     private Header $authorization;
     private string $jwt;
@@ -53,7 +53,7 @@ final class SDK
             );
 
         $this->clock = $clock;
-        $this->transport = new SDK\HttpTransport\AppleMusic($transport);
+        $this->transport = new SDK\HttpTransport($transport);
         $this->jwt = $jwt->toString();
         $this->authorization = new Header(
             'Authorization',

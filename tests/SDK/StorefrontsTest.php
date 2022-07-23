@@ -6,6 +6,7 @@ namespace Tests\MusicCompanion\AppleMusic\SDK;
 use MusicCompanion\AppleMusic\SDK\{
     Storefronts,
     Storefront,
+    HttpTransport,
 };
 use Innmind\HttpTransport\{
     Transport,
@@ -30,7 +31,9 @@ class StorefrontsTest extends TestCase
     public function testAll()
     {
         $storefronts = new Storefronts(
-            $send = $this->createMock(Transport::class),
+            new HttpTransport(
+                $send = $this->createMock(Transport::class),
+            ),
             $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
         );
         $response = $this->createMock(Response::class);
@@ -45,7 +48,7 @@ class StorefrontsTest extends TestCase
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request) use ($authorization): bool {
-                return $request->url()->toString() === '/v1/storefronts' &&
+                return $request->url()->toString() === 'https://api.music.apple.com/v1/storefronts' &&
                     $request->method()->toString() === 'GET' &&
                     $authorization === $request->headers()->get('authorization')->match(
                         static fn($header) => $header,
