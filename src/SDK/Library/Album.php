@@ -19,18 +19,18 @@ final class Album
     private Set $artists;
 
     /**
-     * @no-named-arguments
+     * @param Set<Artist\Id> $artists
      */
     public function __construct(
         Id $id,
         Name $name,
         ?Artwork $artwork,
-        Artist\Id ...$artists,
+        Set $artists,
     ) {
         $this->id = $id;
         $this->name = $name;
         $this->artwork = $artwork;
-        $this->artists = Set::of(...$artists);
+        $this->artists = $artists;
     }
 
     public function id(): Id

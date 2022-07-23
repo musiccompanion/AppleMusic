@@ -48,9 +48,8 @@ final class Library
             new Storefront\Id($resource['data'][0]['id']),
             new Storefront\Name($resource['data'][0]['attributes']['name']),
             new Storefront\Language($resource['data'][0]['attributes']['defaultLanguageTag']),
-            ...\array_map(
-                static fn(string $language): Storefront\Language => new Storefront\Language($language),
-                $resource['data'][0]['attributes']['supportedLanguageTags'],
+            Set::of(...$resource['data'][0]['attributes']['supportedLanguageTags'])->map(
+                static fn($language) => new Storefront\Language($language),
             ),
         );
     }
@@ -108,13 +107,8 @@ final class Library
                         Album\Artwork\Height::of($album['attributes']['artwork']['height']),
                         Url::of($album['attributes']['artwork']['url']),
                     ) : null,
-                    ...\array_map(
-                        static function(array $artist): Artist\Id {
-                            /** @var array{id: string} $artist */
-
-                            return new Artist\Id($artist['id']);
-                        },
-                        $album['relationships']['artists']['data'],
+                    Set::of(...$album['relationships']['artists']['data'])->map(
+                        static fn($artist) => new Artist\Id($artist['id']),
                     ),
                 ));
             }
@@ -142,41 +136,20 @@ final class Library
             $url = null;
 
             foreach ($resource['data'] as $song) {
-                $genres = Set::of(
-                    ...\array_map(
-                        static fn(string $genre): Song\Genre => new Song\Genre($genre),
-                        $song['attributes']['genreNames'],
-                    ),
-                );
-                $albums = Set::of(
-                    ...\array_map(
-                        static function(array $album): Album\Id {
-                            /** @var array{id: string} $album */
-
-                            return new Album\Id($album['id']);
-                        },
-                        $song['relationships']['albums']['data'],
-                    ),
-                );
-                $artists = Set::of(
-                    ...\array_map(
-                        static function(array $artist): Artist\Id {
-                            /** @var array{id: string} $artist */
-
-                            return new Artist\Id($artist['id']);
-                        },
-                        $song['relationships']['artists']['data'],
-                    ),
-                );
-
                 $songs = ($songs)(new Song(
                     new Song\Id($song['id']),
                     new Song\Name($song['attributes']['name']),
                     Song\Duration::of($song['attributes']['durationInMillis'] ?? null),
                     new Song\TrackNumber($song['attributes']['trackNumber']),
-                    $genres,
-                    $albums,
-                    $artists,
+                    Set::of(...$song['attributes']['genreNames'])->map(
+                        static fn($genre) => new Song\Genre($genre),
+                    ),
+                    Set::of(...$song['relationships']['albums']['data'])->map(
+                        static fn($album) => new Album\Id($album['id']),
+                    ),
+                    Set::of(...$song['relationships']['artists']['data'])->map(
+                        static fn($artist) => new Artist\Id($artist['id']),
+                    ),
                 ));
             }
 

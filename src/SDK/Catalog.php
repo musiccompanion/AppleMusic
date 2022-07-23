@@ -57,10 +57,9 @@ final class Catalog
             $id,
             new Artist\Name($resource['data'][0]['attributes']['name']),
             Url::of($resource['data'][0]['attributes']['url']),
-            Set::of(...\array_map(
-                static fn(string $genre): Genre => new Genre($genre),
-                $resource['data'][0]['attributes']['genreNames'],
-            )),
+            Set::of(...$resource['data'][0]['attributes']['genreNames'])->map(
+                static fn($genre) => new Genre($genre),
+            ),
             $this->artistAlbums($resource['data'][0]['relationships']['albums']),
         );
     }
@@ -105,14 +104,12 @@ final class Catalog
             $attributes['isSingle'],
             Url::of($attributes['url']),
             $attributes['isComplete'],
-            Set::of(...\array_map(
-                static fn(string $genre): Genre => new Genre($genre),
-                $attributes['genreNames'],
-            )),
-            Set::of(...\array_map(
-                static fn(array $song): Song\Id => new Song\Id((int) $song['id']),
-                $resource['data'][0]['relationships']['tracks']['data'],
-            )),
+            Set::of(...$attributes['genreNames'])->map(
+                static fn($genre) => new Genre($genre),
+            ),
+            Set::of(...$resource['data'][0]['relationships']['tracks']['data'])->map(
+                static fn($song) => new Song\Id((int) $song['id']),
+            ),
             $attributes['isMasteredForItunes'],
             $this->clock->at($releaseDate)->match(
                 static fn($date) => $date,
@@ -124,10 +121,9 @@ final class Catalog
                 $attributes['editorialNotes']['standard'] ?? '',
                 $attributes['editorialNotes']['short'] ?? '',
             ),
-            Set::of(...\array_map(
-                static fn(array $artist): Artist\Id => new Artist\Id((int) $artist['id']),
-                $resource['data'][0]['relationships']['artists']['data'],
-            )),
+            Set::of(...$resource['data'][0]['relationships']['artists']['data'])->map(
+                static fn($artist) => new Artist\Id((int) $artist['id']),
+            ),
         );
     }
 
@@ -145,10 +141,9 @@ final class Catalog
         /** @psalm-suppress RedundantCastGivenDocblockType */
         return new Song(
             $id,
-            Set::of(...\array_map(
-                static fn(array $preview): Url => Url::of($preview['url']),
-                $attributes['previews'],
-            )),
+            Set::of(...$attributes['previews'])->map(
+                static fn($preview) => Url::of($preview['url']),
+            ),
             new Artwork(
                 new Artwork\Width($attributes['artwork']['width']),
                 new Artwork\Height($attributes['artwork']['height']),
@@ -161,10 +156,9 @@ final class Catalog
             ),
             Url::of($attributes['url']),
             new Song\DiscNumber($attributes['discNumber']),
-            Set::of(...\array_map(
-                static fn(string $genre): Genre => new Genre($genre),
-                $attributes['genreNames'],
-            )),
+            Set::of(...$attributes['genreNames'])->map(
+                static fn($genre) => new Genre($genre),
+            ),
             Song\Duration::of($attributes['durationInMillis'] ?? null),
             $this->clock->at($attributes['releaseDate'])->match(
                 static fn($date) => $date,
@@ -174,14 +168,12 @@ final class Catalog
             new Song\ISRC($attributes['isrc']),
             new Song\TrackNumber($attributes['trackNumber']),
             new Song\Composer($attributes['composerName'] ?? ''),
-            Set::of(...\array_map(
-                static fn(array $artist): Artist\Id => new Artist\Id((int) $artist['id']),
-                $resource['data'][0]['relationships']['artists']['data'],
-            )),
-            Set::of(...\array_map(
-                static fn(array $album): Album\Id => new Album\Id((int) $album['id']),
-                $resource['data'][0]['relationships']['albums']['data'],
-            )),
+            Set::of(...$resource['data'][0]['relationships']['artists']['data'])->map(
+                static fn($artist) => new Artist\Id((int) $artist['id']),
+            ),
+            Set::of(...$resource['data'][0]['relationships']['albums']['data'])->map(
+                static fn($album) => new Album\Id((int) $album['id']),
+            ),
         );
     }
 

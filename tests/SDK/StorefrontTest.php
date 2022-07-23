@@ -32,8 +32,10 @@ class StorefrontTest extends TestCase
                     $id,
                     $name,
                     $defaultLanguage,
-                    $supportedLanguage1,
-                    $supportedLanguage2,
+                    Set::of(
+                        $supportedLanguage1,
+                        $supportedLanguage2,
+                    ),
                 );
 
                 $this->assertSame($id, $storefront->id());

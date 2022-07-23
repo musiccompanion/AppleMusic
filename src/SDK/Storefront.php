@@ -19,18 +19,18 @@ final class Storefront
     private Set $supportedLanguages;
 
     /**
-     * @no-named-arguments
+     * @param Set<Language> $supportedLanguages
      */
     public function __construct(
         Id $id,
         Name $name,
         Language $defaultLanguage,
-        Language ...$supportedLanguages,
+        Set $supportedLanguages,
     ) {
         $this->id = $id;
         $this->name = $name;
         $this->defaultLanguage = $defaultLanguage;
-        $this->supportedLanguages = Set::of(...$supportedLanguages);
+        $this->supportedLanguages = $supportedLanguages;
     }
 
     public function id(): Id
