@@ -216,7 +216,6 @@ final class Catalog implements CatalogInterface
         /** @var array{results: array{artists?: array{data: list<array{id: int}>, next?: string}, albums?: array{data: list<array{id: int}>, next?: string}, songs?: array{data: list<array{id: int}>, next?: string}}} */
         $resource = $this->get($url);
 
-        /** @var Sequence<Artist\Id> */
         $artists = Sequence::lazy(
             Artist\Id::class,
             function() use ($resource): \Generator {
@@ -238,7 +237,6 @@ final class Catalog implements CatalogInterface
             },
         );
 
-        /** @var Sequence<Album\Id> */
         $albums = Sequence::lazy(
             Album\Id::class,
             function() use ($resource): \Generator {
@@ -260,7 +258,6 @@ final class Catalog implements CatalogInterface
             },
         );
 
-        /** @var Sequence<Song\Id> */
         $songs = Sequence::lazy(
             Song\Id::class,
             function() use ($resource): \Generator {

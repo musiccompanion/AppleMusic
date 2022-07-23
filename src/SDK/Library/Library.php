@@ -145,7 +145,6 @@ final class Library implements LibraryInterface
             $url = null;
 
             foreach ($resource['data'] as $song) {
-                /** @var Set<Song\Genre> */
                 $genres = Set::of(
                     Song\Genre::class,
                     ...\array_map(
@@ -153,7 +152,6 @@ final class Library implements LibraryInterface
                         $song['attributes']['genreNames'],
                     ),
                 );
-                /** @var Set<Album\Id> */
                 $albums = Set::of(
                     Album\Id::class,
                     ...\array_map(
@@ -165,7 +163,6 @@ final class Library implements LibraryInterface
                         $song['relationships']['albums']['data'],
                     ),
                 );
-                /** @var Set<Artist\Id> */
                 $artists = Set::of(
                     Artist\Id::class,
                     ...\array_map(

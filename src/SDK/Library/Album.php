@@ -27,7 +27,6 @@ final class Album
         $this->id = $id;
         $this->name = $name;
         $this->artwork = $artwork;
-        /** @var Set<Artist\Id> */
         $this->artists = Set::of(Artist\Id::class, ...$artists);
     }
 

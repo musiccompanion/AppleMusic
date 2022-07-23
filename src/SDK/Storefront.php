@@ -27,7 +27,6 @@ final class Storefront
         $this->id = $id;
         $this->name = $name;
         $this->defaultLanguage = $defaultLanguage;
-        /** @var Set<Language> */
         $this->supportedLanguages = Set::of(Language::class, ...$supportedLanguages);
     }
 
