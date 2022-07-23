@@ -11,7 +11,6 @@ use MusicCompanion\AppleMusic\SDK\Library\Song\{
     TrackNumber,
 };
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
 
 final class Song
 {
@@ -40,10 +39,6 @@ final class Song
         Set $albums,
         Set $artists,
     ) {
-        assertSet(Genre::class, $genres, 5);
-        assertSet(Album\Id::class, $albums, 6);
-        assertSet(Artist\Id::class, $artists, 7);
-
         $this->id = $id;
         $this->name = $name;
         $this->duration = $duration;

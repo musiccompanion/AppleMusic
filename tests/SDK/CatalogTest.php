@@ -17,17 +17,22 @@ use Innmind\TimeContinuum\{
     Earth,
     Format,
 };
-use Innmind\HttpTransport\Transport;
+use Innmind\HttpTransport\{
+    Transport,
+    Success,
+};
 use Innmind\Http\{
     Header\Authorization,
     Header\AuthorizationValue,
+    Message\Request,
     Message\Response,
+    Message\StatusCode,
 };
-use Innmind\Stream\Readable;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\{
-    unwrap,
-    first,
+use Innmind\Filesystem\File\Content;
+use Innmind\Immutable\{
+    Set,
+    Either,
+    Maybe,
 };
 use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Storefront as StorefrontSet,
@@ -59,6 +64,22 @@ class CatalogTest extends TestCase
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
+                $response1 = $this->createMock(Response::class);
+                $response2 = $this->createMock(Response::class);
+                $response1
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response1
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body1 = $this->createMock(Content::class));
+                $response2
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response2
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body2 = $this->createMock(Content::class));
                 $fulfill
                     ->expects($this->exactly(2))
                     ->method('__invoke')
@@ -66,24 +87,32 @@ class CatalogTest extends TestCase
                         [$this->callback(static function($request) use ($storefront, $id, $authorization) {
                             return $request->url()->path()->toString() === "/v1/catalog/{$storefront->toString()}/artists/{$id->toString()}" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                         [$this->callback(static function($request) use ($authorization) {
                             return $request->url()->path()->toString() === '/v1/catalog/fr/artists/178834/albums' &&
                                 $request->url()->query()->toString() === 'offset=1' &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                     )
                     ->will($this->onConsecutiveCalls(
-                        $response1 = $this->createMock(Response::class),
-                        $response2 = $this->createMock(Response::class),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response1,
+                        )),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response2,
+                        )),
                     ));
-                $response1
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body1
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -118,11 +147,7 @@ class CatalogTest extends TestCase
 }
 JSON
                     );
-                $response2
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body2
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -187,8 +212,17 @@ JSON
                     $artist->url()->toString(),
                 );
                 $this->assertCount(1, $artist->genres());
-                $this->assertSame('Rock', first($artist->genres())->toString());
-                $albums = unwrap($artist->albums());
+                $this->assertSame(
+                    'Rock',
+                    $artist
+                        ->genres()
+                        ->find(static fn() => true)
+                        ->match(
+                            static fn($genre) => $genre->toString(),
+                            static fn() => null,
+                        ),
+                );
+                $albums = $artist->albums()->toList();
                 $this->assertCount(2, $albums);
                 $this->assertSame(1459884961, \current($albums)->toInt());
                 \next($albums);
@@ -210,19 +244,29 @@ JSON
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
+                $response = $this->createMock(Response::class);
+                $response
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Content::class));
                 $fulfill
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $id, $authorization) {
                         return $request->url()->path()->toString() === "/v1/catalog/{$storefront->toString()}/albums/{$id->toString()}" &&
                             $request->method()->toString() === 'GET' &&
-                            $request->headers()->get('authorization') === $authorization;
+                            $authorization === $request->headers()->get('authorization')->match(
+                                static fn($header) => $header,
+                                static fn() => null,
+                            );
                     }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
+                    ->willReturn(Either::right(new Success(
+                        $this->createMock(Request::class),
+                        $response,
+                    )));
                 $body
                     ->expects($this->once())
                     ->method('toString')
@@ -778,7 +822,7 @@ JSON
                     ->expects($this->once())
                     ->method('at')
                     ->with('1984-06-04 00:00:00')
-                    ->willReturn($release = $this->createMock(PointInTime::class));
+                    ->willReturn(Maybe::just($release = $this->createMock(PointInTime::class)));
 
                 $album = $catalog->album($id);
 
@@ -806,7 +850,16 @@ JSON
                 );
                 $this->assertTrue($album->complete());
                 $this->assertCount(7, $album->genres());
-                $this->assertSame('Rock', first($album->genres())->toString());
+                $this->assertSame(
+                    'Rock',
+                    $album
+                        ->genres()
+                        ->find(static fn() => true)
+                        ->match(
+                            static fn($genre) => $genre->toString(),
+                            static fn() => null,
+                        ),
+                );
                 $this->assertCount(12, $album->tracks());
                 $this->assertTrue($album->masteredForItunes());
                 $this->assertSame($release, $album->release());
@@ -830,19 +883,29 @@ JSON
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
+                $response = $this->createMock(Response::class);
+                $response
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Content::class));
                 $fulfill
                     ->expects($this->once())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) use ($storefront, $id, $authorization) {
                         return $request->url()->path()->toString() === "/v1/catalog/{$storefront->toString()}/songs/{$id->toString()}" &&
                             $request->method()->toString() === 'GET' &&
-                            $request->headers()->get('authorization') === $authorization;
+                            $authorization === $request->headers()->get('authorization')->match(
+                                static fn($header) => $header,
+                                static fn() => null,
+                            );
                     }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
+                    ->willReturn(Either::right(new Success(
+                        $this->createMock(Request::class),
+                        $response,
+                    )));
                 $body
                     ->expects($this->once())
                     ->method('toString')
@@ -919,7 +982,7 @@ JSON
                     ->expects($this->once())
                     ->method('at')
                     ->with('1984-06-04')
-                    ->willReturn($release = $this->createMock(PointInTime::class));
+                    ->willReturn(Maybe::just($release = $this->createMock(PointInTime::class)));
 
                 $song = $catalog->song($id);
 
@@ -928,7 +991,13 @@ JSON
                 $this->assertCount(1, $song->previews());
                 $this->assertSame(
                     'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview71/v4/c4/e7/0d/c4e70dda-9011-caf6-bc47-e80c93412dba/mzaf_702934268268391713.plus.aac.p.m4a',
-                    first($song->previews())->toString(),
+                    $song
+                        ->previews()
+                        ->find(static fn() => true)
+                        ->match(
+                            static fn($preview) => $preview->toString(),
+                            static fn() => null,
+                        ),
                 );
                 $this->assertSame(6000, $song->artwork()->width()->toInt());
                 $this->assertSame(6000, $song->artwork()->height()->toInt());
@@ -972,6 +1041,22 @@ JSON
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
+                $response1 = $this->createMock(Response::class);
+                $response2 = $this->createMock(Response::class);
+                $response1
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response1
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body1 = $this->createMock(Content::class));
+                $response2
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response2
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body2 = $this->createMock(Content::class));
                 $fulfill
                     ->expects($this->exactly(2))
                     ->method('__invoke')
@@ -979,23 +1064,31 @@ JSON
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
                             return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/genres" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
                             return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/genres?offset=1" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                     )
                     ->will($this->onConsecutiveCalls(
-                        $response1 = $this->createMock(Response::class),
-                        $response2 = $this->createMock(Response::class),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response1,
+                        )),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response2,
+                        )),
                     ));
-                $response1
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body1
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -1014,11 +1107,7 @@ JSON
 }
 JSON
                     );
-                $response2
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body2
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -1040,8 +1129,7 @@ JSON
                 $genres = $catalog->genres();
 
                 $this->assertInstanceOf(Set::class, $genres);
-                $this->assertSame(Genre::class, $genres->type());
-                $genres = unwrap($genres);
+                $genres = $genres->toList();
                 $this->assertCount(2, $genres);
                 $this->assertSame('Musique', \current($genres)->toString());
                 \next($genres);
@@ -1064,6 +1152,38 @@ JSON
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $storefront,
                 );
+                $response1 = $this->createMock(Response::class);
+                $response2 = $this->createMock(Response::class);
+                $response3 = $this->createMock(Response::class);
+                $response4 = $this->createMock(Response::class);
+                $response1
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response1
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body1 = $this->createMock(Content::class));
+                $response2
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response2
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body2 = $this->createMock(Content::class));
+                $response3
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response3
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body3 = $this->createMock(Content::class));
+                $response4
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response4
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body4 = $this->createMock(Content::class));
                 $fulfill
                     ->expects($this->exactly(4))
                     ->method('__invoke')
@@ -1073,35 +1193,55 @@ JSON
 
                             return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?term=$term&types=artists,albums,songs&limit=25" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
                             return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=artists" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
                             return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=albums" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                         [$this->callback(static function($request) use ($storefront, $authorization): bool {
                             return $request->url()->toString() === "/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=songs" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                     )
                     ->will($this->onConsecutiveCalls(
-                        $response1 = $this->createMock(Response::class),
-                        $response2 = $this->createMock(Response::class),
-                        $response3 = $this->createMock(Response::class),
-                        $response4 = $this->createMock(Response::class),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response1,
+                        )),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response2,
+                        )),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response3,
+                        )),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response4,
+                        )),
                     ));
-                $response1
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body1
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -1144,11 +1284,7 @@ JSON
 }
 JSON
                     );
-                $response2
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body2
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -1168,11 +1304,7 @@ JSON
 }
 JSON
                     );
-                $response3
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body3
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -1192,11 +1324,7 @@ JSON
 }
 JSON
                     );
-                $response4
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body4
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -1218,9 +1346,9 @@ JSON
                     );
 
                 $search = $catalog->search($term);
-                $artists = unwrap($search->artists());
-                $albums = unwrap($search->albums());
-                $songs = unwrap($search->songs());
+                $artists = $search->artists()->toList();
+                $albums = $search->albums()->toList();
+                $songs = $search->songs()->toList();
 
                 $this->assertInstanceOf(Search::class, $search);
                 $this->assertSame($term, $search->term());

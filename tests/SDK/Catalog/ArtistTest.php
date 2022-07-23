@@ -34,8 +34,8 @@ class ArtistTest extends TestCase
                 Id::any(),
                 Name::any(),
                 Url::any(),
-                ISet::of(Genre::class, GenreSet::any()),
-                ISet::of(Album\Id::class, AlbumSet\Id::any()),
+                ISet::of(GenreSet::any()),
+                ISet::of(AlbumSet\Id::any()),
             )
             ->then(function($id, $name, $url, $genres, $albums) {
                 $artist = new Artist(
@@ -51,54 +51,6 @@ class ArtistTest extends TestCase
                 $this->assertSame($url, $artist->url());
                 $this->assertSame($genres, $artist->genres());
                 $this->assertSame($albums, $artist->albums());
-            });
-    }
-
-    public function testThrowWhenInvalidSetOfGenres()
-    {
-        $this
-            ->forAll(
-                Id::any(),
-                Name::any(),
-                Url::any(),
-                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-            )
-            ->disableShrinking()
-            ->then(function($id, $name, $url, string $type) {
-                $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 3 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
-
-                new Artist(
-                    $id,
-                    $name,
-                    $url,
-                    Set::of($type),
-                    Set::of(Album\Id::class),
-                );
-            });
-    }
-
-    public function testThrowWhenInvalidSetOfAlbums()
-    {
-        $this
-            ->forAll(
-                Id::any(),
-                Name::any(),
-                Url::any(),
-                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-            )
-            ->disableShrinking()
-            ->then(function($id, $name, $url, string $type) {
-                $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 4 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Album\Id>');
-
-                new Artist(
-                    $id,
-                    $name,
-                    $url,
-                    Set::of(Genre::class),
-                    Set::of($type),
-                );
             });
     }
 }

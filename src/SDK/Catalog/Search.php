@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace MusicCompanion\AppleMusic\SDK\Catalog;
 
 use Innmind\Immutable\Sequence;
-use function Innmind\Immutable\assertSequence;
 
 final class Search
 {
@@ -27,10 +26,6 @@ final class Search
         Sequence $albums,
         Sequence $songs,
     ) {
-        assertSequence(Artist\Id::class, $artists, 2);
-        assertSequence(Album\Id::class, $albums, 3);
-        assertSequence(Song\Id::class, $songs, 4);
-
         $this->term = $term;
         $this->artists = $artists;
         $this->albums = $albums;

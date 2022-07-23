@@ -7,7 +7,7 @@ use MusicCompanion\AppleMusic\{
     Key,
     Exception\DomainException,
 };
-use Innmind\Stream\Readable;
+use Innmind\Filesystem\File\Content;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -32,7 +32,7 @@ class KeyTest extends TestCase
                 $key = new Key(
                     $id,
                     $teamId,
-                    $content = $this->createMock(Readable::class),
+                    $content = $this->createMock(Content::class),
                 );
 
                 $this->assertSame($id, $key->id());
@@ -57,7 +57,7 @@ class KeyTest extends TestCase
                 new Key(
                     $id,
                     $teamId,
-                    $this->createMock(Readable::class),
+                    Content\None::of(),
                 );
             });
     }
@@ -78,7 +78,7 @@ class KeyTest extends TestCase
                 new Key(
                     $id,
                     $teamId,
-                    $this->createMock(Readable::class),
+                    Content\None::of(),
                 );
             });
     }

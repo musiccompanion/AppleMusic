@@ -34,17 +34,20 @@ final class Storefronts
         /** @psalm-suppress MixedArgumentTypeCoercion */
         $response = ($this->fulfill)(new Request(
             Url::of('/v1/storefronts'),
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of(
                 $this->authorization,
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array{data: list<array{id: string, attributes: array{name: string, defaultLanguageTag: string, supportedLanguageTags: list<string>}}>} */
         $resource = Json::decode($response->body()->toString());
         /** @var Set<Storefront> */
-        $storefronts = Set::of(Storefront::class);
+        $storefronts = Set::of();
 
         foreach ($resource['data'] as $storefront) {
             $storefronts = ($storefronts)(new Storefront(

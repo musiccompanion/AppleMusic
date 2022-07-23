@@ -10,7 +10,6 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Storefront\{
     Language,
 };
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\PHPUnit\BlackBox;
 
@@ -41,10 +40,9 @@ class StorefrontTest extends TestCase
                 $this->assertSame($name, $storefront->name());
                 $this->assertSame($defaultLanguage, $storefront->defaultLanguage());
                 $this->assertInstanceOf(Set::class, $storefront->supportedLanguages());
-                $this->assertSame(Storefront\Language::class, (string) $storefront->supportedLanguages()->type());
                 $this->assertSame(
                     [$supportedLanguage1, $supportedLanguage2],
-                    unwrap($storefront->supportedLanguages()),
+                    $storefront->supportedLanguages()->toList(),
                 );
             });
     }

@@ -15,13 +15,17 @@ use Innmind\TimeContinuum\{
     Earth\PointInTime\PointInTime,
     Earth\Period\Minute,
 };
-use Innmind\HttpTransport\Transport;
+use Innmind\HttpTransport\{
+    Transport,
+    Success,
+};
 use Innmind\Http\Message\{
+    Request,
     Response,
     StatusCode,
 };
-use Innmind\Stream\Readable;
-use function Innmind\Immutable\first;
+use Innmind\Filesystem\File\Content;
+use Innmind\Immutable\Either;
 use Lcobucci\JWT\{
     Token\Parser,
     Encoding\JoseEncoder,
@@ -50,28 +54,42 @@ class SDKTest extends TestCase
                 $key = new Key(
                     'AAAAAAAAAA',
                     'BBBBBBBBBB',
-                    $content = $this->createMock(Readable::class),
+                    // this is a randomly generated key
+                    Content\Lines::ofContent(<<<KEY
+                        -----BEGIN PRIVATE KEY-----
+                        MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgSmB1mBZDN7uKBA4p
+                        auujhPQ6DSqMCQj5i/8GWKBTSD2gCgYIKoZIzj0DAQehRANCAARy8AXnCbwjw49e
+                        8Vmmhn7UxrWDp+EcZfIj2A+CxTbZ+8STxZbe18qeq/YaJeWQgtiIByNmQcRIbwW5
+                        CM/EsUjo
+                        -----END PRIVATE KEY-----
+                        KEY
+                    ),
                 );
-                // this is a randomly generated key
-                $content
-                    ->method('toString')
-                    ->willReturn(<<<KEY
------BEGIN PRIVATE KEY-----
-MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgSmB1mBZDN7uKBA4p
-auujhPQ6DSqMCQj5i/8GWKBTSD2gCgYIKoZIzj0DAQehRANCAARy8AXnCbwjw49e
-8Vmmhn7UxrWDp+EcZfIj2A+CxTbZ+8STxZbe18qeq/YaJeWQgtiIByNmQcRIbwW5
-CM/EsUjo
------END PRIVATE KEY-----
-KEY
-                    );
                 $clock
                     ->method('now')
                     ->willReturn(new PointInTime('2019-01-01T00:00:00+00:00'));
+                $response = $this->createMock(Response::class);
+                $response
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response
+                    ->method('body')
+                    ->willReturn($body = $this->createMock(Content::class));
+                $body
+                    ->method('toString')
+                    ->willReturn('{"data":[]}');
                 $transport
                     ->expects($this->any())
                     ->method('__invoke')
                     ->with($this->callback(static function($request) {
-                        $header = first($request->headers()->get('authorization')->values())->toString();
+                        $header = $request
+                            ->headers()
+                            ->get('authorization')
+                            ->flatMap(static fn($header) => $header->values()->find(static fn() => true))
+                            ->match(
+                                static fn($value) => $value->toString(),
+                                static fn() => null,
+                            );
                         $jwt = \substr($header, 7); // remove Bearer
                         $jwt = (new Parser(new JoseEncoder))->parse($jwt);
 
@@ -80,16 +98,10 @@ KEY
                             $jwt->claims()->get('iat')->format(\DateTime::ATOM) === '2019-01-01T00:00:00+00:00' &&
                             $jwt->claims()->get('exp')->format(\DateTime::ATOM) === '2019-01-01T00:01:00+00:00';
                     }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
-                    ->method('statusCode')
-                    ->willReturn(new StatusCode(200));
-                $response
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
-                    ->method('toString')
-                    ->willReturn('{"data":[]}');
+                    ->willReturn(Either::right(new Success(
+                        $this->createMock(Request::class),
+                        $response,
+                    )));
 
                 $sdk = new SDK(
                     $clock,

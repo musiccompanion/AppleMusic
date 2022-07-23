@@ -58,7 +58,7 @@ final class Catalog
             $id,
             new Artist\Name($resource['data'][0]['attributes']['name']),
             Url::of($resource['data'][0]['attributes']['url']),
-            Set::of(Genre::class, ...\array_map(
+            Set::of(...\array_map(
                 static fn(string $genre): Genre => new Genre($genre),
                 $resource['data'][0]['attributes']['genreNames'],
             )),
@@ -106,23 +106,26 @@ final class Catalog
             $attributes['isSingle'],
             Url::of($attributes['url']),
             $attributes['isComplete'],
-            Set::of(Genre::class, ...\array_map(
+            Set::of(...\array_map(
                 static fn(string $genre): Genre => new Genre($genre),
                 $attributes['genreNames'],
             )),
-            Set::of(Song\Id::class, ...\array_map(
+            Set::of(...\array_map(
                 static fn(array $song): Song\Id => new Song\Id((int) $song['id']),
                 $resource['data'][0]['relationships']['tracks']['data'],
             )),
             $attributes['isMasteredForItunes'],
-            $this->clock->at($releaseDate),
+            $this->clock->at($releaseDate)->match(
+                static fn($date) => $date,
+                static fn() => throw new \RuntimeException,
+            ),
             new Album\RecordLabel($attributes['recordLabel'] ?? ''),
             new Album\Copyright($attributes['copyright'] ?? ''),
             new Album\EditorialNotes(
                 $attributes['editorialNotes']['standard'] ?? '',
                 $attributes['editorialNotes']['short'] ?? '',
             ),
-            Set::of(Artist\Id::class, ...\array_map(
+            Set::of(...\array_map(
                 static fn(array $artist): Artist\Id => new Artist\Id((int) $artist['id']),
                 $resource['data'][0]['relationships']['artists']['data'],
             )),
@@ -143,7 +146,7 @@ final class Catalog
         /** @psalm-suppress RedundantCastGivenDocblockType */
         return new Song(
             $id,
-            Set::of(Url::class, ...\array_map(
+            Set::of(...\array_map(
                 static fn(array $preview): Url => Url::of($preview['url']),
                 $attributes['previews'],
             )),
@@ -159,21 +162,24 @@ final class Catalog
             ),
             Url::of($attributes['url']),
             new Song\DiscNumber($attributes['discNumber']),
-            Set::of(Genre::class, ...\array_map(
+            Set::of(...\array_map(
                 static fn(string $genre): Genre => new Genre($genre),
                 $attributes['genreNames'],
             )),
             Song\Duration::of($attributes['durationInMillis'] ?? null),
-            $this->clock->at($attributes['releaseDate']),
+            $this->clock->at($attributes['releaseDate'])->match(
+                static fn($date) => $date,
+                static fn() => throw new \RuntimeException,
+            ),
             new Song\Name($attributes['name']),
             new Song\ISRC($attributes['isrc']),
             new Song\TrackNumber($attributes['trackNumber']),
             new Song\Composer($attributes['composerName'] ?? ''),
-            Set::of(Artist\Id::class, ...\array_map(
+            Set::of(...\array_map(
                 static fn(array $artist): Artist\Id => new Artist\Id((int) $artist['id']),
                 $resource['data'][0]['relationships']['artists']['data'],
             )),
-            Set::of(Album\Id::class, ...\array_map(
+            Set::of(...\array_map(
                 static fn(array $album): Album\Id => new Album\Id((int) $album['id']),
                 $resource['data'][0]['relationships']['albums']['data'],
             )),
@@ -187,7 +193,7 @@ final class Catalog
     {
         $url = $this->url('genres');
         /** @var Set<Genre> */
-        $genres = Set::of(Genre::class);
+        $genres = Set::of();
 
         do {
             /** @var array{data: list<array{attributes: array{name: string}}>, next?: string} */
@@ -216,7 +222,6 @@ final class Catalog
         $resource = $this->get($url);
 
         $artists = Sequence::lazy(
-            Artist\Id::class,
             function() use ($resource): \Generator {
                 do {
                     $artists = $resource['results']['artists'] ?? [];
@@ -237,7 +242,6 @@ final class Catalog
         );
 
         $albums = Sequence::lazy(
-            Album\Id::class,
             function() use ($resource): \Generator {
                 do {
                     $albums = $resource['results']['albums'] ?? [];
@@ -258,7 +262,6 @@ final class Catalog
         );
 
         $songs = Sequence::lazy(
-            Song\Id::class,
             function() use ($resource): \Generator {
                 do {
                     $songs = $resource['results']['songs'] ?? [];
@@ -289,7 +292,7 @@ final class Catalog
     private function artistAlbums(array $resources): Set
     {
         /** @var Set<Album\Id> */
-        $albums = Set::of(Album\Id::class);
+        $albums = Set::of();
 
         foreach ($resources['data'] as $album) {
             /** @psalm-suppress RedundantCastGivenDocblockType */
@@ -311,10 +314,13 @@ final class Catalog
         /** @psalm-suppress MixedArgumentTypeCoercion */
         $response = ($this->fulfill)(new Request(
             $url,
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of($this->authorization),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array */
         return Json::decode($response->body()->toString());

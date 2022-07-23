@@ -9,7 +9,6 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Artist\{
 };
 use Innmind\Url\Url;
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
 
 final class Artist
 {
@@ -32,9 +31,6 @@ final class Artist
         Set $genres,
         Set $albums,
     ) {
-        assertSet(Genre::class, $genres, 3);
-        assertSet(Album\Id::class, $albums, 4);
-
         $this->id = $id;
         $this->name = $name;
         $this->url = $url;

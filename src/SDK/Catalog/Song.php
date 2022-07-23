@@ -15,7 +15,6 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Song\{
 use Innmind\Url\Url;
 use Innmind\TimeContinuum\PointInTime;
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
 
 final class Song
 {
@@ -60,11 +59,6 @@ final class Song
         Set $artists,
         Set $albums,
     ) {
-        assertSet(Url::class, $previews, 2);
-        assertSet(Genre::class, $genres, 6);
-        assertSet(Artist\Id::class, $artists, 13);
-        assertSet(Album\Id::class, $albums, 14);
-
         $this->id = $id;
         $this->previews = $previews;
         $this->artwork = $artwork;

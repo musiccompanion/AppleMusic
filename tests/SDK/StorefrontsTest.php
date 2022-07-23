@@ -7,15 +7,22 @@ use MusicCompanion\AppleMusic\SDK\{
     Storefronts,
     Storefront,
 };
-use Innmind\HttpTransport\Transport;
+use Innmind\HttpTransport\{
+    Transport,
+    Success,
+};
 use Innmind\Http\{
     Header\Authorization,
     Header\AuthorizationValue,
+    Message\Request,
     Message\Response,
+    Message\StatusCode,
 };
-use Innmind\Stream\Readable;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
+use Innmind\Filesystem\File\Content;
+use Innmind\Immutable\{
+    Set,
+    Either,
+};
 use PHPUnit\Framework\TestCase;
 
 class StorefrontsTest extends TestCase
@@ -26,19 +33,29 @@ class StorefrontsTest extends TestCase
             $send = $this->createMock(Transport::class),
             $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
         );
+        $response = $this->createMock(Response::class);
+        $response
+            ->method('statusCode')
+            ->willReturn(StatusCode::ok);
+        $response
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn($body = $this->createMock(Content::class));
         $send
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request) use ($authorization): bool {
                 return $request->url()->toString() === '/v1/storefronts' &&
                     $request->method()->toString() === 'GET' &&
-                    $request->headers()->get('authorization') === $authorization;
+                    $authorization === $request->headers()->get('authorization')->match(
+                        static fn($header) => $header,
+                        static fn() => null,
+                    );
             }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn($body = $this->createMock(Readable::class));
+            ->willReturn(Either::right(new Success(
+                $this->createMock(Request::class),
+                $response,
+            )));
         $body
             ->expects($this->once())
             ->method('toString')
@@ -1631,8 +1648,7 @@ JSON
         $all = $storefronts->all();
 
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertSame(Storefront::class, $all->type());
-        $all = unwrap($all);
+        $all = $all->toList();
         $this->assertCount(115, $all);
         $this->assertSame('ai', \current($all)->id()->toString());
         $this->assertSame('Anguilla', \current($all)->name()->toString());

@@ -10,8 +10,9 @@ use MusicCompanion\AppleMusic\{
 };
 use Innmind\HttpTransport\{
     Transport,
-    Exception\ClientError,
-    Exception\ServerError,
+    Success,
+    ClientError,
+    ServerError,
 };
 use Innmind\Http\{
     Message\Request\Request,
@@ -20,6 +21,7 @@ use Innmind\Http\{
     Message\StatusCode,
     ProtocolVersion,
 };
+use Innmind\Immutable\Either;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -44,9 +46,14 @@ class AppleMusicTest extends TestCase
                 );
                 $initial = new Request(
                     $url,
-                    Method::get(),
-                    new ProtocolVersion(2, 0),
+                    Method::get,
+                    ProtocolVersion::v20,
                 );
+                $response = $this->createMock(Response::class);
+                $response
+                    ->expects($this->any())
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::of($statusCode));
                 $inner
                     ->expects($this->once())
                     ->method('__invoke')
@@ -60,13 +67,12 @@ class AppleMusicTest extends TestCase
                             $request->headers() === $initial->headers() &&
                             $request->body() === $initial->body();
                     }))
-                    ->willReturn($response = $this->createMock(Response::class));
-                $response
-                    ->expects($this->any())
-                    ->method('statusCode')
-                    ->willReturn(new StatusCode($statusCode));
+                    ->willReturn($expected = Either::right(new Success(
+                        $initial,
+                        $response,
+                    )));
 
-                $this->assertSame($response, $fulfill($initial));
+                $this->assertEquals($expected, $fulfill($initial));
             });
     }
 
@@ -83,19 +89,23 @@ class AppleMusicTest extends TestCase
                 );
                 $initial = new Request(
                     $url,
-                    Method::get(),
-                    new ProtocolVersion(2, 0),
+                    Method::get,
+                    ProtocolVersion::v20,
                 );
-                $inner
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->willReturn($response = $this->createMock(Response::class));
+                $response = $this->createMock(Response::class);
                 $response
                     ->expects($this->any())
                     ->method('statusCode')
-                    ->willReturn(new StatusCode($statusCode));
+                    ->willReturn(StatusCode::of($statusCode));
+                $inner
+                    ->expects($this->once())
+                    ->method('__invoke')
+                    ->willReturn(Either::left(new ClientError(
+                        $initial,
+                        $response,
+                    )));
 
-                $this->expectException(ClientError::class);
+                $this->expectException(\RuntimeException::class);
 
                 $fulfill($initial);
             });
@@ -111,17 +121,18 @@ class AppleMusicTest extends TestCase
                 );
                 $initial = new Request(
                     $url,
-                    Method::get(),
-                    new ProtocolVersion(2, 0),
+                    Method::get,
+                    ProtocolVersion::v20,
                 );
-                $inner
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->willReturn($response = $this->createMock(Response::class));
+                $response = $this->createMock(Response::class);
                 $response
                     ->expects($this->any())
                     ->method('statusCode')
-                    ->willReturn(new StatusCode(401));
+                    ->willReturn(StatusCode::unauthorized);
+                $inner
+                    ->expects($this->once())
+                    ->method('__invoke')
+                    ->willReturn(Either::left(new ClientError($initial, $response)));
 
                 $this->expectException(InvalidToken::class);
 
@@ -139,17 +150,18 @@ class AppleMusicTest extends TestCase
                 );
                 $initial = new Request(
                     $url,
-                    Method::get(),
-                    new ProtocolVersion(2, 0),
+                    Method::get,
+                    ProtocolVersion::v20,
                 );
-                $inner
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->willReturn($response = $this->createMock(Response::class));
+                $response = $this->createMock(Response::class);
                 $response
                     ->expects($this->any())
                     ->method('statusCode')
-                    ->willReturn(new StatusCode(403));
+                    ->willReturn(StatusCode::forbidden);
+                $inner
+                    ->expects($this->once())
+                    ->method('__invoke')
+                    ->willReturn(Either::left(new ClientError($initial, $response)));
 
                 $this->expectException(InvalidUserToken::class);
 
@@ -170,19 +182,20 @@ class AppleMusicTest extends TestCase
                 );
                 $initial = new Request(
                     $url,
-                    Method::get(),
-                    new ProtocolVersion(2, 0),
+                    Method::get,
+                    ProtocolVersion::v20,
                 );
-                $inner
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->willReturn($response = $this->createMock(Response::class));
+                $response = $this->createMock(Response::class);
                 $response
                     ->expects($this->any())
                     ->method('statusCode')
-                    ->willReturn(new StatusCode($statusCode));
+                    ->willReturn(StatusCode::of($statusCode));
+                $inner
+                    ->expects($this->once())
+                    ->method('__invoke')
+                    ->willReturn(Either::left(new ServerError($initial, $response)));
 
-                $this->expectException(ServerError::class);
+                $this->expectException(\RuntimeException::class);
 
                 $fulfill($initial);
             });

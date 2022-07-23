@@ -10,22 +10,24 @@ use MusicCompanion\AppleMusic\SDK\{
     Library\Song,
     Storefront,
 };
-use Innmind\HttpTransport\Transport;
+use Innmind\HttpTransport\{
+    Transport,
+    Success,
+};
 use Innmind\Http\{
     Header\Authorization,
     Header\AuthorizationValue,
     Header\Header,
     Header\Value\Value,
+    Message\Request,
     Message\Response,
+    Message\StatusCode,
 };
-use Innmind\Stream\Readable;
+use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\{
     Set,
     Sequence,
-};
-use function Innmind\Immutable\{
-    unwrap,
-    first,
+    Either,
 };
 use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Artist as ArtistSet,
@@ -45,20 +47,33 @@ class LibraryTest extends TestCase
             $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
             $userToken = new Header('Music-User-Token', new Value('token')),
         );
+        $response = $this->createMock(Response::class);
+        $response
+            ->method('statusCode')
+            ->willReturn(StatusCode::ok);
+        $response
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn($body = $this->createMock(Content::class));
         $fulfill
             ->expects($this->once())
             ->method('__invoke')
             ->with($this->callback(static function($request) use ($authorization, $userToken): bool {
                 return $request->url()->toString() === '/v1/me/storefront' &&
                     $request->method()->toString() === 'GET' &&
-                    $request->headers()->get('authorization') === $authorization &&
-                    $request->headers()->get('music-user-token') === $userToken;
+                    $authorization === $request->headers()->get('authorization')->match(
+                        static fn($header) => $header,
+                        static fn() => null,
+                    ) &&
+                    $userToken === $request->headers()->get('music-user-token')->match(
+                        static fn($header) => $header,
+                        static fn() => null,
+                    );
             }))
-            ->willReturn($response = $this->createMock(Response::class));
-        $response
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn($body = $this->createMock(Readable::class));
+            ->willReturn(Either::right(new Success(
+                $this->createMock(Request::class),
+                $response,
+            )));
         $body
             ->expects($this->once())
             ->method('toString')
@@ -100,6 +115,22 @@ JSON
             $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
             $userToken = new Header('Music-User-Token', new Value('token')),
         );
+        $response1 = $this->createMock(Response::class);
+        $response2 = $this->createMock(Response::class);
+        $response1
+            ->method('statusCode')
+            ->willReturn(StatusCode::ok);
+        $response1
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn($body1 = $this->createMock(Content::class));
+        $response2
+            ->method('statusCode')
+            ->willReturn(StatusCode::ok);
+        $response2
+            ->expects($this->once())
+            ->method('body')
+            ->willReturn($body2 = $this->createMock(Content::class));
         $fulfill
             ->expects($this->exactly(2))
             ->method('__invoke')
@@ -107,25 +138,39 @@ JSON
                 [$this->callback(static function($request) use ($authorization, $userToken): bool {
                     return $request->url()->toString() === '/v1/me/library/artists' &&
                         $request->method()->toString() === 'GET' &&
-                        $request->headers()->get('authorization') === $authorization &&
-                        $request->headers()->get('music-user-token') === $userToken;
+                        $authorization === $request->headers()->get('authorization')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ) &&
+                        $userToken === $request->headers()->get('music-user-token')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        );
                 })],
                 [$this->callback(static function($request) use ($authorization, $userToken): bool {
                     return $request->url()->toString() === '/v1/me/library/artists?offset=25' &&
                         $request->method()->toString() === 'GET' &&
-                        $request->headers()->get('authorization') === $authorization &&
-                        $request->headers()->get('music-user-token') === $userToken;
+                        $authorization === $request->headers()->get('authorization')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ) &&
+                        $userToken === $request->headers()->get('music-user-token')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        );
                 })],
             )
             ->will($this->onConsecutiveCalls(
-                $response1 = $this->createMock(Response::class),
-                $response2 = $this->createMock(Response::class),
+                Either::right(new Success(
+                    $this->createMock(Request::class),
+                    $response1,
+                )),
+                Either::right(new Success(
+                    $this->createMock(Request::class),
+                    $response2,
+                )),
             ));
-        $response1
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn($body = $this->createMock(Readable::class));
-        $body
+        $body1
             ->expects($this->once())
             ->method('toString')
             ->willReturn(<<<JSON
@@ -147,11 +192,7 @@ JSON
 }
 JSON
             );
-        $response2
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn($body = $this->createMock(Readable::class));
-        $body
+        $body2
             ->expects($this->once())
             ->method('toString')
             ->willReturn(<<<JSON
@@ -176,8 +217,7 @@ JSON
         $artists = $library->artists();
 
         $this->assertInstanceOf(Sequence::class, $artists);
-        $this->assertSame(Artist::class, $artists->type());
-        $artists = unwrap($artists);
+        $artists = $artists->toList();
         $this->assertCount(2, $artists);
         $this->assertSame('r.2S6SRHl', \current($artists)->id()->toString());
         $this->assertSame('"Weird Al" Yankovic', \current($artists)->name()->toString());
@@ -196,6 +236,22 @@ JSON
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $userToken = new Header('Music-User-Token', new Value('token')),
                 );
+                $response1 = $this->createMock(Response::class);
+                $response2 = $this->createMock(Response::class);
+                $response1
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response1
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body1 = $this->createMock(Content::class));
+                $response2
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response2
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body2 = $this->createMock(Content::class));
                 $fulfill
                     ->expects($this->exactly(2))
                     ->method('__invoke')
@@ -203,25 +259,39 @@ JSON
                         [$this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
                             return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?include=artists" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization &&
-                                $request->headers()->get('music-user-token') === $userToken;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ) &&
+                                $userToken === $request->headers()->get('music-user-token')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                         [$this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
                             return $request->url()->toString() === "/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization &&
-                                $request->headers()->get('music-user-token') === $userToken;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ) &&
+                                $userToken === $request->headers()->get('music-user-token')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                     )
                     ->will($this->onConsecutiveCalls(
-                        $response1 = $this->createMock(Response::class),
-                        $response2 = $this->createMock(Response::class),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response1,
+                        )),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response2,
+                        )),
                     ));
-                $response1
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body1
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -265,11 +335,7 @@ JSON
 }
 JSON
                     );
-                $response2
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body2
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -321,14 +387,22 @@ JSON
                 $albums = $library->albums($artist);
 
                 $this->assertInstanceOf(Set::class, $albums);
-                $this->assertSame(Album::class, $albums->type());
-                $albums = unwrap($albums);
+                $albums = $albums->toList();
                 $this->assertCount(2, $albums);
                 $this->assertSame('l.wXEf8fr', \current($albums)->id()->toString());
                 $this->assertSame('Skull & Bonus', \current($albums)->name()->toString());
                 $this->assertFalse(\current($albums)->hasArtwork());
                 $this->assertCount(1, \current($albums)->artists());
-                $this->assertSame('r.o860e82', first(\current($albums)->artists())->toString());
+                $this->assertSame(
+                    'r.o860e82',
+                    \current($albums)
+                        ->artists()
+                        ->find(static fn() => true)
+                        ->match(
+                            static fn($album) => $album->toString(),
+                            static fn() => null,
+                        ),
+                );
                 \next($albums);
                 $this->assertSame('l.gACheFi', \current($albums)->id()->toString());
                 $this->assertTrue(\current($albums)->hasArtwork());
@@ -351,6 +425,22 @@ JSON
                     $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
                     $userToken = new Header('Music-User-Token', new Value('token')),
                 );
+                $response1 = $this->createMock(Response::class);
+                $response2 = $this->createMock(Response::class);
+                $response1
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response1
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body1 = $this->createMock(Content::class));
+                $response2
+                    ->method('statusCode')
+                    ->willReturn(StatusCode::ok);
+                $response2
+                    ->expects($this->once())
+                    ->method('body')
+                    ->willReturn($body2 = $this->createMock(Content::class));
                 $fulfill
                     ->expects($this->exactly(2))
                     ->method('__invoke')
@@ -358,25 +448,39 @@ JSON
                         [$this->callback(static function($request) use ($album, $authorization, $userToken): bool {
                             return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization &&
-                                $request->headers()->get('music-user-token') === $userToken;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ) &&
+                                $userToken === $request->headers()->get('music-user-token')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                         [$this->callback(static function($request) use ($album, $authorization, $userToken): bool {
                             return $request->url()->toString() === "/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists" &&
                                 $request->method()->toString() === 'GET' &&
-                                $request->headers()->get('authorization') === $authorization &&
-                                $request->headers()->get('music-user-token') === $userToken;
+                                $authorization === $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ) &&
+                                $userToken === $request->headers()->get('music-user-token')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                );
                         })],
                     )
                     ->will($this->onConsecutiveCalls(
-                        $response1 = $this->createMock(Response::class),
-                        $response2 = $this->createMock(Response::class),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response1,
+                        )),
+                        Either::right(new Success(
+                            $this->createMock(Request::class),
+                            $response2,
+                        )),
                     ));
-                $response1
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body1
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -440,11 +544,7 @@ JSON
 }
 JSON
                     );
-                $response2
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Readable::class));
-                $body
+                $body2
                     ->expects($this->once())
                     ->method('toString')
                     ->willReturn(<<<JSON
@@ -517,19 +617,45 @@ JSON
                 $songs = $library->songs($album);
 
                 $this->assertInstanceOf(Set::class, $songs);
-                $this->assertSame(Song::class, $songs->type());
-                $songs = unwrap($songs);
+                $songs = $songs->toList();
                 $this->assertCount(2, $songs);
                 $this->assertSame('i.mmpYYzeu4J0XGD', \current($songs)->id()->toString());
                 $this->assertSame('Judgement Day', \current($songs)->name()->toString());
                 $this->assertSame('325459', \current($songs)->duration()->toString());
                 $this->assertSame('1', \current($songs)->trackNumber()->toString());
                 $this->assertCount(1, \current($songs)->genres());
-                $this->assertSame('Rapcore, Punk, Rap', first(\current($songs)->genres())->toString());
+                $this->assertSame(
+                    'Rapcore, Punk, Rap',
+                    \current($songs)
+                        ->genres()
+                        ->find(static fn() => true)
+                        ->match(
+                            static fn($genre) => $genre->toString(),
+                            static fn() => null,
+                        ),
+                );
                 $this->assertCount(1, \current($songs)->artists());
                 $this->assertCount(1, \current($songs)->albums());
-                $this->assertSame('r.o860e82', first(\current($songs)->artists())->toString());
-                $this->assertSame('l.wXEf8fr', first(\current($songs)->albums())->toString());
+                $this->assertSame(
+                    'r.o860e82',
+                    \current($songs)
+                        ->artists()
+                        ->find(static fn() => true)
+                        ->match(
+                            static fn($artist) => $artist->toString(),
+                            static fn() => null,
+                        ),
+                );
+                $this->assertSame(
+                    'l.wXEf8fr',
+                    \current($songs)
+                        ->albums()
+                        ->find(static fn() => true)
+                        ->match(
+                            static fn($album) => $album->toString(),
+                            static fn() => null,
+                        ),
+                );
                 \next($songs);
                 $this->assertSame('i.b1Jvv08sqZgz8A', \current($songs)->id()->toString());
                 $this->assertSame('Takeover (feat. Axe Murder Boyz & DGAF)', \current($songs)->name()->toString());

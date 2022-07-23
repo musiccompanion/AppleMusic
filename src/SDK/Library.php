@@ -65,7 +65,6 @@ final class Library
 
         /** @var Sequence<Artist> */
         return Sequence::lazy(
-            Artist::class,
             function() use ($url): \Generator {
                 do {
                     /** @var array{data: list<array{id: string, attributes: array{name: string}}>, next?: string} */
@@ -94,7 +93,7 @@ final class Library
     {
         $url = $this->url("artists/{$artist->toString()}/albums?include=artists");
         /** @var Set<Album> */
-        $albums = Set::of(Album::class);
+        $albums = Set::of();
 
         do {
             /** @var array{data: list<array{id: string, attributes: array{name: string, artwork?: array{width: int, height: int, url: string}}, relationships: array{artists: array{data: list<array{id: string}>}}}>, next?: string} */
@@ -136,7 +135,7 @@ final class Library
     {
         $url = $this->url("albums/{$album->toString()}/tracks?include=albums,artists");
         /** @var Set<Song> */
-        $songs = Set::of(Song::class);
+        $songs = Set::of();
 
         do {
             /** @var array{data: list<array{id: string, attributes: array{name: string, durationInMillis?: int, trackNumber: int, genreNames: list<string>}, relationships: array{albums: array{data: list<array{id: string}>}, artists: array{data: list<array{id: string}>}}}>, next?: string} */
@@ -145,14 +144,12 @@ final class Library
 
             foreach ($resource['data'] as $song) {
                 $genres = Set::of(
-                    Song\Genre::class,
                     ...\array_map(
                         static fn(string $genre): Song\Genre => new Song\Genre($genre),
                         $song['attributes']['genreNames'],
                     ),
                 );
                 $albums = Set::of(
-                    Album\Id::class,
                     ...\array_map(
                         static function(array $album): Album\Id {
                             /** @var array{id: string} $album */
@@ -163,7 +160,6 @@ final class Library
                     ),
                 );
                 $artists = Set::of(
-                    Artist\Id::class,
                     ...\array_map(
                         static function(array $artist): Artist\Id {
                             /** @var array{id: string} $artist */
@@ -198,13 +194,16 @@ final class Library
         /** @psalm-suppress MixedArgumentTypeCoercion */
         $response = ($this->fulfill)(new Request(
             $url,
-            Method::get(),
-            new ProtocolVersion(2, 0),
+            Method::get,
+            ProtocolVersion::v20,
             Headers::of(
                 $this->authorization,
                 $this->userToken,
             ),
-        ));
+        ))->match(
+            static fn($success) => $success->response(),
+            static fn() => throw new \RuntimeException,
+        );
 
         /** @var array */
         return Json::decode($response->body()->toString());

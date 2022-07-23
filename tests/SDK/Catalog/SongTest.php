@@ -9,7 +9,6 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Album,
     Genre,
 };
-use Innmind\Url\Url;
 use Innmind\Immutable\Set;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
@@ -42,19 +41,19 @@ class SongTest extends TestCase
         $this
             ->forAll(
                 Id::any(),
-                ISet::of(Url::class, FUrl::any()),
+                ISet::of(FUrl::any()),
                 Artwork::any(),
                 FUrl::any(),
                 DiscNumber::any(),
-                ISet::of(Genre::class, GenreSet::any()),
+                ISet::of(GenreSet::any()),
                 Duration::any(),
                 PointInTime::any(),
                 Name::any(),
                 ISRC::any(),
                 TrackNumber::any(),
                 Composer::any(),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
-                ISet::of(Album\Id::class, AlbumSet\Id::any()),
+                ISet::of(ArtistSet\Id::any()),
+                ISet::of(AlbumSet\Id::any()),
             )
             ->then(function($id, $previews, $artwork, $url, $discNumber, $genres, $duration, $release, $name, $isrc, $trackNumber, $composer, $artists, $albums) {
                 $song = new Song(

@@ -9,7 +9,6 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Album,
     Song,
 };
-use Innmind\Immutable\Sequence;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artist as ArtistSet,
     Album as AlbumSet,
@@ -31,9 +30,9 @@ class SearchTest extends TestCase
         $this
             ->forAll(
                 DataSet\Strings::any(),
-                ISequence::of(Artist\Id::class, ArtistSet\Id::any()),
-                ISequence::of(Album\Id::class, AlbumSet\Id::any()),
-                ISequence::of(Song\Id::class, SongSet\Id::any()),
+                ISequence::of(ArtistSet\Id::any()),
+                ISequence::of(AlbumSet\Id::any()),
+                ISequence::of(SongSet\Id::any()),
             )
             ->then(function($term, $artists, $albums, $songs) {
                 $search = new Search($term, $artists, $albums, $songs);
@@ -42,75 +41,6 @@ class SearchTest extends TestCase
                 $this->assertSame($artists, $search->artists());
                 $this->assertSame($albums, $search->albums());
                 $this->assertSame($songs, $search->songs());
-            });
-    }
-
-    public function testThrowWhenInvalidArtistSet()
-    {
-        $this
-            ->forAll(
-                DataSet\Strings::any(),
-                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-                ISequence::of(Album\Id::class, AlbumSet\Id::any()),
-                ISequence::of(Song\Id::class, SongSet\Id::any()),
-            )
-            ->disableShrinking()
-            ->then(function($term, $artist, $albums, $songs) {
-                $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 2 must be of type Sequence<MusicCompanion\AppleMusic\SDK\Catalog\Artist\Id>');
-
-                new Search(
-                    $term,
-                    Sequence::of($artist),
-                    $albums,
-                    $songs,
-                );
-            });
-    }
-
-    public function testThrowWhenInvalidAlbumSet()
-    {
-        $this
-            ->forAll(
-                DataSet\Strings::any(),
-                ISequence::of(Artist\Id::class, ArtistSet\Id::any()),
-                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-                ISequence::of(Song\Id::class, SongSet\Id::any()),
-            )
-            ->disableShrinking()
-            ->then(function($term, $artists, $album, $songs) {
-                $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 3 must be of type Sequence<MusicCompanion\AppleMusic\SDK\Catalog\Album\Id>');
-
-                new Search(
-                    $term,
-                    $artists,
-                    Sequence::of($album),
-                    $songs,
-                );
-            });
-    }
-
-    public function testThrowWhenInvalidSongSet()
-    {
-        $this
-            ->forAll(
-                DataSet\Strings::any(),
-                ISequence::of(Artist\Id::class, ArtistSet\Id::any()),
-                ISequence::of(Album\Id::class, AlbumSet\Id::any()),
-                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-            )
-            ->disableShrinking()
-            ->then(function($term, $artists, $albums, $song) {
-                $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 4 must be of type Sequence<MusicCompanion\AppleMusic\SDK\Catalog\Song\Id>');
-
-                new Search(
-                    $term,
-                    $artists,
-                    $albums,
-                    Sequence::of($song),
-                );
             });
     }
 }

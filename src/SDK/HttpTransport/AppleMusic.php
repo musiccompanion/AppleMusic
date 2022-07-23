@@ -9,15 +9,14 @@ use MusicCompanion\AppleMusic\Exception\{
 };
 use Innmind\HttpTransport\{
     Transport,
-    ThrowOnErrorTransport,
-    Exception\ClientError,
+    ClientError,
 };
 use Innmind\Http\Message\{
     Request,
-    Response,
     StatusCode,
 };
 use Innmind\Url\Url;
+use Innmind\Immutable\Either;
 
 final class AppleMusic implements Transport
 {
@@ -26,33 +25,29 @@ final class AppleMusic implements Transport
 
     public function __construct(Transport $fulfill)
     {
-        $this->fulfill = new ThrowOnErrorTransport($fulfill);
+        $this->fulfill = $fulfill;
         $this->url = Url::of('https://api.music.apple.com/');
     }
 
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): Either
     {
-        try {
-            return ($this->fulfill)(new Request\Request(
-                $this
-                    ->url
-                    ->withPath($request->url()->path())
-                    ->withQuery($request->url()->query()),
-                $request->method(),
-                $request->protocolVersion(),
-                $request->headers(),
-                $request->body(),
-            ));
-        } catch (ClientError $e) {
-            if ($e->response()->statusCode()->equals(StatusCode::of('UNAUTHORIZED'))) {
-                throw new InvalidToken('', 0, $e);
-            }
-
-            if ($e->response()->statusCode()->equals(StatusCode::of('FORBIDDEN'))) {
-                throw new InvalidUserToken('', 0, $e);
-            }
-
-            throw $e;
-        }
+        return ($this->fulfill)(new Request\Request(
+            $this
+                ->url
+                ->withPath($request->url()->path())
+                ->withQuery($request->url()->query()),
+            $request->method(),
+            $request->protocolVersion(),
+            $request->headers(),
+            $request->body(),
+        ))
+            ->leftMap(static fn($left) => match (true) {
+                $left instanceof ClientError => match ($left->response()->statusCode()) {
+                    StatusCode::unauthorized => throw new InvalidToken,
+                    StatusCode::forbidden => throw new InvalidUserToken,
+                    default => throw new \RuntimeException,
+                },
+                default => throw new \RuntimeException,
+            });
     }
 }
