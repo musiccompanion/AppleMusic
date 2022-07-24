@@ -5,6 +5,9 @@ namespace MusicCompanion\AppleMusic\SDK\Catalog\Artwork;
 
 use MusicCompanion\AppleMusic\Exception\DomainException;
 
+/**
+ * @psalm-immutable
+ */
 final class Height
 {
     private int $value;

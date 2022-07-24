@@ -38,7 +38,7 @@ class IdTest extends TestCase
             ->forAll($chars)
             ->then(function(string $chars) {
                 $string = 'r.'.$chars;
-                $id = new Id($string);
+                $id = Id::of($string);
 
                 $this->assertSame($string, $id->toString());
             });
@@ -52,7 +52,7 @@ class IdTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);
 
-                new Id($string);
+                Id::of($string);
             });
     }
 }

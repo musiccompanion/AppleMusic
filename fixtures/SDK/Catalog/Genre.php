@@ -14,9 +14,7 @@ final class Genre
     public static function any(): Set
     {
         return Set\Decorate::immutable(
-            static function(string $string): Model {
-                return new Model($string);
-            },
+            Model::of(...),
             Set\Strings::any(),
         );
     }

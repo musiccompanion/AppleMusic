@@ -12,13 +12,18 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Album\{
 };
 use Innmind\Url\Url;
 use Innmind\TimeContinuum\PointInTime;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 
+/**
+ * @psalm-immutable
+ */
 final class Album
 {
     private Id $id;
-    private ?Artwork $artwork;
+    private Artwork $artwork;
     private Name $name;
     private bool $single;
     private Url $url;
@@ -28,7 +33,8 @@ final class Album
     /** @var Set<Song\Id> */
     private Set $tracks;
     private bool $masteredForItunes;
-    private PointInTime $release;
+    /** @var Maybe<PointInTime> */
+    private Maybe $release;
     private RecordLabel $recordLabel;
     private Copyright $copyright;
     private EditorialNotes $editorialNotes;
@@ -38,11 +44,12 @@ final class Album
     /**
      * @param Set<Genre> $genres
      * @param Set<Song\Id> $tracks
+     * @param Maybe<PointInTime> $release
      * @param Set<Artist\Id> $artists
      */
     public function __construct(
         Id $id,
-        ?Artwork $artwork,
+        Artwork $artwork,
         Name $name,
         bool $single,
         Url $url,
@@ -50,16 +57,12 @@ final class Album
         Set $genres,
         Set $tracks,
         bool $masteredForItunes,
-        PointInTime $release,
+        Maybe $release,
         RecordLabel $recordLabel,
         Copyright $copyright,
         EditorialNotes $editorialNotes,
-        Set $artists
+        Set $artists,
     ) {
-        assertSet(Genre::class, $genres, 7);
-        assertSet(Song\Id::class, $tracks, 8);
-        assertSet(Artist\Id::class, $artists, 14);
-
         $this->id = $id;
         $this->artwork = $artwork;
         $this->name = $name;
@@ -81,15 +84,8 @@ final class Album
         return $this->id;
     }
 
-    public function hasArtwork(): bool
-    {
-        return $this->artwork instanceof Artwork;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
     public function artwork(): Artwork
     {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->artwork;
     }
 
@@ -134,7 +130,10 @@ final class Album
         return $this->masteredForItunes;
     }
 
-    public function release(): PointInTime
+    /**
+     * @return Maybe<PointInTime>
+     */
+    public function release(): Maybe
     {
         return $this->release;
     }

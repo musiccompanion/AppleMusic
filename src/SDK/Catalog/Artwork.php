@@ -12,28 +12,46 @@ use Innmind\Url\{
     Path,
 };
 use Innmind\Colour\RGBA;
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
+};
 
+/**
+ * @psalm-immutable
+ */
 final class Artwork
 {
     private Width $width;
     private Height $height;
     private Url $url;
-    private ?RGBA $backgroundColor;
-    private ?RGBA $textColor1;
-    private ?RGBA $textColor2;
-    private ?RGBA $textColor3;
-    private ?RGBA $textColor4;
+    /** @var Maybe<RGBA> */
+    private Maybe $backgroundColor;
+    /** @var Maybe<RGBA> */
+    private Maybe $textColor1;
+    /** @var Maybe<RGBA> */
+    private Maybe $textColor2;
+    /** @var Maybe<RGBA> */
+    private Maybe $textColor3;
+    /** @var Maybe<RGBA> */
+    private Maybe $textColor4;
 
+    /**
+     * @param Maybe<RGBA> $backgroundColor
+     * @param Maybe<RGBA> $textColor1
+     * @param Maybe<RGBA> $textColor2
+     * @param Maybe<RGBA> $textColor3
+     * @param Maybe<RGBA> $textColor4
+     */
     public function __construct(
         Width $width,
         Height $height,
         Url $url,
-        ?RGBA $backgroundColor,
-        ?RGBA $textColor1,
-        ?RGBA $textColor2,
-        ?RGBA $textColor3,
-        ?RGBA $textColor4
+        Maybe $backgroundColor,
+        Maybe $textColor1,
+        Maybe $textColor2,
+        Maybe $textColor3,
+        Maybe $textColor4,
     ) {
         $this->width = $width;
         $this->height = $height;
@@ -60,27 +78,42 @@ final class Artwork
         return $this->url;
     }
 
-    public function backgroundColor(): ?RGBA
+    /**
+     * @return Maybe<RGBA>
+     */
+    public function backgroundColor(): Maybe
     {
         return $this->backgroundColor;
     }
 
-    public function textColor1(): ?RGBA
+    /**
+     * @return Maybe<RGBA>
+     */
+    public function textColor1(): Maybe
     {
         return $this->textColor1;
     }
 
-    public function textColor2(): ?RGBA
+    /**
+     * @return Maybe<RGBA>
+     */
+    public function textColor2(): Maybe
     {
         return $this->textColor2;
     }
 
-    public function textColor3(): ?RGBA
+    /**
+     * @return Maybe<RGBA>
+     */
+    public function textColor3(): Maybe
     {
         return $this->textColor3;
     }
 
-    public function textColor4(): ?RGBA
+    /**
+     * @return Maybe<RGBA>
+     */
+    public function textColor4(): Maybe
     {
         return $this->textColor4;
     }

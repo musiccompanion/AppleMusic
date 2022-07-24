@@ -5,17 +5,28 @@ namespace MusicCompanion\AppleMusic\SDK\Library\Song;
 
 use MusicCompanion\AppleMusic\Exception\DomainException;
 
+/**
+ * @psalm-immutable
+ */
 final class TrackNumber
 {
     private int $value;
 
-    public function __construct(int $value)
+    private function __construct(int $value)
     {
         if ($value < 1) {
             throw new DomainException((string) $value);
         }
 
         $this->value = $value;
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function of(int $value): self
+    {
+        return new self($value);
     }
 
     public function toInt(): int

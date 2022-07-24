@@ -9,8 +9,10 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Album,
     Genre,
 };
-use Innmind\Url\Url;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
     Song\Id,
@@ -42,19 +44,19 @@ class SongTest extends TestCase
         $this
             ->forAll(
                 Id::any(),
-                ISet::of(Url::class, FUrl::any()),
+                ISet::of(FUrl::any()),
                 Artwork::any(),
                 FUrl::any(),
                 DiscNumber::any(),
-                ISet::of(Genre::class, GenreSet::any()),
+                ISet::of(GenreSet::any()),
                 Duration::any(),
                 PointInTime::any(),
                 Name::any(),
                 ISRC::any(),
                 TrackNumber::any(),
                 Composer::any(),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any()),
-                ISet::of(Album\Id::class, AlbumSet\Id::any())
+                ISet::of(ArtistSet\Id::any()),
+                ISet::of(AlbumSet\Id::any()),
             )
             ->then(function($id, $previews, $artwork, $url, $discNumber, $genres, $duration, $release, $name, $isrc, $trackNumber, $composer, $artists, $albums) {
                 $song = new Song(
@@ -62,29 +64,44 @@ class SongTest extends TestCase
                     $previews,
                     $artwork,
                     $url,
-                    $discNumber,
+                    Maybe::of($discNumber),
                     $genres,
-                    $duration,
-                    $release,
+                    Maybe::of($duration),
+                    Maybe::of($release),
                     $name,
-                    $isrc,
-                    $trackNumber,
+                    Maybe::of($isrc),
+                    Maybe::of($trackNumber),
                     $composer,
                     $artists,
-                    $albums
+                    $albums,
                 );
 
                 $this->assertSame($id, $song->id());
                 $this->assertSame($previews, $song->previews());
                 $this->assertSame($artwork, $song->artwork());
                 $this->assertSame($url, $song->url());
-                $this->assertSame($discNumber, $song->discNumber());
+                $this->assertSame($discNumber, $song->discNumber()->match(
+                    static fn($discNumber) => $discNumber,
+                    static fn() => null,
+                ));
                 $this->assertSame($genres, $song->genres());
-                $this->assertSame($duration, $song->duration());
-                $this->assertSame($release, $song->release());
+                $this->assertSame($duration, $song->duration()->match(
+                    static fn($duration) => $duration,
+                    static fn() => null,
+                ));
+                $this->assertSame($release, $song->release()->match(
+                    static fn($release) => $release,
+                    static fn() => null,
+                ));
                 $this->assertSame($name, $song->name());
-                $this->assertSame($isrc, $song->isrc());
-                $this->assertSame($trackNumber, $song->trackNumber());
+                $this->assertSame($isrc, $song->isrc()->match(
+                    static fn($isrc) => $isrc,
+                    static fn() => null,
+                ));
+                $this->assertSame($trackNumber, $song->trackNumber()->match(
+                    static fn($trackNumber) => $trackNumber,
+                    static fn() => null,
+                ));
                 $this->assertSame($composer, $song->composer());
                 $this->assertSame($artists, $song->artists());
                 $this->assertSame($albums, $song->albums());

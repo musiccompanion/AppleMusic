@@ -22,7 +22,7 @@ class DiscNumberTest extends TestCase
         $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
-                $discNumber = new DiscNumber($number);
+                $discNumber = DiscNumber::of($number);
 
                 $this->assertSame($number, $discNumber->toInt());
             });
@@ -36,7 +36,7 @@ class DiscNumberTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);
 
-                new DiscNumber($negative);
+                DiscNumber::of($negative);
             });
     }
 }

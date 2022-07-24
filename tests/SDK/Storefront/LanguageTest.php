@@ -24,7 +24,7 @@ class LanguageTest extends TestCase
         $this
             ->forAll($char, $char)
             ->then(function(string $char1, string $char2) {
-                $language = new Language($char1.$char2);
+                $language = Language::of($char1.$char2);
 
                 $this->assertSame($char1.$char2, $language->toString());
             });
@@ -38,7 +38,7 @@ class LanguageTest extends TestCase
         $this
             ->forAll($char, $char, $region, $region)
             ->then(function(string $char1, string $char2, $region1, $region2) {
-                $language = new Language($char1.$char2.'-'.$region1.$region2);
+                $language = Language::of($char1.$char2.'-'.$region1.$region2);
 
                 $this->assertSame($char1.$char2.'-'.$region1.$region2, $language->toString());
             });
@@ -50,10 +50,10 @@ class LanguageTest extends TestCase
             ->forAll(Set\Elements::of(
                 'zh-Hans-CN',
                 'zh-Hant-HK',
-                'zh-Hant-TW'
+                'zh-Hant-TW',
             ))
             ->then(function(string $code) {
-                $language = new Language($code);
+                $language = Language::of($code);
 
                 $this->assertSame($code, $language->toString());
             });
@@ -65,13 +65,13 @@ class LanguageTest extends TestCase
             ->forAll(
                 Set\Strings::any()->filter(static function($string): bool {
                     return !\preg_match('~^[a-z]{2}$~', $string);
-                })
+                }),
             )
             ->then(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);
 
-                new Language($string);
+                Language::of($string);
             });
     }
 }

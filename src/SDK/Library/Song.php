@@ -10,15 +10,22 @@ use MusicCompanion\AppleMusic\SDK\Library\Song\{
     Duration,
     TrackNumber,
 };
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\assertSet;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 
+/**
+ * @psalm-immutable
+ */
 final class Song
 {
     private Id $id;
     private Name $name;
-    private ?Duration $duration;
-    private TrackNumber $trackNumber;
+    /** @var Maybe<Duration> */
+    private Maybe $duration;
+    /** @var Maybe<TrackNumber> */
+    private Maybe $trackNumber;
     /** @var Set<Genre> */
     private Set $genres;
     /** @var Set<Album\Id> */
@@ -27,6 +34,8 @@ final class Song
     private Set $artists;
 
     /**
+     * @param Maybe<Duration> $duration
+     * @param Maybe<TrackNumber> $trackNumber
      * @param Set<Genre> $genres
      * @param Set<Album\Id> $albums
      * @param Set<Artist\Id> $artists
@@ -34,16 +43,12 @@ final class Song
     public function __construct(
         Id $id,
         Name $name,
-        ?Duration $duration,
-        TrackNumber $trackNumber,
+        Maybe $duration,
+        Maybe $trackNumber,
         Set $genres,
         Set $albums,
-        Set $artists
+        Set $artists,
     ) {
-        assertSet(Genre::class, $genres, 5);
-        assertSet(Album\Id::class, $albums, 6);
-        assertSet(Artist\Id::class, $artists, 7);
-
         $this->id = $id;
         $this->name = $name;
         $this->duration = $duration;
@@ -63,19 +68,18 @@ final class Song
         return $this->name;
     }
 
-    public function durationKnown(): bool
+    /**
+     * @return Maybe<Duration>
+     */
+    public function duration(): Maybe
     {
-        return $this->duration instanceof Duration;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function duration(): Duration
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->duration;
     }
 
-    public function trackNumber(): TrackNumber
+    /**
+     * @return Maybe<TrackNumber>
+     */
+    public function trackNumber(): Maybe
     {
         return $this->trackNumber;
     }

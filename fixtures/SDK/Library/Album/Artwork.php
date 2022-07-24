@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Fixtures\MusicCompanion\AppleMusic\SDK\Library\Album;
 
 use MusicCompanion\AppleMusic\SDK\Library\Album\Artwork as Model;
+use Innmind\Immutable\Maybe;
 use Innmind\BlackBox\Set;
 use Fixtures\Innmind\Url\Url;
 
@@ -16,7 +17,7 @@ final class Artwork
     {
         return Set\Composite::immutable(
             static function($width, $height, $url): Model {
-                return new Model($width, $height, $url);
+                return new Model(Maybe::of($width), Maybe::of($height), $url);
             },
             new Set\Either(
                 Artwork\Width::any(),
