@@ -3,20 +3,28 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK\Library;
 
-use MusicCompanion\AppleMusic\SDK\Library\Artist\{
-    Id,
-    Name,
+use MusicCompanion\AppleMusic\SDK\{
+    Library\Artist\Id,
+    Library\Artist\Name,
+    Catalog\Artist\Id as Catalog,
 };
+use Innmind\Immutable\Maybe;
 
 final class Artist
 {
     private Id $id;
     private Name $name;
+    /** @var Maybe<Catalog> */
+    private Maybe $catalog;
 
-    public function __construct(Id $id, Name $name)
+    /**
+     * @param Maybe<Catalog> $catalog
+     */
+    public function __construct(Id $id, Name $name, Maybe $catalog)
     {
         $this->id = $id;
         $this->name = $name;
+        $this->catalog = $catalog;
     }
 
     public function id(): Id
@@ -27,5 +35,13 @@ final class Artist
     public function name(): Name
     {
         return $this->name;
+    }
+
+    /**
+     * @return Maybe<Catalog>
+     */
+    public function catalog(): Maybe
+    {
+        return $this->catalog;
     }
 }

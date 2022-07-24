@@ -153,7 +153,7 @@ JSON
                         );
                 })],
                 [$this->callback(static function($request) use ($authorization, $userToken): bool {
-                    return $request->url()->toString() === 'https://api.music.apple.com/v1/me/library/artists?offset=25' &&
+                    return $request->url()->toString() === 'https://api.music.apple.com/v1/me/library/artists?offset=25&include=catalog' &&
                         $request->method()->toString() === 'GET' &&
                         $authorization === $request->headers()->get('authorization')->match(
                             static fn($header) => $header,
@@ -188,6 +188,13 @@ JSON
       "href": "/v1/me/library/artists/r.2S6SRHl",
       "attributes": {
         "name": "\"Weird Al\" Yankovic"
+      },
+      "relationships": {
+        "catalog": {
+            "data": [{
+                "id": "1234"
+            }]
+        }
       }
     }
   ],
@@ -209,6 +216,11 @@ JSON
       "href": "/v1/me/library/artists/r.o860e82",
       "attributes": {
         "name": "(hed) p.e."
+      },
+      "relationships": {
+        "catalog": {
+            "data": []
+        }
       }
     }
   ],
@@ -226,9 +238,17 @@ JSON
         $this->assertCount(2, $artists);
         $this->assertSame('r.2S6SRHl', \current($artists)->id()->toString());
         $this->assertSame('"Weird Al" Yankovic', \current($artists)->name()->toString());
+        $this->assertSame(1234, \current($artists)->catalog()->match(
+            static fn($id) => $id->toInt(),
+            static fn() => null,
+        ));
         \next($artists);
         $this->assertSame('r.o860e82', \current($artists)->id()->toString());
         $this->assertSame('(hed) p.e.', \current($artists)->name()->toString());
+        $this->assertNull(\current($artists)->catalog()->match(
+            static fn($id) => $id->toInt(),
+            static fn() => null,
+        ));
     }
 
     public function testAlbums()

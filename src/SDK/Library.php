@@ -71,7 +71,7 @@ final class Library
      */
     public function artists(): Sequence
     {
-        $url = $this->url('artists');
+        $url = $this->url('artists?include=catalog');
 
         /** @var Sequence<Artist> */
         return Sequence::lazy(
@@ -83,6 +83,13 @@ final class Library
                      *         id: string,
                      *         attributes: array{
                      *             name: string
+                     *         },
+                     *         relationships: array{
+                     *             catalog: array{
+                     *                 data: list<array{
+                     *                     id: string
+                     *                 }>
+                     *             }
                      *         }
                      *     }>,
                      *     next?: string
@@ -95,11 +102,15 @@ final class Library
                         yield new Artist(
                             Artist\Id::of($artist['id']),
                             new Artist\Name($artist['attributes']['name']),
+                            Set::of(...$artist['relationships']['catalog']['data'])
+                                ->map(static fn($artist) => (int) $artist['id'])
+                                ->map(Catalog\Artist\Id::of(...))
+                                ->find(static fn() => true), // the documentation say there's at most one artist
                         );
                     }
 
                     if (\array_key_exists('next', $resource)) {
-                        $url = Url::of($resource['next']);
+                        $url = Url::of($resource['next'].'&include=catalog');
                     }
                 } while ($url instanceof Url);
             },
