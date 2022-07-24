@@ -76,9 +76,7 @@ final class Catalog
             $id,
             new Artist\Name($resource['data'][0]['attributes']['name']),
             Url::of($resource['data'][0]['attributes']['url']),
-            Set::of(...$resource['data'][0]['attributes']['genreNames'])->map(
-                static fn($genre) => new Genre($genre),
-            ),
+            Set::of(...$resource['data'][0]['attributes']['genreNames'])->map(Genre::of(...)),
             $this->artistAlbums($resource['data'][0]['relationships']['albums']),
         );
     }
@@ -160,12 +158,10 @@ final class Catalog
             $attributes['isSingle'],
             Url::of($attributes['url']),
             $attributes['isComplete'],
-            Set::of(...$attributes['genreNames'])->map(
-                static fn($genre) => new Genre($genre),
-            ),
-            Set::of(...$resource['data'][0]['relationships']['tracks']['data'])->map(
-                static fn($song) => new Song\Id((int) $song['id']),
-            ),
+            Set::of(...$attributes['genreNames'])->map(Genre::of(...)),
+            Set::of(...$resource['data'][0]['relationships']['tracks']['data'])
+                ->map(static fn($song) => (int) $song['id'])
+                ->map(Song\Id::of(...)),
             $attributes['isMasteredForItunes'],
             $this->clock->at($releaseDate)->match(
                 static fn($date) => $date,
@@ -177,9 +173,9 @@ final class Catalog
                 $attributes['editorialNotes']['standard'] ?? '',
                 $attributes['editorialNotes']['short'] ?? '',
             ),
-            Set::of(...$resource['data'][0]['relationships']['artists']['data'])->map(
-                static fn($artist) => new Artist\Id((int) $artist['id']),
-            ),
+            Set::of(...$resource['data'][0]['relationships']['artists']['data'])
+                ->map(static fn($artist) => (int) $artist['id'])
+                ->map(Artist\Id::of(...)),
         );
     }
 
@@ -244,9 +240,7 @@ final class Catalog
             ),
             Url::of($attributes['url']),
             new Song\DiscNumber($attributes['discNumber']),
-            Set::of(...$attributes['genreNames'])->map(
-                static fn($genre) => new Genre($genre),
-            ),
+            Set::of(...$attributes['genreNames'])->map(Genre::of(...)),
             Maybe::of($attributes['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
             $this->clock->at($attributes['releaseDate'])->match(
                 static fn($date) => $date,
@@ -256,12 +250,12 @@ final class Catalog
             new Song\ISRC($attributes['isrc']),
             new Song\TrackNumber($attributes['trackNumber']),
             new Song\Composer($attributes['composerName'] ?? ''),
-            Set::of(...$resource['data'][0]['relationships']['artists']['data'])->map(
-                static fn($artist) => new Artist\Id((int) $artist['id']),
-            ),
-            Set::of(...$resource['data'][0]['relationships']['albums']['data'])->map(
-                static fn($album) => new Album\Id((int) $album['id']),
-            ),
+            Set::of(...$resource['data'][0]['relationships']['artists']['data'])
+                ->map(static fn($artist) => (int) $artist['id'])
+                ->map(Artist\Id::of(...)),
+            Set::of(...$resource['data'][0]['relationships']['albums']['data'])
+                ->map(static fn($album) => (int) $album['id'])
+                ->map(Album\Id::of(...)),
         );
     }
 
@@ -289,7 +283,7 @@ final class Catalog
             $url = null;
 
             foreach ($resource['data'] as $genre) {
-                $genres = ($genres)(new Genre(
+                $genres = ($genres)(Genre::of(
                     $genre['attributes']['name'],
                 ));
             }
@@ -333,7 +327,7 @@ final class Catalog
 
                     foreach ($artists['data'] ?? [] as $artist) {
                         /** @psalm-suppress RedundantCastGivenDocblockType */
-                        yield new Artist\Id((int) $artist['id']);
+                        yield Artist\Id::of((int) $artist['id']);
                     }
 
                     if (!\array_key_exists('next', $artists)) {
@@ -353,7 +347,7 @@ final class Catalog
 
                     foreach ($albums['data'] ?? [] as $album) {
                         /** @psalm-suppress RedundantCastGivenDocblockType */
-                        yield new Album\Id((int) $album['id']);
+                        yield Album\Id::of((int) $album['id']);
                     }
 
                     if (!\array_key_exists('next', $albums)) {
@@ -373,7 +367,7 @@ final class Catalog
 
                     foreach ($songs['data'] ?? [] as $song) {
                         /** @psalm-suppress RedundantCastGivenDocblockType */
-                        yield new Song\Id((int) $song['id']);
+                        yield Song\Id::of((int) $song['id']);
                     }
 
                     if (!\array_key_exists('next', $songs)) {
@@ -401,7 +395,7 @@ final class Catalog
 
         foreach ($resources['data'] as $album) {
             /** @psalm-suppress RedundantCastGivenDocblockType */
-            $albums = ($albums)(new Album\Id((int) $album['id']));
+            $albums = ($albums)(Album\Id::of((int) $album['id']));
         }
 
         if (\array_key_exists('next', $resources)) {

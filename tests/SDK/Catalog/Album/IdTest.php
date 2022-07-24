@@ -22,7 +22,7 @@ class IdTest extends TestCase
         $this
             ->forAll(Set\NaturalNumbers::any())
             ->then(function(int $number) {
-                $id = new Id($number);
+                $id = Id::of($number);
 
                 $this->assertSame($number, $id->toInt());
                 $this->assertSame((string) $number, $id->toString());
@@ -37,7 +37,7 @@ class IdTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);
 
-                new Id($negative);
+                Id::of($negative);
             });
     }
 }

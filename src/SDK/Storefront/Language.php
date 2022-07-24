@@ -10,13 +10,18 @@ final class Language
 {
     private string $value;
 
-    public function __construct(string $value)
+    private function __construct(string $value)
     {
         if (!Str::of($value)->matches('~^[a-z]{2}(-[a-zA-Z]+){0,2}$~')) {
             throw new DomainException($value);
         }
 
         $this->value = $value;
+    }
+
+    public static function of(string $value): self
+    {
+        return new self($value);
     }
 
     public function toString(): string

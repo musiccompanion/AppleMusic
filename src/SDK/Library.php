@@ -61,10 +61,8 @@ final class Library
         return new Storefront(
             new Storefront\Id($resource['data'][0]['id']),
             new Storefront\Name($resource['data'][0]['attributes']['name']),
-            new Storefront\Language($resource['data'][0]['attributes']['defaultLanguageTag']),
-            Set::of(...$resource['data'][0]['attributes']['supportedLanguageTags'])->map(
-                static fn($language) => new Storefront\Language($language),
-            ),
+            Storefront\Language::of($resource['data'][0]['attributes']['defaultLanguageTag']),
+            Set::of(...$resource['data'][0]['attributes']['supportedLanguageTags'])->map(Storefront\Language::of(...)),
         );
     }
 
@@ -95,7 +93,7 @@ final class Library
 
                     foreach ($resource['data'] as $artist) {
                         yield new Artist(
-                            new Artist\Id($artist['id']),
+                            Artist\Id::of($artist['id']),
                             new Artist\Name($artist['attributes']['name']),
                         );
                     }
@@ -144,7 +142,7 @@ final class Library
 
             foreach ($resource['data'] as $album) {
                 $albums = ($albums)(new Album(
-                    new Album\Id($album['id']),
+                    Album\Id::of($album['id']),
                     new Album\Name($album['attributes']['name']),
                     Maybe::of($album['attributes']['artwork'] ?? null)->map(
                         static fn($artwork) => new Album\Artwork(
@@ -153,9 +151,9 @@ final class Library
                             Url::of($artwork['url']),
                         ),
                     ),
-                    Set::of(...$album['relationships']['artists']['data'])->map(
-                        static fn($artist) => new Artist\Id($artist['id']),
-                    ),
+                    Set::of(...$album['relationships']['artists']['data'])
+                        ->map(static fn($artist) => $artist['id'])
+                        ->map(Artist\Id::of(...)),
                 ));
             }
 
@@ -208,15 +206,13 @@ final class Library
                     new Song\Name($song['attributes']['name']),
                     Maybe::of($song['attributes']['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
                     new Song\TrackNumber($song['attributes']['trackNumber']),
-                    Set::of(...$song['attributes']['genreNames'])->map(
-                        static fn($genre) => new Song\Genre($genre),
-                    ),
-                    Set::of(...$song['relationships']['albums']['data'])->map(
-                        static fn($album) => new Album\Id($album['id']),
-                    ),
-                    Set::of(...$song['relationships']['artists']['data'])->map(
-                        static fn($artist) => new Artist\Id($artist['id']),
-                    ),
+                    Set::of(...$song['attributes']['genreNames'])->map(Song\Genre::of(...)),
+                    Set::of(...$song['relationships']['albums']['data'])
+                        ->map(static fn($album) => $album['id'])
+                        ->map(Album\Id::of(...)),
+                    Set::of(...$song['relationships']['artists']['data'])
+                        ->map(static fn($artist) => $artist['id'])
+                        ->map(Artist\Id::of(...)),
                 ));
             }
 

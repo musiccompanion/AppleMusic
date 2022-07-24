@@ -30,7 +30,7 @@ final class Id
 
         return Set\Decorate::immutable(
             static function(string $chars): Model {
-                return new Model('r.'.$chars);
+                return Model::of('r.'.$chars);
             },
             $chars,
         )->take(100);

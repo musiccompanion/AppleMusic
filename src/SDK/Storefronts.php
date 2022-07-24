@@ -63,10 +63,8 @@ final class Storefronts
             $storefronts = ($storefronts)(new Storefront(
                 new Storefront\Id($storefront['id']),
                 new Storefront\Name($storefront['attributes']['name']),
-                new Storefront\Language($storefront['attributes']['defaultLanguageTag']),
-                Set::of(...$storefront['attributes']['supportedLanguageTags'])->map(
-                    static fn($language) => new Storefront\Language($language),
-                ),
+                Storefront\Language::of($storefront['attributes']['defaultLanguageTag']),
+                Set::of(...$storefront['attributes']['supportedLanguageTags'])->map(Storefront\Language::of(...)),
             ));
         }
 
