@@ -15,13 +15,18 @@ final class ISRC
 {
     private string $value;
 
-    public function __construct(string $value)
+    private function __construct(string $value)
     {
         if (!Str::of($value)->matches('~^[A-Z]{2}[A-Z0-9]{3}\d{7}$~')) {
             throw new DomainException($value);
         }
 
         $this->value = $value;
+    }
+
+    public static function of(string $value): self
+    {
+        return new self($value);
     }
 
     public function toString(): string

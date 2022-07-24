@@ -181,8 +181,8 @@ final class Library
              *         id: string,
              *         attributes: array{
              *             name: string,
-             *             durationInMillis?: int,
-             *             trackNumber: int,
+             *             durationInMillis: int,
+             *             trackNumber?: int,
              *             genreNames: list<string>
              *         },
              *         relationships: array{
@@ -205,7 +205,7 @@ final class Library
                     new Song\Id($song['id']),
                     new Song\Name($song['attributes']['name']),
                     Maybe::of($song['attributes']['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
-                    new Song\TrackNumber($song['attributes']['trackNumber']),
+                    Maybe::of($song['attributes']['trackNumber'] ?? null)->map(Song\TrackNumber::of(...)),
                     Set::of(...$song['attributes']['genreNames'])->map(Song\Genre::of(...)),
                     Set::of(...$song['relationships']['albums']['data'])
                         ->map(static fn($album) => $album['id'])

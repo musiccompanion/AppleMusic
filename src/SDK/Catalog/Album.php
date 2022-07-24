@@ -31,7 +31,8 @@ final class Album
     /** @var Set<Song\Id> */
     private Set $tracks;
     private bool $masteredForItunes;
-    private PointInTime $release;
+    /** @var Maybe<PointInTime> */
+    private Maybe $release;
     private RecordLabel $recordLabel;
     private Copyright $copyright;
     private EditorialNotes $editorialNotes;
@@ -42,6 +43,7 @@ final class Album
      * @param Maybe<Artwork> $artwork
      * @param Set<Genre> $genres
      * @param Set<Song\Id> $tracks
+     * @param Maybe<PointInTime> $release
      * @param Set<Artist\Id> $artists
      */
     public function __construct(
@@ -54,7 +56,7 @@ final class Album
         Set $genres,
         Set $tracks,
         bool $masteredForItunes,
-        PointInTime $release,
+        Maybe $release,
         RecordLabel $recordLabel,
         Copyright $copyright,
         EditorialNotes $editorialNotes,
@@ -130,7 +132,10 @@ final class Album
         return $this->masteredForItunes;
     }
 
-    public function release(): PointInTime
+    /**
+     * @return Maybe<PointInTime>
+     */
+    public function release(): Maybe
     {
         return $this->release;
     }

@@ -141,7 +141,7 @@ JSON
             ->method('__invoke')
             ->withConsecutive(
                 [$this->callback(static function($request) use ($authorization, $userToken): bool {
-                    return $request->url()->toString() === 'https://api.music.apple.com/v1/me/library/artists' &&
+                    return $request->url()->toString() === 'https://api.music.apple.com/v1/me/library/artists?include=catalog' &&
                         $request->method()->toString() === 'GET' &&
                         $authorization === $request->headers()->get('authorization')->match(
                             static fn($header) => $header,
@@ -657,7 +657,10 @@ JSON
                     static fn($duration) => $duration->toString(),
                     static fn() => null,
                 ));
-                $this->assertSame('1', \current($songs)->trackNumber()->toString());
+                $this->assertSame('1', \current($songs)->trackNumber()->match(
+                    static fn($number) => $number->toString(),
+                    static fn() => null,
+                ));
                 $this->assertCount(1, \current($songs)->genres());
                 $this->assertSame(
                     'Rapcore, Punk, Rap',

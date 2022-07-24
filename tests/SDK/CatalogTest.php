@@ -826,8 +826,8 @@ JSON
                 $clock
                     ->expects($this->once())
                     ->method('at')
-                    ->with('1984-06-04 00:00:00')
-                    ->willReturn(Maybe::just($release = $this->createMock(PointInTime::class)));
+                    ->with('1984-06-04')
+                    ->willReturn($release = Maybe::just($this->createMock(PointInTime::class)));
 
                 $album = $catalog->album($id);
 
@@ -1040,7 +1040,7 @@ JSON
                     ->expects($this->once())
                     ->method('at')
                     ->with('1984-06-04')
-                    ->willReturn(Maybe::just($release = $this->createMock(PointInTime::class)));
+                    ->willReturn($release = Maybe::just($this->createMock(PointInTime::class)));
 
                 $song = $catalog->song($id);
 
@@ -1090,7 +1090,10 @@ JSON
                     'https://music.apple.com/us/album/born-in-the-u-s-a/203708420?i=203708455',
                     $song->url()->toString(),
                 );
-                $this->assertSame(1, $song->discNumber()->toInt());
+                $this->assertSame(1, $song->discNumber()->match(
+                    static fn($number) => $number->toInt(),
+                    static fn() => null,
+                ));
                 $this->assertCount(2, $song->genres());
                 $this->assertSame(279784, $song->duration()->match(
                     static fn($duration) => $duration->toInt(),
@@ -1098,8 +1101,14 @@ JSON
                 ));
                 $this->assertSame($release, $song->release());
                 $this->assertSame('Born in the U.S.A. track', $song->name()->toString());
-                $this->assertSame('USSM18400406', $song->isrc()->toString());
-                $this->assertSame(2, $song->trackNumber()->toInt());
+                $this->assertSame('USSM18400406', $song->isrc()->match(
+                    static fn($isrc) => $isrc->toString(),
+                    static fn() => null,
+                ));
+                $this->assertSame(2, $song->trackNumber()->match(
+                    static fn($trackNumber) => $trackNumber->toInt(),
+                    static fn() => null,
+                ));
                 $this->assertSame('Bruce Springsteen', $song->composer()->name());
                 $this->assertCount(1, $song->artists());
                 $this->assertCount(1, $song->albums());

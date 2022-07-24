@@ -12,7 +12,10 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog\Search,
     Storefront,
 };
-use Innmind\TimeContinuum\Clock;
+use Innmind\TimeContinuum\{
+    Clock,
+    PointInTime,
+};
 use Innmind\Http\{
     Header,
     Message\Request\Request,
@@ -62,7 +65,7 @@ final class Catalog
          *             },
          *             relationships: array{
          *                 albums: array{
-         *                     data: list<array{id: int}>,
+         *                     data: list<array{id: string}>,
          *                     next?: string
          *                 }
          *             }
@@ -70,7 +73,7 @@ final class Catalog
          *     }
          * }
          */
-        $resource = $this->get($this->url("artists/{$id->toString()}"));
+        $resource = $this->get($this->url("artists/{$id->toString()}?include=albums"));
 
         return new Artist(
             $id,
@@ -88,7 +91,7 @@ final class Catalog
          *     data: array{
          *         0: array{
          *             attributes: array{
-         *                 artwork?: array{
+         *                 artwork: array{
          *                     width: int,
          *                     height: int,
          *                     url: string,
@@ -104,42 +107,29 @@ final class Catalog
          *                 isComplete: bool,
          *                 genreNames: list<string>,
          *                 isMasteredForItunes: bool,
-         *                 releaseDate: string,
-         *                 recordLabel: string,
+         *                 releaseDate?: string,
+         *                 recordLabel?: string,
          *                 copyright?: string,
          *                 editorialNotes?: array{
-         *                     standard: string,
-         *                     short: string
+         *                     standard?: string,
+         *                     short?: string
          *                 }
          *             },
          *             relationships: array{
          *                 tracks: array{
-         *                     data: list<array{id: int}>
+         *                     data: list<array{id: string}>
          *                 },
          *                 artists: array{
-         *                     data: list<array{id: int}>
+         *                     data: list<array{id: string}>
          *                 }
          *             }
          *         }
          *     }
          * }
          */
-        $resource = $this->get($this->url("albums/{$id->toString()}"));
+        $resource = $this->get($this->url("albums/{$id->toString()}?include=artists,tracks"));
         $attributes = $resource['data'][0]['attributes'];
-        $releaseDate = $attributes['releaseDate'];
 
-        if (Str::of($releaseDate)->matches('~^\d{4}$~')) {
-            // like in the case of this EP https://music.apple.com/fr/album/rip-it-up-ep/213587444
-            // only the year is provided, and Apple Music interprets this as
-            // january 1st
-            $releaseDate .= '-01-01';
-        }
-
-        if (Str::of($releaseDate)->matches('~^\d{4}-\d{2}-\d{2}$~')) {
-            $releaseDate .= ' 00:00:00';
-        }
-
-        /** @psalm-suppress RedundantCastGivenDocblockType */
         return new Album(
             $id,
             Maybe::of($attributes['artwork'] ?? null)->map(
@@ -163,10 +153,7 @@ final class Catalog
                 ->map(static fn($song) => (int) $song['id'])
                 ->map(Song\Id::of(...)),
             $attributes['isMasteredForItunes'],
-            $this->clock->at($releaseDate)->match(
-                static fn($date) => $date,
-                static fn() => throw new \RuntimeException,
-            ),
+            $this->releaseDate($attributes['releaseDate'] ?? null),
             new Album\RecordLabel($attributes['recordLabel'] ?? ''),
             new Album\Copyright($attributes['copyright'] ?? ''),
             new Album\EditorialNotes(
@@ -198,31 +185,30 @@ final class Catalog
          *                     textColor4?: string
          *                 },
          *                 url: string,
-         *                 discNumber: int,
+         *                 discNumber?: int,
          *                 genreNames: list<string>,
-         *                 durationInMillis?: int,
-         *                 releaseDate: string,
+         *                 durationInMillis: int,
+         *                 releaseDate?: string,
          *                 name: string,
-         *                 isrc: string,
-         *                 trackNumber: int,
+         *                 isrc?: string,
+         *                 trackNumber?: int,
          *                 composerName?: string
          *             },
          *             relationships: array{
          *                 artists: array{
-         *                     data: list<array{id: int}>
+         *                     data: list<array{id: string}>
          *                 },
          *                 albums: array{
-         *                     data: list<array{id: int}>
+         *                     data: list<array{id: string}>
          *                 }
          *             }
          *         }
          *     }
          * }
          */
-        $resource = $this->get($this->url("songs/{$id->toString()}"));
+        $resource = $this->get($this->url("songs/{$id->toString()}?include=artists,albums"));
         $attributes = $resource['data'][0]['attributes'];
 
-        /** @psalm-suppress RedundantCastGivenDocblockType */
         return new Song(
             $id,
             Set::of(...$attributes['previews'])->map(
@@ -239,16 +225,13 @@ final class Catalog
                 Maybe::of($attributes['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
             ),
             Url::of($attributes['url']),
-            new Song\DiscNumber($attributes['discNumber']),
+            Maybe::of($attributes['discNumber'] ?? null)->map(Song\DiscNumber::of(...)),
             Set::of(...$attributes['genreNames'])->map(Genre::of(...)),
             Maybe::of($attributes['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
-            $this->clock->at($attributes['releaseDate'])->match(
-                static fn($date) => $date,
-                static fn() => throw new \RuntimeException,
-            ),
+            $this->releaseDate($attributes['releaseDate'] ?? null),
             new Song\Name($attributes['name']),
-            new Song\ISRC($attributes['isrc']),
-            new Song\TrackNumber($attributes['trackNumber']),
+            Maybe::of($attributes['isrc'] ?? null)->map(Song\ISRC::of(...)),
+            Maybe::of($attributes['trackNumber'] ?? null)->map(Song\TrackNumber::of(...)),
             new Song\Composer($attributes['composerName'] ?? ''),
             Set::of(...$resource['data'][0]['relationships']['artists']['data'])
                 ->map(static fn($artist) => (int) $artist['id'])
@@ -304,15 +287,15 @@ final class Catalog
          * @var array{
          *     results: array{
          *         artists?: array{
-         *             data: list<array{id: int}>,
+         *             data: list<array{id: string}>,
          *             next?: string
          *         },
          *         albums?: array{
-         *             data: list<array{id: int}>,
+         *             data: list<array{id: string}>,
          *             next?: string
          *         },
          *         songs?: array{
-         *             data: list<array{id: int}>,
+         *             data: list<array{id: string}>,
          *             next?: string
          *         }
          *     }
@@ -326,7 +309,6 @@ final class Catalog
                     $artists = $resource['results']['artists'] ?? [];
 
                     foreach ($artists['data'] ?? [] as $artist) {
-                        /** @psalm-suppress RedundantCastGivenDocblockType */
                         yield Artist\Id::of((int) $artist['id']);
                     }
 
@@ -334,7 +316,7 @@ final class Catalog
                         return;
                     }
 
-                    /** @var array{results: array{artists: array{data: list<array{id: int}>, next?: string}}} */
+                    /** @var array{results: array{artists: array{data: list<array{id: string}>, next?: string}}} */
                     $resource = $this->get(Url::of($artists['next']));
                 } while (true);
             },
@@ -346,7 +328,6 @@ final class Catalog
                     $albums = $resource['results']['albums'] ?? [];
 
                     foreach ($albums['data'] ?? [] as $album) {
-                        /** @psalm-suppress RedundantCastGivenDocblockType */
                         yield Album\Id::of((int) $album['id']);
                     }
 
@@ -354,7 +335,7 @@ final class Catalog
                         return;
                     }
 
-                    /** @var array{results: array{albums: array{data: list<array{id: int}>, next?: string}}} */
+                    /** @var array{results: array{albums: array{data: list<array{id: string}>, next?: string}}} */
                     $resource = $this->get(Url::of($albums['next']));
                 } while (true);
             },
@@ -366,7 +347,6 @@ final class Catalog
                     $songs = $resource['results']['songs'] ?? [];
 
                     foreach ($songs['data'] ?? [] as $song) {
-                        /** @psalm-suppress RedundantCastGivenDocblockType */
                         yield Song\Id::of((int) $song['id']);
                     }
 
@@ -374,7 +354,7 @@ final class Catalog
                         return;
                     }
 
-                    /** @var array{results: array{songs: array{data: list<array{id: int}>, next?: string}}} */
+                    /** @var array{results: array{songs: array{data: list<array{id: string}>, next?: string}}} */
                     $resource = $this->get(Url::of($songs['next']));
                 } while (true);
             },
@@ -384,7 +364,7 @@ final class Catalog
     }
 
     /**
-     * @param array{data: list<array{id: int}>, next?: string} $resources
+     * @param array{data: list<array{id: string}>, next?: string} $resources
      *
      * @return Set<Album\Id>
      */
@@ -394,12 +374,11 @@ final class Catalog
         $albums = Set::of();
 
         foreach ($resources['data'] as $album) {
-            /** @psalm-suppress RedundantCastGivenDocblockType */
             $albums = ($albums)(Album\Id::of((int) $album['id']));
         }
 
         if (\array_key_exists('next', $resources)) {
-            /** @var array{data: list<array{id: int}>, next?: string} */
+            /** @var array{data: list<array{id: string}>, next?: string} */
             $resources = $this->get(Url::of($resources['next']));
 
             $albums = $albums->merge($this->artistAlbums($resources));
@@ -428,5 +407,25 @@ final class Catalog
     private function url(string $path): Url
     {
         return Url::of("/v1/catalog/{$this->storefront->toString()}/$path");
+    }
+
+    /**
+     * @return Maybe<PointInTime>
+     */
+    private function releaseDate(?string $releaseDate): Maybe
+    {
+        return Maybe::of($releaseDate)
+            ->map(Str::of(...))
+            // like in the case of this EP https://music.apple.com/fr/album/rip-it-up-ep/213587444
+            // only the year is provided, and Apple Music interprets this as
+            // january 1st
+            ->map(static fn($date) => match ($date->matches('~^\d{4}$~')) {
+                true => $date->append('-01-01'),
+                false => $date,
+            })
+            ->flatMap(fn($date) => $this->clock->at(
+                $date->toString(),
+                new ReleaseDate,
+            ));
     }
 }

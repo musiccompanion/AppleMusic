@@ -49,7 +49,7 @@ class SongTest extends TestCase
                     $id,
                     $name,
                     Maybe::of($duration),
-                    $trackNumber,
+                    Maybe::of($trackNumber),
                     $genres,
                     $albums,
                     $artists,

@@ -65,7 +65,7 @@ class AlbumTest extends TestCase
                     $genres,
                     $tracks,
                     $masteredForItunes,
-                    $release,
+                    Maybe::of($release),
                     $recordLabel,
                     $copyright,
                     $editorialNotes,
@@ -84,7 +84,10 @@ class AlbumTest extends TestCase
                 $this->assertSame($genres, $album->genres());
                 $this->assertSame($tracks, $album->tracks());
                 $this->assertSame($masteredForItunes, $album->masteredForItunes());
-                $this->assertSame($release, $album->release());
+                $this->assertSame($release, $album->release()->match(
+                    static fn($release) => $release,
+                    static fn() => null,
+                ));
                 $this->assertSame($recordLabel, $album->recordLabel());
                 $this->assertSame($copyright, $album->copyright());
                 $this->assertSame($editorialNotes, $album->editorialNotes());

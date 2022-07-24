@@ -21,7 +21,8 @@ final class Song
     private Name $name;
     /** @var Maybe<Duration> */
     private Maybe $duration;
-    private TrackNumber $trackNumber;
+    /** @var Maybe<TrackNumber> */
+    private Maybe $trackNumber;
     /** @var Set<Genre> */
     private Set $genres;
     /** @var Set<Album\Id> */
@@ -31,6 +32,7 @@ final class Song
 
     /**
      * @param Maybe<Duration> $duration
+     * @param Maybe<TrackNumber> $trackNumber
      * @param Set<Genre> $genres
      * @param Set<Album\Id> $albums
      * @param Set<Artist\Id> $artists
@@ -39,7 +41,7 @@ final class Song
         Id $id,
         Name $name,
         Maybe $duration,
-        TrackNumber $trackNumber,
+        Maybe $trackNumber,
         Set $genres,
         Set $albums,
         Set $artists,
@@ -71,7 +73,10 @@ final class Song
         return $this->duration;
     }
 
-    public function trackNumber(): TrackNumber
+    /**
+     * @return Maybe<TrackNumber>
+     */
+    public function trackNumber(): Maybe
     {
         return $this->trackNumber;
     }

@@ -22,7 +22,7 @@ class TrackNumberTest extends TestCase
         $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
-                $trackNumber = new TrackNumber($number);
+                $trackNumber = TrackNumber::of($number);
 
                 $this->assertSame($number, $trackNumber->toInt());
             });
@@ -36,7 +36,7 @@ class TrackNumberTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);
 
-                new TrackNumber($negative);
+                TrackNumber::of($negative);
             });
     }
 }

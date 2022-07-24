@@ -42,7 +42,7 @@ class ISRCTest extends TestCase
             ->then(function(...$bits) {
                 $string = \implode('', $bits);
 
-                $isrc = new ISRC($string);
+                $isrc = ISRC::of($string);
 
                 $this->assertSame($string, $isrc->toString());
             });
@@ -56,7 +56,7 @@ class ISRCTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);
 
-                new ISRC($string);
+                ISRC::of($string);
             });
     }
 }

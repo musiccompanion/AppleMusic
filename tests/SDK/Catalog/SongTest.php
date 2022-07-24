@@ -64,13 +64,13 @@ class SongTest extends TestCase
                     $previews,
                     $artwork,
                     $url,
-                    $discNumber,
+                    Maybe::of($discNumber),
                     $genres,
                     Maybe::of($duration),
-                    $release,
+                    Maybe::of($release),
                     $name,
-                    $isrc,
-                    $trackNumber,
+                    Maybe::of($isrc),
+                    Maybe::of($trackNumber),
                     $composer,
                     $artists,
                     $albums,
@@ -80,16 +80,28 @@ class SongTest extends TestCase
                 $this->assertSame($previews, $song->previews());
                 $this->assertSame($artwork, $song->artwork());
                 $this->assertSame($url, $song->url());
-                $this->assertSame($discNumber, $song->discNumber());
+                $this->assertSame($discNumber, $song->discNumber()->match(
+                    static fn($discNumber) => $discNumber,
+                    static fn() => null,
+                ));
                 $this->assertSame($genres, $song->genres());
                 $this->assertSame($duration, $song->duration()->match(
                     static fn($duration) => $duration,
                     static fn() => null,
                 ));
-                $this->assertSame($release, $song->release());
+                $this->assertSame($release, $song->release()->match(
+                    static fn($release) => $release,
+                    static fn() => null,
+                ));
                 $this->assertSame($name, $song->name());
-                $this->assertSame($isrc, $song->isrc());
-                $this->assertSame($trackNumber, $song->trackNumber());
+                $this->assertSame($isrc, $song->isrc()->match(
+                    static fn($isrc) => $isrc,
+                    static fn() => null,
+                ));
+                $this->assertSame($trackNumber, $song->trackNumber()->match(
+                    static fn($trackNumber) => $trackNumber,
+                    static fn() => null,
+                ));
                 $this->assertSame($composer, $song->composer());
                 $this->assertSame($artists, $song->artists());
                 $this->assertSame($albums, $song->albums());
