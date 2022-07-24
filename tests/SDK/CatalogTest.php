@@ -205,7 +205,10 @@ JSON
 JSON
                     );
 
-                $artist = $catalog->artist($id);
+                $artist = $catalog->artist($id)->match(
+                    static fn($artist) => $artist,
+                    static fn() => null,
+                );
 
                 $this->assertInstanceOf(Artist::class, $artist);
                 $this->assertSame($id, $artist->id());
@@ -829,7 +832,10 @@ JSON
                     ->with('1984-06-04')
                     ->willReturn($release = Maybe::just($this->createMock(PointInTime::class)));
 
-                $album = $catalog->album($id);
+                $album = $catalog->album($id)->match(
+                    static fn($album) => $album,
+                    static fn() => null,
+                );
 
                 $this->assertInstanceOf(Album::class, $album);
                 $this->assertSame($id, $album->id());
@@ -1033,7 +1039,10 @@ JSON
                     ->with('1984-06-04')
                     ->willReturn($release = Maybe::just($this->createMock(PointInTime::class)));
 
-                $song = $catalog->song($id);
+                $song = $catalog->song($id)->match(
+                    static fn($song) => $song,
+                    static fn() => null,
+                );
 
                 $this->assertInstanceOf(Song::class, $song);
                 $this->assertSame($id, $song->id());

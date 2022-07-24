@@ -33,6 +33,120 @@ use Innmind\Immutable\{
     Maybe,
 };
 
+/**
+ * @psalm-type Artists = array{
+ *     data: list<array{
+ *         attributes: array{
+ *             name: string,
+ *             url: string,
+ *             genreNames: list<string>,
+ *             artwork?: array{
+ *                 url: string,
+ *                 height: int,
+ *                 width: int,
+ *                 bgColor?: string,
+ *                 textColor1?: string,
+ *                 textColor2?: string,
+ *                 textColor3?: string,
+ *                 textColor4?: string,
+ *             },
+ *         },
+ *         relationships: array{
+ *             albums: array{
+ *                 data: list<array{id: string}>,
+ *                 next?: string
+ *             }
+ *         }
+ *     }>
+ * }
+ * @psalm-type Albums = array{
+ *     data: list<array{
+ *         attributes: array{
+ *             artwork: array{
+ *                 width: int,
+ *                 height: int,
+ *                 url: string,
+ *                 bgColor?: string,
+ *                 textColor1?: string,
+ *                 textColor2?: string,
+ *                 textColor3?: string,
+ *                 textColor4?: string
+ *             },
+ *             name: string,
+ *             isSingle: bool,
+ *             url: string,
+ *             isComplete: bool,
+ *             genreNames: list<string>,
+ *             isMasteredForItunes: bool,
+ *             releaseDate?: string,
+ *             recordLabel?: string,
+ *             copyright?: string,
+ *             editorialNotes?: array{
+ *                 standard?: string,
+ *                 short?: string
+ *             }
+ *         },
+ *         relationships: array{
+ *             tracks: array{
+ *                 data: list<array{id: string}>
+ *             },
+ *             artists: array{
+ *                 data: list<array{id: string}>
+ *             }
+ *         }
+ *     }>
+ * }
+ * @psalm-type Songs = array{
+ *     data: list<array{
+ *         attributes: array{
+ *             previews: list<array{url: string}>,
+ *             artwork: array{
+ *                 width: int,
+ *                 height: int,
+ *                 url: string,
+ *                 bgColor?: string,
+ *                 textColor1?: string,
+ *                 textColor2?: string,
+ *                 textColor3?: string,
+ *                 textColor4?: string
+ *             },
+ *             url: string,
+ *             discNumber?: int,
+ *             genreNames: list<string>,
+ *             durationInMillis: int,
+ *             releaseDate?: string,
+ *             name: string,
+ *             isrc?: string,
+ *             trackNumber?: int,
+ *             composerName?: string
+ *         },
+ *         relationships: array{
+ *             artists: array{
+ *                 data: list<array{id: string}>
+ *             },
+ *             albums: array{
+ *                 data: list<array{id: string}>
+ *             }
+ *         }
+ *     }>
+ * }
+ * @psalm-type Search = array{
+ *     results: array{
+ *         artists?: array{
+ *             data: list<array{id: string}>,
+ *             next?: string
+ *         },
+ *         albums?: array{
+ *             data: list<array{id: string}>,
+ *             next?: string
+ *         },
+ *         songs?: array{
+ *             data: list<array{id: string}>,
+ *             next?: string
+ *         }
+ *     }
+ * }
+ */
 final class Catalog
 {
     private Clock $clock;
@@ -52,214 +166,122 @@ final class Catalog
         $this->storefront = $storefront;
     }
 
-    public function artist(Artist\Id $id): Artist
+    /**
+     * @return Maybe<Artist>
+     */
+    public function artist(Artist\Id $id): Maybe
     {
-        /**
-         * @var array{
-         *     data: array{
-         *         0: array{
-         *             attributes: array{
-         *                 name: string,
-         *                 url: string,
-         *                 genreNames: list<string>,
-         *                 artwork?: array{
-         *                     url: string,
-         *                     height: int,
-         *                     width: int,
-         *                     bgColor?: string,
-         *                     textColor1?: string,
-         *                     textColor2?: string,
-         *                     textColor3?: string,
-         *                     textColor4?: string,
-         *                 },
-         *             },
-         *             relationships: array{
-         *                 albums: array{
-         *                     data: list<array{id: string}>,
-         *                     next?: string
-         *                 }
-         *             }
-         *         }
-         *     }
-         * }
-         */
-        $resource = $this->get($this->url("artists/{$id->toString()}?include=albums"));
-
-        return new Artist(
-            $id,
-            new Artist\Name($resource['data'][0]['attributes']['name']),
-            Url::of($resource['data'][0]['attributes']['url']),
-            Set::of(...$resource['data'][0]['attributes']['genreNames'])->map(Genre::of(...)),
-            $this->artistAlbums($resource['data'][0]['relationships']['albums']),
-            Maybe::of($resource['data'][0]['attributes']['artwork'] ?? null)->map(
-                static fn($artwork) => new Artwork(
-                    new Artwork\Width($artwork['width']),
-                    new Artwork\Height($artwork['height']),
-                    Url::of($artwork['url']),
-                    Maybe::of($artwork['bgColor'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($artwork['textColor1'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($artwork['textColor2'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($artwork['textColor3'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($artwork['textColor4'] ?? null)->map(RGBA::of(...)),
+        return $this
+            ->get($this->url("artists/{$id->toString()}?include=albums"))
+            ->map($this->decodeArtists(...))
+            ->map(static fn($artists) => Sequence::of(...$artists['data']))
+            ->flatMap(static fn($artists) => $artists->first())
+            ->map(fn($artist) => new Artist(
+                $id,
+                new Artist\Name($artist['attributes']['name']),
+                Url::of($artist['attributes']['url']),
+                Set::of(...$artist['attributes']['genreNames'])->map(Genre::of(...)),
+                $this->artistAlbums($artist['relationships']['albums']),
+                Maybe::of($artist['attributes']['artwork'] ?? null)->map(
+                    static fn($artwork) => new Artwork(
+                        new Artwork\Width($artwork['width']),
+                        new Artwork\Height($artwork['height']),
+                        Url::of($artwork['url']),
+                        Maybe::of($artwork['bgColor'] ?? null)->map(RGBA::of(...)),
+                        Maybe::of($artwork['textColor1'] ?? null)->map(RGBA::of(...)),
+                        Maybe::of($artwork['textColor2'] ?? null)->map(RGBA::of(...)),
+                        Maybe::of($artwork['textColor3'] ?? null)->map(RGBA::of(...)),
+                        Maybe::of($artwork['textColor4'] ?? null)->map(RGBA::of(...)),
+                    ),
                 ),
-            ),
-        );
+            ));
     }
 
-    public function album(Album\Id $id): Album
+    /**
+     * @return Maybe<Album>
+     */
+    public function album(Album\Id $id): Maybe
     {
-        /**
-         * @var array{
-         *     data: array{
-         *         0: array{
-         *             attributes: array{
-         *                 artwork: array{
-         *                     width: int,
-         *                     height: int,
-         *                     url: string,
-         *                     bgColor?: string,
-         *                     textColor1?: string,
-         *                     textColor2?: string,
-         *                     textColor3?: string,
-         *                     textColor4?: string
-         *                 },
-         *                 name: string,
-         *                 isSingle: bool,
-         *                 url: string,
-         *                 isComplete: bool,
-         *                 genreNames: list<string>,
-         *                 isMasteredForItunes: bool,
-         *                 releaseDate?: string,
-         *                 recordLabel?: string,
-         *                 copyright?: string,
-         *                 editorialNotes?: array{
-         *                     standard?: string,
-         *                     short?: string
-         *                 }
-         *             },
-         *             relationships: array{
-         *                 tracks: array{
-         *                     data: list<array{id: string}>
-         *                 },
-         *                 artists: array{
-         *                     data: list<array{id: string}>
-         *                 }
-         *             }
-         *         }
-         *     }
-         * }
-         */
-        $resource = $this->get($this->url("albums/{$id->toString()}?include=artists,tracks"));
-        $attributes = $resource['data'][0]['attributes'];
-
-        return new Album(
-            $id,
-            new Artwork(
-                new Artwork\Width($attributes['artwork']['width']),
-                new Artwork\Height($attributes['artwork']['height']),
-                Url::of($attributes['artwork']['url']),
-                Maybe::of($attributes['artwork']['bgColor'] ?? null)->map(RGBA::of(...)),
-                Maybe::of($attributes['artwork']['textColor1'] ?? null)->map(RGBA::of(...)),
-                Maybe::of($attributes['artwork']['textColor2'] ?? null)->map(RGBA::of(...)),
-                Maybe::of($attributes['artwork']['textColor3'] ?? null)->map(RGBA::of(...)),
-                Maybe::of($attributes['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
-            ),
-            new Album\Name($attributes['name']),
-            $attributes['isSingle'],
-            Url::of($attributes['url']),
-            $attributes['isComplete'],
-            Set::of(...$attributes['genreNames'])->map(Genre::of(...)),
-            Set::of(...$resource['data'][0]['relationships']['tracks']['data'])
-                ->map(static fn($song) => (int) $song['id'])
-                ->map(Song\Id::of(...)),
-            $attributes['isMasteredForItunes'],
-            $this->releaseDate($attributes['releaseDate'] ?? null),
-            new Album\RecordLabel($attributes['recordLabel'] ?? ''),
-            new Album\Copyright($attributes['copyright'] ?? ''),
-            new Album\EditorialNotes(
-                $attributes['editorialNotes']['standard'] ?? '',
-                $attributes['editorialNotes']['short'] ?? '',
-            ),
-            Set::of(...$resource['data'][0]['relationships']['artists']['data'])
-                ->map(static fn($artist) => (int) $artist['id'])
-                ->map(Artist\Id::of(...)),
-        );
+        return $this
+            ->get($this->url("albums/{$id->toString()}?include=artists,tracks"))
+            ->map($this->decodeAlbums(...))
+            ->map(static fn($albums) => Sequence::of(...$albums['data']))
+            ->flatMap(static fn($albums) => $albums->first())
+            ->map(fn($album) => new Album(
+                $id,
+                new Artwork(
+                    new Artwork\Width($album['attributes']['artwork']['width']),
+                    new Artwork\Height($album['attributes']['artwork']['height']),
+                    Url::of($album['attributes']['artwork']['url']),
+                    Maybe::of($album['attributes']['artwork']['bgColor'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($album['attributes']['artwork']['textColor1'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($album['attributes']['artwork']['textColor2'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($album['attributes']['artwork']['textColor3'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($album['attributes']['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
+                ),
+                new Album\Name($album['attributes']['name']),
+                $album['attributes']['isSingle'],
+                Url::of($album['attributes']['url']),
+                $album['attributes']['isComplete'],
+                Set::of(...$album['attributes']['genreNames'])->map(Genre::of(...)),
+                Set::of(...$album['relationships']['tracks']['data'])
+                    ->map(static fn($song) => (int) $song['id'])
+                    ->map(Song\Id::of(...)),
+                $album['attributes']['isMasteredForItunes'],
+                $this->releaseDate($album['attributes']['releaseDate'] ?? null),
+                new Album\RecordLabel($album['attributes']['recordLabel'] ?? ''),
+                new Album\Copyright($album['attributes']['copyright'] ?? ''),
+                new Album\EditorialNotes(
+                    $album['attributes']['editorialNotes']['standard'] ?? '',
+                    $album['attributes']['editorialNotes']['short'] ?? '',
+                ),
+                Set::of(...$album['relationships']['artists']['data'])
+                    ->map(static fn($artist) => (int) $artist['id'])
+                    ->map(Artist\Id::of(...)),
+            ));
     }
 
-    public function song(Song\Id $id): Song
+    /**
+     * @return Maybe<Song>
+     */
+    public function song(Song\Id $id): Maybe
     {
-        /**
-         * @var array{
-         *     data: array{
-         *         0: array{
-         *             attributes: array{
-         *                 previews: list<array{url: string}>,
-         *                 artwork: array{
-         *                     width: int,
-         *                     height: int,
-         *                     url: string,
-         *                     bgColor?: string,
-         *                     textColor1?: string,
-         *                     textColor2?: string,
-         *                     textColor3?: string,
-         *                     textColor4?: string
-         *                 },
-         *                 url: string,
-         *                 discNumber?: int,
-         *                 genreNames: list<string>,
-         *                 durationInMillis: int,
-         *                 releaseDate?: string,
-         *                 name: string,
-         *                 isrc?: string,
-         *                 trackNumber?: int,
-         *                 composerName?: string
-         *             },
-         *             relationships: array{
-         *                 artists: array{
-         *                     data: list<array{id: string}>
-         *                 },
-         *                 albums: array{
-         *                     data: list<array{id: string}>
-         *                 }
-         *             }
-         *         }
-         *     }
-         * }
-         */
-        $resource = $this->get($this->url("songs/{$id->toString()}?include=artists,albums"));
-        $attributes = $resource['data'][0]['attributes'];
-
-        return new Song(
-            $id,
-            Set::of(...$attributes['previews'])->map(
-                static fn($preview) => Url::of($preview['url']),
-            ),
-            new Artwork(
-                new Artwork\Width($attributes['artwork']['width']),
-                new Artwork\Height($attributes['artwork']['height']),
-                Url::of($attributes['artwork']['url']),
-                Maybe::of($attributes['artwork']['bgColor'] ?? null)->map(RGBA::of(...)),
-                Maybe::of($attributes['artwork']['textColor1'] ?? null)->map(RGBA::of(...)),
-                Maybe::of($attributes['artwork']['textColor2'] ?? null)->map(RGBA::of(...)),
-                Maybe::of($attributes['artwork']['textColor3'] ?? null)->map(RGBA::of(...)),
-                Maybe::of($attributes['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
-            ),
-            Url::of($attributes['url']),
-            Maybe::of($attributes['discNumber'] ?? null)->map(Song\DiscNumber::of(...)),
-            Set::of(...$attributes['genreNames'])->map(Genre::of(...)),
-            Maybe::of($attributes['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
-            $this->releaseDate($attributes['releaseDate'] ?? null),
-            new Song\Name($attributes['name']),
-            Maybe::of($attributes['isrc'] ?? null)->map(Song\ISRC::of(...)),
-            Maybe::of($attributes['trackNumber'] ?? null)->map(Song\TrackNumber::of(...)),
-            new Song\Composer($attributes['composerName'] ?? ''),
-            Set::of(...$resource['data'][0]['relationships']['artists']['data'])
-                ->map(static fn($artist) => (int) $artist['id'])
-                ->map(Artist\Id::of(...)),
-            Set::of(...$resource['data'][0]['relationships']['albums']['data'])
-                ->map(static fn($album) => (int) $album['id'])
-                ->map(Album\Id::of(...)),
-        );
+        return $this
+            ->get($this->url("songs/{$id->toString()}?include=artists,albums"))
+            ->map($this->decodeSongs(...))
+            ->map(static fn($songs) => Sequence::of(...$songs['data']))
+            ->flatMap(static fn($songs) => $songs->first())
+            ->map(fn($song) => new Song(
+                $id,
+                Set::of(...$song['attributes']['previews'])->map(
+                    static fn($preview) => Url::of($preview['url']),
+                ),
+                new Artwork(
+                    new Artwork\Width($song['attributes']['artwork']['width']),
+                    new Artwork\Height($song['attributes']['artwork']['height']),
+                    Url::of($song['attributes']['artwork']['url']),
+                    Maybe::of($song['attributes']['artwork']['bgColor'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($song['attributes']['artwork']['textColor1'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($song['attributes']['artwork']['textColor2'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($song['attributes']['artwork']['textColor3'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($song['attributes']['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
+                ),
+                Url::of($song['attributes']['url']),
+                Maybe::of($song['attributes']['discNumber'] ?? null)->map(Song\DiscNumber::of(...)),
+                Set::of(...$song['attributes']['genreNames'])->map(Genre::of(...)),
+                Maybe::of($song['attributes']['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
+                $this->releaseDate($song['attributes']['releaseDate'] ?? null),
+                new Song\Name($song['attributes']['name']),
+                Maybe::of($song['attributes']['isrc'] ?? null)->map(Song\ISRC::of(...)),
+                Maybe::of($song['attributes']['trackNumber'] ?? null)->map(Song\TrackNumber::of(...)),
+                new Song\Composer($song['attributes']['composerName'] ?? ''),
+                Set::of(...$song['relationships']['artists']['data'])
+                    ->map(static fn($artist) => (int) $artist['id'])
+                    ->map(Artist\Id::of(...)),
+                Set::of(...$song['relationships']['albums']['data'])
+                    ->map(static fn($album) => (int) $album['id'])
+                    ->map(Album\Id::of(...)),
+            ));
     }
 
     /**
@@ -282,7 +304,13 @@ final class Catalog
              *     next?: string
              * }
              */
-            $resource = $this->get($url);
+            $resource = $this
+                ->get($url)
+                ->map(Json::decode(...))
+                ->match(
+                    static fn($genres): mixed => $genres,
+                    static fn() => ['data' => []],
+                );
             $url = null;
 
             foreach ($resource['data'] as $genre) {
@@ -304,24 +332,15 @@ final class Catalog
         $encodedTerm = \urlencode($term);
         $url = $this->url("search?term=$encodedTerm&types=artists,albums,songs&limit=25");
         /**
-         * @var array{
-         *     results: array{
-         *         artists?: array{
-         *             data: list<array{id: string}>,
-         *             next?: string
-         *         },
-         *         albums?: array{
-         *             data: list<array{id: string}>,
-         *             next?: string
-         *         },
-         *         songs?: array{
-         *             data: list<array{id: string}>,
-         *             next?: string
-         *         }
-         *     }
-         * }
+         * @var Search
          */
-        $resource = $this->get($url);
+        $resource = $this
+            ->get($url)
+            ->map(Json::decode(...))
+            ->match(
+                static fn($result): mixed => $result,
+                static fn() => ['results' => []],
+            );
 
         $artists = Sequence::lazy(
             function() use ($resource): \Generator {
@@ -336,8 +355,14 @@ final class Catalog
                         return;
                     }
 
-                    /** @var array{results: array{artists: array{data: list<array{id: string}>, next?: string}}} */
-                    $resource = $this->get(Url::of($artists['next']));
+                    /** @var Search */
+                    $resource = $this
+                        ->get(Url::of($artists['next']))
+                        ->map(Json::decode(...))
+                        ->match(
+                            static fn($result): mixed => $result,
+                            static fn() => ['results' => []],
+                        );
                 } while (true);
             },
         );
@@ -355,8 +380,14 @@ final class Catalog
                         return;
                     }
 
-                    /** @var array{results: array{albums: array{data: list<array{id: string}>, next?: string}}} */
-                    $resource = $this->get(Url::of($albums['next']));
+                    /** @var Search */
+                    $resource = $this
+                        ->get(Url::of($albums['next']))
+                        ->map(Json::decode(...))
+                        ->match(
+                            static fn($result): mixed => $result,
+                            static fn() => ['results' => []],
+                        );
                 } while (true);
             },
         );
@@ -374,8 +405,14 @@ final class Catalog
                         return;
                     }
 
-                    /** @var array{results: array{songs: array{data: list<array{id: string}>, next?: string}}} */
-                    $resource = $this->get(Url::of($songs['next']));
+                    /** @var Search */
+                    $resource = $this
+                        ->get(Url::of($songs['next']))
+                        ->map(Json::decode(...))
+                        ->match(
+                            static fn($result): mixed => $result,
+                            static fn() => ['results' => []],
+                        );
                 } while (true);
             },
         );
@@ -399,7 +436,13 @@ final class Catalog
 
         if (\array_key_exists('next', $resources)) {
             /** @var array{data: list<array{id: string}>, next?: string} */
-            $resources = $this->get(Url::of($resources['next']));
+            $resources = $this
+                ->get(Url::of($resources['next']))
+                ->map(Json::decode(...))
+                ->match(
+                    static fn($albums): mixed => $albums,
+                    static fn() => ['data' => []],
+                );
 
             $albums = $albums->merge($this->artistAlbums($resources));
         }
@@ -407,21 +450,44 @@ final class Catalog
         return $albums;
     }
 
-    private function get(Url $url): array
+    /**
+     * @return Maybe<string>
+     */
+    private function get(Url $url): Maybe
     {
-        /** @psalm-suppress MixedArgumentTypeCoercion */
-        $response = ($this->fulfill)(new Request(
+        return ($this->fulfill)(new Request(
             $url,
             Method::get,
             ProtocolVersion::v20,
             Headers::of($this->authorization),
-        ))->match(
-            static fn($response) => $response,
-            static fn() => throw new \RuntimeException,
-        );
+        ))->map(static fn($response) => $response->body()->toString());
+    }
 
-        /** @var array */
-        return Json::decode($response->body()->toString());
+    /**
+     * @return Artists
+     */
+    private function decodeArtists(string $content): array
+    {
+        /** @var Artists */
+        return Json::decode($content);
+    }
+
+    /**
+     * @return Albums
+     */
+    private function decodeAlbums(string $content): array
+    {
+        /** @var Albums */
+        return Json::decode($content);
+    }
+
+    /**
+     * @return Songs
+     */
+    private function decodeSongs(string $content): array
+    {
+        /** @var Songs */
+        return Json::decode($content);
     }
 
     private function url(string $path): Url
