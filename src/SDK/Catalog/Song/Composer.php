@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK\Catalog\Song;
 
+/**
+ * @psalm-immutable
+ */
 final class Composer
 {
     private string $name;

@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK\Catalog;
 
+/**
+ * @psalm-immutable
+ */
 final class Genre
 {
     private string $value;
@@ -12,6 +15,9 @@ final class Genre
         $this->value = $value;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(string $value): self
     {
         return new self($value);

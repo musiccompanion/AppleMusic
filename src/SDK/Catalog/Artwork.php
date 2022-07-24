@@ -17,6 +17,9 @@ use Innmind\Immutable\{
     Maybe,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Artwork
 {
     private Width $width;

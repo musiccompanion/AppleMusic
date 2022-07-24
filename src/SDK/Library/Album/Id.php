@@ -6,6 +6,9 @@ namespace MusicCompanion\AppleMusic\SDK\Library\Album;
 use MusicCompanion\AppleMusic\Exception\DomainException;
 use Innmind\Immutable\Str;
 
+/**
+ * @psalm-immutable
+ */
 final class Id
 {
     private string $value;
@@ -19,6 +22,9 @@ final class Id
         $this->value = $value;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(string $value): self
     {
         return new self($value);

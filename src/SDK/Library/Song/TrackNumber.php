@@ -5,6 +5,9 @@ namespace MusicCompanion\AppleMusic\SDK\Library\Song;
 
 use MusicCompanion\AppleMusic\Exception\DomainException;
 
+/**
+ * @psalm-immutable
+ */
 final class TrackNumber
 {
     private int $value;
@@ -18,6 +21,9 @@ final class TrackNumber
         $this->value = $value;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(int $value): self
     {
         return new self($value);

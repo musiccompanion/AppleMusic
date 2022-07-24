@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK\Storefront;
 
+/**
+ * @psalm-immutable
+ */
 final class Name
 {
     private string $value;

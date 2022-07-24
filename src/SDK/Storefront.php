@@ -10,6 +10,9 @@ use MusicCompanion\AppleMusic\SDK\Storefront\{
 };
 use Innmind\Immutable\Set;
 
+/**
+ * @psalm-immutable
+ */
 final class Storefront
 {
     private Id $id;

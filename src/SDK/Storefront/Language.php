@@ -6,6 +6,9 @@ namespace MusicCompanion\AppleMusic\SDK\Storefront;
 use MusicCompanion\AppleMusic\Exception\DomainException;
 use Innmind\Immutable\Str;
 
+/**
+ * @psalm-immutable
+ */
 final class Language
 {
     private string $value;
@@ -19,6 +22,9 @@ final class Language
         $this->value = $value;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(string $value): self
     {
         return new self($value);

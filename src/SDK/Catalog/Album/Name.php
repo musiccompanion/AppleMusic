@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK\Catalog\Album;
 
+/**
+ * @psalm-immutable
+ */
 final class Name
 {
     private string $value;

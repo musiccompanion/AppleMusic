@@ -16,6 +16,9 @@ use Innmind\Immutable\{
     Maybe,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Artwork
 {
     /** @var Maybe<Width> */

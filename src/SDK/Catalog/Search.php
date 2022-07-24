@@ -5,6 +5,9 @@ namespace MusicCompanion\AppleMusic\SDK\Catalog;
 
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class Search
 {
     private string $term;

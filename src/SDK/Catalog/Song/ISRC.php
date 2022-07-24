@@ -10,6 +10,7 @@ use Innmind\Immutable\Str;
  * International Standard Recording Code
  *
  * @see https://en.wikipedia.org/wiki/International_Standard_Recording_Code#Format
+ * @psalm-immutable
  */
 final class ISRC
 {
@@ -24,6 +25,9 @@ final class ISRC
         $this->value = $value;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(string $value): self
     {
         return new self($value);
