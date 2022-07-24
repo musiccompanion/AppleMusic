@@ -21,6 +21,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Song as SongSet,
     Artist as ArtistSet,
 };
+use Innmind\Immutable\Maybe;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -44,14 +45,14 @@ class AlbumTest extends TestCase
                 DataSet\Elements::of(true, false),
                 Url::any(),
                 DataSet\Elements::of(true, false),
-                ISet::of(Genre::class, GenreSet::any()),
-                ISet::of(Song\Id::class, SongSet\Id::any()),
+                ISet::of(GenreSet::any()),
+                ISet::of(SongSet\Id::any()),
                 DataSet\Elements::of(true, false),
                 PointInTime::any(),
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any(),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $album = new Album(
@@ -64,11 +65,11 @@ class AlbumTest extends TestCase
                     $genres,
                     $tracks,
                     $masteredForItunes,
-                    $release,
+                    Maybe::of($release),
                     $recordLabel,
                     $copyright,
                     $editorialNotes,
-                    $artists
+                    $artists,
                 );
 
                 $this->assertSame($id, $album->id());
@@ -80,134 +81,14 @@ class AlbumTest extends TestCase
                 $this->assertSame($genres, $album->genres());
                 $this->assertSame($tracks, $album->tracks());
                 $this->assertSame($masteredForItunes, $album->masteredForItunes());
-                $this->assertSame($release, $album->release());
+                $this->assertSame($release, $album->release()->match(
+                    static fn($release) => $release,
+                    static fn() => null,
+                ));
                 $this->assertSame($recordLabel, $album->recordLabel());
                 $this->assertSame($copyright, $album->copyright());
                 $this->assertSame($editorialNotes, $album->editorialNotes());
                 $this->assertSame($artists, $album->artists());
-            });
-    }
-
-    public function testThrowWhenInvalidSetOfGenre()
-    {
-        $this
-            ->forAll(
-                Id::any(),
-                Artwork::any(),
-                Name::any(),
-                DataSet\Elements::of(true, false),
-                Url::any(),
-                DataSet\Elements::of(true, false),
-                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-                DataSet\Elements::of(true, false),
-                PointInTime::any(),
-                RecordLabel::any(),
-                Copyright::any(),
-                EditorialNotes::any()
-            )
-            ->disableShrinking()
-            ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
-                $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 7 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Genre>');
-
-                new Album(
-                    $id,
-                    $artwork,
-                    $name,
-                    $single,
-                    $url,
-                    $complete,
-                    Set::of($genres),
-                    Set::of(Song\Id::class),
-                    $masteredForItunes,
-                    $release,
-                    $recordLabel,
-                    $copyright,
-                    $editorialNotes,
-                    Set::of(Artist\Id::class)
-                );
-            });
-    }
-
-    public function testThrowWhenInvalidSetOfTracks()
-    {
-        $this
-            ->forAll(
-                Id::any(),
-                Artwork::any(),
-                Name::any(),
-                DataSet\Elements::of(true, false),
-                Url::any(),
-                DataSet\Elements::of(true, false),
-                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-                DataSet\Elements::of(true, false),
-                PointInTime::any(),
-                RecordLabel::any(),
-                Copyright::any(),
-                EditorialNotes::any()
-            )
-            ->disableShrinking()
-            ->then(function($id, $artwork, $name, $single, $url, $complete, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes) {
-                $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 8 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Song\Id>');
-
-                new Album(
-                    $id,
-                    $artwork,
-                    $name,
-                    $single,
-                    $url,
-                    $complete,
-                    Set::of(Genre::class),
-                    Set::of($tracks),
-                    $masteredForItunes,
-                    $release,
-                    $recordLabel,
-                    $copyright,
-                    $editorialNotes,
-                    Set::of(Artist\Id::class)
-                );
-            });
-    }
-
-    public function testThrowWhenInvalidSetOfArtists()
-    {
-        $this
-            ->forAll(
-                Id::any(),
-                Artwork::any(),
-                Name::any(),
-                DataSet\Elements::of(true, false),
-                Url::any(),
-                DataSet\Elements::of(true, false),
-                DataSet\Elements::of(true, false),
-                PointInTime::any(),
-                RecordLabel::any(),
-                Copyright::any(),
-                EditorialNotes::any(),
-                DataSet\Strings::any()->filter(static fn($s) => \strpos($s, '?') === false),
-            )
-            ->disableShrinking()
-            ->then(function($id, $artwork, $name, $single, $url, $complete, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
-                $this->expectException(\TypeError::class);
-                $this->expectExceptionMessage('Argument 14 must be of type Set<MusicCompanion\AppleMusic\SDK\Catalog\Artist\Id>');
-
-                new Album(
-                    $id,
-                    $artwork,
-                    $name,
-                    $single,
-                    $url,
-                    $complete,
-                    Set::of(Genre::class),
-                    Set::of(Song\Id::class),
-                    $masteredForItunes,
-                    $release,
-                    $recordLabel,
-                    $copyright,
-                    $editorialNotes,
-                    Set::of($artists)
-                );
             });
     }
 }

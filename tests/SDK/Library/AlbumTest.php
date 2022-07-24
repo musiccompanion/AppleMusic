@@ -7,13 +7,13 @@ use MusicCompanion\AppleMusic\SDK\Library\{
     Album,
     Artist,
 };
+use Innmind\Immutable\Maybe;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Album\Id,
     Album\Name,
     Album\Artwork,
     Artist as ArtistSet,
 };
-use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -32,15 +32,17 @@ class AlbumTest extends TestCase
                 Id::any(),
                 Name::any(),
                 Artwork::any(),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $artwork, $artists) {
-                $album = new Album($id, $name, $artwork, ...unwrap($artists));
+                $album = new Album($id, $name, Maybe::just($artwork), $artists);
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());
-                $this->assertTrue($album->hasArtwork());
-                $this->assertSame($artwork, $album->artwork());
+                $this->assertSame($artwork, $album->artwork()->match(
+                    static fn($artwork) => $artwork,
+                    static fn() => null,
+                ));
                 $this->assertTrue($artists->equals($album->artists()));
             });
     }
@@ -51,14 +53,17 @@ class AlbumTest extends TestCase
             ->forAll(
                 Id::any(),
                 Name::any(),
-                ISet::of(Artist\Id::class, ArtistSet\Id::any())
+                ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $artists) {
-                $album = new Album($id, $name, null, ...unwrap($artists));
+                $album = new Album($id, $name, Maybe::nothing(), $artists);
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());
-                $this->assertFalse($album->hasArtwork());
+                $this->assertFalse($album->artwork()->match(
+                    static fn() => true,
+                    static fn() => false,
+                ));
                 $this->assertTrue($artists->equals($album->artists()));
             });
     }

@@ -7,6 +7,7 @@ use MusicCompanion\AppleMusic\Exception\DomainException;
 
 /**
  * Expressed in milliseconds
+ * @psalm-immutable
  */
 final class Duration
 {
@@ -21,12 +22,11 @@ final class Duration
         $this->value = $value;
     }
 
-    public static function of(?int $value): ?self
+    /**
+     * @psalm-pure
+     */
+    public static function of(int $value): self
     {
-        if (\is_null($value)) {
-            return null;
-        }
-
         return new self($value);
     }
 

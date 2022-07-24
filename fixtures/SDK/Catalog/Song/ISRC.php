@@ -20,7 +20,7 @@ final class ISRC
 
         return Set\Composite::immutable(
             static function(...$bits): Model {
-                return new Model(\implode('', $bits));
+                return Model::of(\implode('', $bits));
             },
             $c,
             $c,

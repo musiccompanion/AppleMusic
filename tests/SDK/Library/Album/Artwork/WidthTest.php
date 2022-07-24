@@ -38,8 +38,6 @@ class WidthTest extends TestCase
                 $this->assertInstanceOf(Width::class, Width::of($width->toInt()));
                 $this->assertSame($width->toInt(), Width::of($width->toInt())->toInt());
             });
-
-        $this->assertNull(Width::of(null));
     }
 
     public function testNegativeNumbersAreNotAccepted()

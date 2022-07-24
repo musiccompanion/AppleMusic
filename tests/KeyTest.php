@@ -7,7 +7,7 @@ use MusicCompanion\AppleMusic\{
     Key,
     Exception\DomainException,
 };
-use Innmind\Stream\Readable;
+use Innmind\Filesystem\File\Content;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -23,16 +23,16 @@ class KeyTest extends TestCase
         $this
             ->forAll(
                 Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
-                Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9))
+                Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
             )
             ->then(function($id, $teamId) {
                 $id = \implode(\array_pad([], 10, $id));
                 $teamId = \implode(\array_pad([], 10, $teamId));
 
-                $key = new Key(
+                $key = Key::of(
                     $id,
                     $teamId,
-                    $content = $this->createMock(Readable::class)
+                    $content = $this->createMock(Content::class),
                 );
 
                 $this->assertSame($id, $key->id());
@@ -46,7 +46,7 @@ class KeyTest extends TestCase
         $this
             ->forAll(
                 new Set\Strings,
-                Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9))
+                Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
             )
             ->then(function($id, $teamId) {
                 $teamId = \implode(\array_pad([], 10, $teamId));
@@ -54,10 +54,10 @@ class KeyTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage("Invalid key id '$id'");
 
-                new Key(
+                Key::of(
                     $id,
                     $teamId,
-                    $this->createMock(Readable::class)
+                    Content\None::of(),
                 );
             });
     }
@@ -67,7 +67,7 @@ class KeyTest extends TestCase
         $this
             ->forAll(
                 Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
-                new Set\Strings
+                new Set\Strings,
             )
             ->then(function($id, $teamId) {
                 $id = \implode(\array_pad([], 10, $id));
@@ -75,10 +75,10 @@ class KeyTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage("Invalid team id '$teamId'");
 
-                new Key(
+                Key::of(
                     $id,
                     $teamId,
-                    $this->createMock(Readable::class)
+                    Content\None::of(),
                 );
             });
     }

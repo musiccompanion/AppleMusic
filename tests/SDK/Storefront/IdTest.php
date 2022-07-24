@@ -36,7 +36,7 @@ class IdTest extends TestCase
             ->forAll(
                 Set\Strings::any()->filter(static function($string): bool {
                     return !\preg_match('~^[a-z]{2}$~', $string);
-                })
+                }),
             )
             ->then(function(string $string) {
                 $this->expectException(DomainException::class);

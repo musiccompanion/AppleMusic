@@ -9,6 +9,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Artwork\{
     Height,
 };
 use Innmind\Url\Url as ConcreteUrl;
+use Innmind\Immutable\Maybe;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -32,28 +33,43 @@ class ArtworkTest extends TestCase
                 Colour::any(),
                 Colour::any(),
                 Colour::any(),
-                Colour::any()
+                Colour::any(),
             )
             ->then(function($width, $height, $url, $background, $text1, $text2, $text3, $text4) {
                 $artwork = new Artwork(
                     $width,
                     $height,
                     $url,
-                    $background,
-                    $text1,
-                    $text2,
-                    $text3,
-                    $text4
+                    Maybe::of($background),
+                    Maybe::of($text1),
+                    Maybe::of($text2),
+                    Maybe::of($text3),
+                    Maybe::of($text4),
                 );
 
                 $this->assertSame($width, $artwork->width());
                 $this->assertSame($height, $artwork->height());
                 $this->assertSame($url, $artwork->url());
-                $this->assertSame($background, $artwork->backgroundColor());
-                $this->assertSame($text1, $artwork->textColor1());
-                $this->assertSame($text2, $artwork->textColor2());
-                $this->assertSame($text3, $artwork->textColor3());
-                $this->assertSame($text4, $artwork->textColor4());
+                $this->assertSame($background, $artwork->backgroundColor()->match(
+                    static fn($color) => $color,
+                    static fn() => null,
+                ));
+                $this->assertSame($text1, $artwork->textColor1()->match(
+                    static fn($color) => $color,
+                    static fn() => null,
+                ));
+                $this->assertSame($text2, $artwork->textColor2()->match(
+                    static fn($color) => $color,
+                    static fn() => null,
+                ));
+                $this->assertSame($text3, $artwork->textColor3()->match(
+                    static fn($color) => $color,
+                    static fn() => null,
+                ));
+                $this->assertSame($text4, $artwork->textColor4()->match(
+                    static fn($color) => $color,
+                    static fn() => null,
+                ));
             });
     }
 
@@ -67,18 +83,18 @@ class ArtworkTest extends TestCase
                 Colour::any(),
                 Colour::any(),
                 Colour::any(),
-                Colour::any()
+                Colour::any(),
             )
             ->then(function($width, $height, $background, $text1, $text2, $text3, $text4) {
                 $artwork = new Artwork(
                     $width,
                     $height,
                     ConcreteUrl::of('https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg'),
-                    $background,
-                    $text1,
-                    $text2,
-                    $text3,
-                    $text4
+                    Maybe::of($background),
+                    Maybe::of($text1),
+                    Maybe::of($text2),
+                    Maybe::of($text3),
+                    Maybe::of($text4),
                 );
 
                 $url = $artwork->ofSize(

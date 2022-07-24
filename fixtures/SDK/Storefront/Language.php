@@ -18,7 +18,7 @@ final class Language
 
         return Set\Composite::immutable(
             static function(string $char1, string $char2, string $region1, string $region2): Model {
-                return new Model($char1.$char2.'-'.$region1.$region2);
+                return Model::of($char1.$char2.'-'.$region1.$region2);
             },
             $char,
             $char,

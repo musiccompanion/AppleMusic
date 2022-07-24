@@ -6,6 +6,9 @@ namespace MusicCompanion\AppleMusic\SDK\Library\Song;
 use MusicCompanion\AppleMusic\Exception\DomainException;
 use Innmind\Immutable\Str;
 
+/**
+ * @psalm-immutable
+ */
 final class Id
 {
     private string $value;

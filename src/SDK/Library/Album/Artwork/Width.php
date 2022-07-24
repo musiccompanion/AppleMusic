@@ -5,6 +5,9 @@ namespace MusicCompanion\AppleMusic\SDK\Library\Album\Artwork;
 
 use MusicCompanion\AppleMusic\Exception\DomainException;
 
+/**
+ * @psalm-immutable
+ */
 final class Width
 {
     private int $value;
@@ -18,12 +21,11 @@ final class Width
         $this->value = $value;
     }
 
-    public static function of(?int $value): ?self
+    /**
+     * @psalm-pure
+     */
+    public static function of(int $value): self
     {
-        if (\is_null($value)) {
-            return null;
-        }
-
         return new self($value);
     }
 

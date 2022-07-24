@@ -19,7 +19,7 @@ class GenreTest extends TestCase
         $this
             ->forAll(new Set\Strings)
             ->then(function(string $string) {
-                $genre = new Genre($string);
+                $genre = Genre::of($string);
 
                 $this->assertSame($string, $genre->toString());
             });

@@ -4,8 +4,10 @@ declare(strict_types = 1);
 namespace MusicCompanion\AppleMusic\SDK\Catalog;
 
 use Innmind\Immutable\Sequence;
-use function Innmind\Immutable\assertSequence;
 
+/**
+ * @psalm-immutable
+ */
 final class Search
 {
     private string $term;
@@ -25,12 +27,8 @@ final class Search
         string $term,
         Sequence $artists,
         Sequence $albums,
-        Sequence $songs
+        Sequence $songs,
     ) {
-        assertSequence(Artist\Id::class, $artists, 2);
-        assertSequence(Album\Id::class, $albums, 3);
-        assertSequence(Song\Id::class, $songs, 4);
-
         $this->term = $term;
         $this->artists = $artists;
         $this->albums = $albums;
