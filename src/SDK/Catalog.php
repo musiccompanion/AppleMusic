@@ -289,51 +289,45 @@ final class Catalog
      */
     public function genres(): Set
     {
-        $url = $this->url('genres');
-        /** @var Set<Genre> */
-        $genres = Set::of();
+        return Set::lazy(function() {
+            $url = $this->url('genres');
 
-        do {
-            /**
-             * @var array{
-             *     data: list<array{
-             *         attributes: array{
-             *             name: string
-             *         }
-             *     }>,
-             *     next?: string
-             * }
-             */
-            $resource = $this
-                ->get($url)
-                ->map(Json::decode(...))
-                ->match(
-                    static fn($genres): mixed => $genres,
-                    static fn() => ['data' => []],
-                );
-            $url = null;
+            do {
+                /**
+                 * @var array{
+                 *     data: list<array{
+                 *         attributes: array{
+                 *             name: string
+                 *         }
+                 *     }>,
+                 *     next?: string
+                 * }
+                 */
+                $resource = $this
+                    ->get($url)
+                    ->map(Json::decode(...))
+                    ->match(
+                        static fn($genres): mixed => $genres,
+                        static fn() => ['data' => []],
+                    );
+                $url = null;
 
-            foreach ($resource['data'] as $genre) {
-                $genres = ($genres)(Genre::of(
-                    $genre['attributes']['name'],
-                ));
-            }
+                foreach ($resource['data'] as $genre) {
+                    yield Genre::of($genre['attributes']['name']);
+                }
 
-            if (\array_key_exists('next', $resource)) {
-                $url = Url::of($resource['next']);
-            }
-        } while ($url instanceof Url);
-
-        return $genres;
+                if (\array_key_exists('next', $resource)) {
+                    $url = Url::of($resource['next']);
+                }
+            } while ($url instanceof Url);
+        });
     }
 
     public function search(string $term): Search
     {
         $encodedTerm = \urlencode($term);
         $url = $this->url("search?term=$encodedTerm&types=artists,albums,songs&limit=25");
-        /**
-         * @var Search
-         */
+        /** @var Search */
         $resource = $this
             ->get($url)
             ->map(Json::decode(...))

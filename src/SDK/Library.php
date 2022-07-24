@@ -141,61 +141,59 @@ final class Library
      */
     public function albums(Artist\Id $artist): Set
     {
-        $url = $this->url("artists/{$artist->toString()}/albums?include=artists");
-        /** @var Set<Album> */
-        $albums = Set::of();
+        return Set::lazy(function() use ($artist) {
+            $url = $this->url("artists/{$artist->toString()}/albums?include=artists");
 
-        do {
-            /**
-             * @var array{
-             *     data: list<array{
-             *         id: string,
-             *         attributes: array{
-             *             name: string,
-             *             artwork?: array{
-             *                 width: int,
-             *                 height: int,
-             *                 url: string
-             *             }
-             *         },
-             *         relationships: array{
-             *             artists: array{
-             *                 data: list<array{id: string}>
-             *             }
-             *         }
-             *     }>,
-             *     next?: string
-             * }
-             */
-            $resource = $this->get($url)->match(
-                static fn($albums): mixed => $albums,
-                static fn() => ['data' => []],
-            );
-            $url = null;
+            do {
+                /**
+                 * @var array{
+                 *     data: list<array{
+                 *         id: string,
+                 *         attributes: array{
+                 *             name: string,
+                 *             artwork?: array{
+                 *                 width: int,
+                 *                 height: int,
+                 *                 url: string
+                 *             }
+                 *         },
+                 *         relationships: array{
+                 *             artists: array{
+                 *                 data: list<array{id: string}>
+                 *             }
+                 *         }
+                 *     }>,
+                 *     next?: string
+                 * }
+                 */
+                $resource = $this->get($url)->match(
+                    static fn($albums): mixed => $albums,
+                    static fn() => ['data' => []],
+                );
+                $url = null;
 
-            foreach ($resource['data'] as $album) {
-                $albums = ($albums)(new Album(
-                    Album\Id::of($album['id']),
-                    new Album\Name($album['attributes']['name']),
-                    Maybe::of($album['attributes']['artwork'] ?? null)->map(
-                        static fn($artwork) => new Album\Artwork(
-                            Maybe::of($artwork['width'])->map(Album\Artwork\Width::of(...)),
-                            Maybe::of($artwork['height'])->map(Album\Artwork\Height::of(...)),
-                            Url::of($artwork['url']),
+                foreach ($resource['data'] as $album) {
+                    yield new Album(
+                        Album\Id::of($album['id']),
+                        new Album\Name($album['attributes']['name']),
+                        Maybe::of($album['attributes']['artwork'] ?? null)->map(
+                            static fn($artwork) => new Album\Artwork(
+                                Maybe::of($artwork['width'])->map(Album\Artwork\Width::of(...)),
+                                Maybe::of($artwork['height'])->map(Album\Artwork\Height::of(...)),
+                                Url::of($artwork['url']),
+                            ),
                         ),
-                    ),
-                    Set::of(...$album['relationships']['artists']['data'])
-                        ->map(static fn($artist) => $artist['id'])
-                        ->map(Artist\Id::of(...)),
-                ));
-            }
+                        Set::of(...$album['relationships']['artists']['data'])
+                            ->map(static fn($artist) => $artist['id'])
+                            ->map(Artist\Id::of(...)),
+                    );
+                }
 
-            if (\array_key_exists('next', $resource)) {
-                $url = Url::of($resource['next'].'&include=artists');
-            }
-        } while ($url instanceof Url);
-
-        return $albums;
+                if (\array_key_exists('next', $resource)) {
+                    $url = Url::of($resource['next'].'&include=artists');
+                }
+            } while ($url instanceof Url);
+        });
     }
 
     /**
@@ -203,61 +201,59 @@ final class Library
      */
     public function songs(Album\Id $album): Set
     {
-        $url = $this->url("albums/{$album->toString()}/tracks?include=albums,artists");
-        /** @var Set<Song> */
-        $songs = Set::of();
+        return Set::lazy(function() use ($album) {
+            $url = $this->url("albums/{$album->toString()}/tracks?include=albums,artists");
 
-        do {
-            /**
-             * @var array{
-             *     data: list<array{
-             *         id: string,
-             *         attributes: array{
-             *             name: string,
-             *             durationInMillis: int,
-             *             trackNumber?: int,
-             *             genreNames: list<string>
-             *         },
-             *         relationships: array{
-             *             albums: array{
-             *                 data: list<array{id: string}>
-             *             },
-             *             artists: array{
-             *                 data: list<array{id: string}>
-             *             }
-             *         }
-             *     }>,
-             *     next?: string
-             * }
-             */
-            $resource = $this->get($url)->match(
-                static fn($songs): mixed => $songs,
-                static fn() => ['data' => []],
-            );
-            $url = null;
+            do {
+                /**
+                 * @var array{
+                 *     data: list<array{
+                 *         id: string,
+                 *         attributes: array{
+                 *             name: string,
+                 *             durationInMillis: int,
+                 *             trackNumber?: int,
+                 *             genreNames: list<string>
+                 *         },
+                 *         relationships: array{
+                 *             albums: array{
+                 *                 data: list<array{id: string}>
+                 *             },
+                 *             artists: array{
+                 *                 data: list<array{id: string}>
+                 *             }
+                 *         }
+                 *     }>,
+                 *     next?: string
+                 * }
+                 */
+                $resource = $this->get($url)->match(
+                    static fn($songs): mixed => $songs,
+                    static fn() => ['data' => []],
+                );
+                $url = null;
 
-            foreach ($resource['data'] as $song) {
-                $songs = ($songs)(new Song(
-                    new Song\Id($song['id']),
-                    new Song\Name($song['attributes']['name']),
-                    Maybe::of($song['attributes']['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
-                    Maybe::of($song['attributes']['trackNumber'] ?? null)->map(Song\TrackNumber::of(...)),
-                    Set::of(...$song['attributes']['genreNames'])->map(Song\Genre::of(...)),
-                    Set::of(...$song['relationships']['albums']['data'])
-                        ->map(static fn($album) => $album['id'])
-                        ->map(Album\Id::of(...)),
-                    Set::of(...$song['relationships']['artists']['data'])
-                        ->map(static fn($artist) => $artist['id'])
-                        ->map(Artist\Id::of(...)),
-                ));
-            }
+                foreach ($resource['data'] as $song) {
+                    yield new Song(
+                        new Song\Id($song['id']),
+                        new Song\Name($song['attributes']['name']),
+                        Maybe::of($song['attributes']['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
+                        Maybe::of($song['attributes']['trackNumber'] ?? null)->map(Song\TrackNumber::of(...)),
+                        Set::of(...$song['attributes']['genreNames'])->map(Song\Genre::of(...)),
+                        Set::of(...$song['relationships']['albums']['data'])
+                            ->map(static fn($album) => $album['id'])
+                            ->map(Album\Id::of(...)),
+                        Set::of(...$song['relationships']['artists']['data'])
+                            ->map(static fn($artist) => $artist['id'])
+                            ->map(Artist\Id::of(...)),
+                    );
+                }
 
-            if (\array_key_exists('next', $resource)) {
-                $url = Url::of($resource['next'].'&include=albums,artists');
-            }
-        } while ($url instanceof Url);
-
-        return $songs;
+                if (\array_key_exists('next', $resource)) {
+                    $url = Url::of($resource['next'].'&include=albums,artists');
+                }
+            } while ($url instanceof Url);
+        });
     }
 
     /**
