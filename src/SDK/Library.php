@@ -42,7 +42,20 @@ final class Library
 
     public function storefront(): Storefront
     {
-        /** @var array{data: array{0: array{id: string, attributes: array{name: string, defaultLanguageTag: string, supportedLanguageTags: list<string>}}}} */
+        /**
+         * @var array{
+         *     data: array{
+         *         0: array{
+         *             id: string,
+         *             attributes: array{
+         *                 name: string,
+         *                 defaultLanguageTag: string,
+         *                 supportedLanguageTags: list<string>
+         *             }
+         *         }
+         *     }
+         * }
+         */
         $resource = $this->get(Url::of('/v1/me/storefront'));
 
         return new Storefront(
@@ -66,7 +79,17 @@ final class Library
         return Sequence::lazy(
             function() use ($url): \Generator {
                 do {
-                    /** @var array{data: list<array{id: string, attributes: array{name: string}}>, next?: string} */
+                    /**
+                     * @var array{
+                     *     data: list<array{
+                     *         id: string,
+                     *         attributes: array{
+                     *             name: string
+                     *         }
+                     *     }>,
+                     *     next?: string
+                     * }
+                     */
                     $resource = $this->get($url);
                     $url = null;
 
@@ -95,7 +118,27 @@ final class Library
         $albums = Set::of();
 
         do {
-            /** @var array{data: list<array{id: string, attributes: array{name: string, artwork?: array{width: int, height: int, url: string}}, relationships: array{artists: array{data: list<array{id: string}>}}}>, next?: string} */
+            /**
+             * @var array{
+             *     data: list<array{
+             *         id: string,
+             *         attributes: array{
+             *             name: string,
+             *             artwork?: array{
+             *                 width: int,
+             *                 height: int,
+             *                 url: string
+             *             }
+             *         },
+             *         relationships: array{
+             *             artists: array{
+             *                 data: list<array{id: string}>
+             *             }
+             *         }
+             *     }>,
+             *     next?: string
+             * }
+             */
             $resource = $this->get($url);
             $url = null;
 
@@ -134,7 +177,28 @@ final class Library
         $songs = Set::of();
 
         do {
-            /** @var array{data: list<array{id: string, attributes: array{name: string, durationInMillis?: int, trackNumber: int, genreNames: list<string>}, relationships: array{albums: array{data: list<array{id: string}>}, artists: array{data: list<array{id: string}>}}}>, next?: string} */
+            /**
+             * @var array{
+             *     data: list<array{
+             *         id: string,
+             *         attributes: array{
+             *             name: string,
+             *             durationInMillis?: int,
+             *             trackNumber: int,
+             *             genreNames: list<string>
+             *         },
+             *         relationships: array{
+             *             albums: array{
+             *                 data: list<array{id: string}>
+             *             },
+             *             artists: array{
+             *                 data: list<array{id: string}>
+             *             }
+             *         }
+             *     }>,
+             *     next?: string
+             * }
+             */
             $resource = $this->get($url);
             $url = null;
 

@@ -43,7 +43,18 @@ final class Storefronts
             static fn() => throw new \RuntimeException,
         );
 
-        /** @var array{data: list<array{id: string, attributes: array{name: string, defaultLanguageTag: string, supportedLanguageTags: list<string>}}>} */
+        /**
+         * @var array{
+         *     data: list<array{
+         *         id: string,
+         *         attributes: array{
+         *             name: string,
+         *             defaultLanguageTag: string,
+         *             supportedLanguageTags: list<string>
+         *         }
+         *     }>
+         * }
+         */
         $resource = Json::decode($response->body()->toString());
         /** @var Set<Storefront> */
         $storefronts = Set::of();

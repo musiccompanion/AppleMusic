@@ -51,7 +51,25 @@ final class Catalog
 
     public function artist(Artist\Id $id): Artist
     {
-        /** @var array{data: array{0: array{attributes: array{name: string, url: string, genreNames: list<string>}, relationships: array{albums: array{data: list<array{id: int}>, next?: string}}}}} */
+        /**
+         * @var array{
+         *     data: array{
+         *         0: array{
+         *             attributes: array{
+         *                 name: string,
+         *                 url: string,
+         *                 genreNames: list<string>
+         *             },
+         *             relationships: array{
+         *                 albums: array{
+         *                     data: list<array{id: int}>,
+         *                     next?: string
+         *                 }
+         *             }
+         *         }
+         *     }
+         * }
+         */
         $resource = $this->get($this->url("artists/{$id->toString()}"));
 
         return new Artist(
@@ -67,7 +85,47 @@ final class Catalog
 
     public function album(Album\Id $id): Album
     {
-        /** @var array{data: array{0: array{attributes: array{artwork?: array{width: int, height: int, url: string, bgColor?: string, textColor1?: string, textColor2?: string, textColor3?: string, textColor4?: string}, name: string, isSingle: bool, url: string, isComplete: bool, genreNames: list<string>, isMasteredForItunes: bool, releaseDate: string, recordLabel: string, copyright?: string, editorialNotes?: array{standard: string, short: string}}, relationships: array{tracks: array{data: list<array{id: int}>}, artists: array{data: list<array{id: int}>}}}}} */
+        /**
+         * @var array{
+         *     data: array{
+         *         0: array{
+         *             attributes: array{
+         *                 artwork?: array{
+         *                     width: int,
+         *                     height: int,
+         *                     url: string,
+         *                     bgColor?: string,
+         *                     textColor1?: string,
+         *                     textColor2?: string,
+         *                     textColor3?: string,
+         *                     textColor4?: string
+         *                 },
+         *                 name: string,
+         *                 isSingle: bool,
+         *                 url: string,
+         *                 isComplete: bool,
+         *                 genreNames: list<string>,
+         *                 isMasteredForItunes: bool,
+         *                 releaseDate: string,
+         *                 recordLabel: string,
+         *                 copyright?: string,
+         *                 editorialNotes?: array{
+         *                     standard: string,
+         *                     short: string
+         *                 }
+         *             },
+         *             relationships: array{
+         *                 tracks: array{
+         *                     data: list<array{id: int}>
+         *                 },
+         *                 artists: array{
+         *                     data: list<array{id: int}>
+         *                 }
+         *             }
+         *         }
+         *     }
+         * }
+         */
         $resource = $this->get($this->url("albums/{$id->toString()}"));
         $attributes = $resource['data'][0]['attributes'];
         $releaseDate = $attributes['releaseDate'];
@@ -127,7 +185,44 @@ final class Catalog
 
     public function song(Song\Id $id): Song
     {
-        /** @var array{data: array{0: array{attributes: array{previews: list<array{url: string}>, artwork: array{width: int, height: int, url: string, bgColor?: string, textColor1?: string, textColor2?: string, textColor3?: string, textColor4?: string}, url: string, discNumber: int, genreNames: list<string>, durationInMillis?: int, releaseDate: string, name: string, isrc: string, trackNumber: int, composerName?: string}, relationships: array{artists: array{data: list<array{id: int}>}, albums: array{data: list<array{id: int}>}}}}} */
+        /**
+         * @var array{
+         *     data: array{
+         *         0: array{
+         *             attributes: array{
+         *                 previews: list<array{url: string}>,
+         *                 artwork: array{
+         *                     width: int,
+         *                     height: int,
+         *                     url: string,
+         *                     bgColor?: string,
+         *                     textColor1?: string,
+         *                     textColor2?: string,
+         *                     textColor3?: string,
+         *                     textColor4?: string
+         *                 },
+         *                 url: string,
+         *                 discNumber: int,
+         *                 genreNames: list<string>,
+         *                 durationInMillis?: int,
+         *                 releaseDate: string,
+         *                 name: string,
+         *                 isrc: string,
+         *                 trackNumber: int,
+         *                 composerName?: string
+         *             },
+         *             relationships: array{
+         *                 artists: array{
+         *                     data: list<array{id: int}>
+         *                 },
+         *                 albums: array{
+         *                     data: list<array{id: int}>
+         *                 }
+         *             }
+         *         }
+         *     }
+         * }
+         */
         $resource = $this->get($this->url("songs/{$id->toString()}"));
         $attributes = $resource['data'][0]['attributes'];
 
@@ -180,7 +275,16 @@ final class Catalog
         $genres = Set::of();
 
         do {
-            /** @var array{data: list<array{attributes: array{name: string}}>, next?: string} */
+            /**
+             * @var array{
+             *     data: list<array{
+             *         attributes: array{
+             *             name: string
+             *         }
+             *     }>,
+             *     next?: string
+             * }
+             */
             $resource = $this->get($url);
             $url = null;
 
@@ -202,7 +306,24 @@ final class Catalog
     {
         $encodedTerm = \urlencode($term);
         $url = $this->url("search?term=$encodedTerm&types=artists,albums,songs&limit=25");
-        /** @var array{results: array{artists?: array{data: list<array{id: int}>, next?: string}, albums?: array{data: list<array{id: int}>, next?: string}, songs?: array{data: list<array{id: int}>, next?: string}}} */
+        /**
+         * @var array{
+         *     results: array{
+         *         artists?: array{
+         *             data: list<array{id: int}>,
+         *             next?: string
+         *         },
+         *         albums?: array{
+         *             data: list<array{id: int}>,
+         *             next?: string
+         *         },
+         *         songs?: array{
+         *             data: list<array{id: int}>,
+         *             next?: string
+         *         }
+         *     }
+         * }
+         */
         $resource = $this->get($url);
 
         $artists = Sequence::lazy(
