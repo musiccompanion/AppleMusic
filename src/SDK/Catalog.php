@@ -421,27 +421,26 @@ final class Catalog
      */
     private function artistAlbums(array $resources): Set
     {
-        /** @var Set<Album\Id> */
-        $albums = Set::of();
+        return Set::lazy(function() use ($resources) {
+            do {
+                foreach ($resources['data'] as $album) {
+                    yield (int) $album['id'];
+                }
 
-        foreach ($resources['data'] as $album) {
-            $albums = ($albums)(Album\Id::of((int) $album['id']));
-        }
+                if (!\array_key_exists('next', $resources)) {
+                    return;
+                }
 
-        if (\array_key_exists('next', $resources)) {
-            /** @var array{data: list<array{id: string}>, next?: string} */
-            $resources = $this
-                ->get(Url::of($resources['next']))
-                ->map(Json::decode(...))
-                ->match(
-                    static fn($albums): mixed => $albums,
-                    static fn() => ['data' => []],
-                );
-
-            $albums = $albums->merge($this->artistAlbums($resources));
-        }
-
-        return $albums;
+                /** @var array{data: list<array{id: string}>, next?: string} */
+                $resources = $this
+                    ->get(Url::of($resources['next']))
+                    ->map(Json::decode(...))
+                    ->match(
+                        static fn($albums): mixed => $albums,
+                        static fn() => ['data' => []],
+                    );
+            } while (true);
+        })->map(Album\Id::of(...));
     }
 
     /**
