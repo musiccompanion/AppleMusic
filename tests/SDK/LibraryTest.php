@@ -427,7 +427,7 @@ JSON
 
                 $albums = $library->albums($artist);
 
-                $this->assertInstanceOf(Set::class, $albums);
+                $this->assertInstanceOf(Sequence::class, $albums);
                 $albums = $albums->toList();
                 $this->assertCount(2, $albums);
                 $this->assertSame('l.wXEf8fr', \current($albums)->id()->toString());
@@ -683,7 +683,7 @@ JSON
 
                 $songs = $library->songs($album);
 
-                $this->assertInstanceOf(Set::class, $songs);
+                $this->assertInstanceOf(Sequence::class, $songs);
                 $songs = $songs->toList();
                 $this->assertCount(2, $songs);
                 $this->assertSame('i.mmpYYzeu4J0XGD', \current($songs)->id()->toString());

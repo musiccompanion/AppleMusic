@@ -285,11 +285,11 @@ final class Catalog
     }
 
     /**
-     * @return Set<Genre>
+     * @return Sequence<Genre>
      */
-    public function genres(): Set
+    public function genres(): Sequence
     {
-        return Set::lazy(function() {
+        return Sequence::lazy(function() {
             $url = $this->url('genres');
 
             do {

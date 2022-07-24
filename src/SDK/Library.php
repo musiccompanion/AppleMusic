@@ -137,11 +137,11 @@ final class Library
     }
 
     /**
-     * @return Set<Album>
+     * @return Sequence<Album>
      */
-    public function albums(Artist\Id $artist): Set
+    public function albums(Artist\Id $artist): Sequence
     {
-        return Set::lazy(function() use ($artist) {
+        return Sequence::lazy(function() use ($artist) {
             $url = $this->url("artists/{$artist->toString()}/albums?include=artists");
 
             do {
@@ -197,11 +197,11 @@ final class Library
     }
 
     /**
-     * @return Set<Song>
+     * @return Sequence<Song>
      */
-    public function songs(Album\Id $album): Set
+    public function songs(Album\Id $album): Sequence
     {
-        return Set::lazy(function() use ($album) {
+        return Sequence::lazy(function() use ($album) {
             $url = $this->url("albums/{$album->toString()}/tracks?include=albums,artists");
 
             do {

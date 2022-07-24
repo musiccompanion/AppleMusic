@@ -34,6 +34,7 @@ use Innmind\Immutable\{
     Set,
     Either,
     Maybe,
+    Sequence,
 };
 use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Storefront as StorefrontSet,
@@ -1215,7 +1216,7 @@ JSON
 
                 $genres = $catalog->genres();
 
-                $this->assertInstanceOf(Set::class, $genres);
+                $this->assertInstanceOf(Sequence::class, $genres);
                 $genres = $genres->toList();
                 $this->assertCount(2, $genres);
                 $this->assertSame('Musique', \current($genres)->toString());
