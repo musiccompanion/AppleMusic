@@ -111,7 +111,10 @@ final class Library
                      *     next?: string
                      * }
                      */
-                    $resource = $this->get($url);
+                    $resource = $this->get($url)->match(
+                        static fn($artists): mixed => $artists,
+                        static fn() => ['data' => []],
+                    );
                     $url = null;
 
                     foreach ($resource['data'] as $artist) {
@@ -164,7 +167,10 @@ final class Library
              *     next?: string
              * }
              */
-            $resource = $this->get($url);
+            $resource = $this->get($url)->match(
+                static fn($albums): mixed => $albums,
+                static fn() => ['data' => []],
+            );
             $url = null;
 
             foreach ($resource['data'] as $album) {
@@ -224,7 +230,10 @@ final class Library
              *     next?: string
              * }
              */
-            $resource = $this->get($url);
+            $resource = $this->get($url)->match(
+                static fn($songs): mixed => $songs,
+                static fn() => ['data' => []],
+            );
             $url = null;
 
             foreach ($resource['data'] as $song) {
@@ -251,10 +260,13 @@ final class Library
         return $songs;
     }
 
-    private function get(Url $url): array
+    /**
+     * @return Maybe<array>
+     */
+    private function get(Url $url): Maybe
     {
-        /** @psalm-suppress MixedArgumentTypeCoercion */
-        $response = ($this->fulfill)(new Request(
+        /** @var Maybe<array> */
+        return ($this->fulfill)(new Request(
             $url,
             Method::get,
             ProtocolVersion::v20,
@@ -262,13 +274,9 @@ final class Library
                 $this->authorization,
                 $this->userToken,
             ),
-        ))->match(
-            static fn($response) => $response,
-            static fn() => throw new \RuntimeException,
-        );
-
-        /** @var array */
-        return Json::decode($response->body()->toString());
+        ))
+            ->map(static fn($response) => $response->body()->toString())
+            ->map(Json::decode(...));
     }
 
     private function url(string $path): Url
