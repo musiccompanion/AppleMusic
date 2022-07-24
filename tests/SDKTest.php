@@ -103,7 +103,7 @@ class SDKTest extends TestCase
                         $response,
                     )));
 
-                $sdk = new SDK(
+                $sdk = SDK::of(
                     $clock,
                     $transport,
                     $key,

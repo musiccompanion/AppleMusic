@@ -27,7 +27,7 @@ final class SDK
     private Header $authorization;
     private string $jwt;
 
-    public function __construct(
+    private function __construct(
         Clock $clock,
         Transport $transport,
         Key $key,
@@ -60,6 +60,15 @@ final class SDK
             'Authorization',
             new Value('Bearer '.$this->jwt),
         );
+    }
+
+    public static function of(
+        Clock $clock,
+        Transport $transport,
+        Key $key,
+        Period $tokenValidity,
+    ): self {
+        return new self($clock, $transport, $key, $tokenValidity);
     }
 
     public function jwt(): string
