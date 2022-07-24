@@ -10,13 +10,17 @@ use MusicCompanion\AppleMusic\SDK\Library\Song\{
     Duration,
     TrackNumber,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 
 final class Song
 {
     private Id $id;
     private Name $name;
-    private ?Duration $duration;
+    /** @var Maybe<Duration> */
+    private Maybe $duration;
     private TrackNumber $trackNumber;
     /** @var Set<Genre> */
     private Set $genres;
@@ -26,6 +30,7 @@ final class Song
     private Set $artists;
 
     /**
+     * @param Maybe<Duration> $duration
      * @param Set<Genre> $genres
      * @param Set<Album\Id> $albums
      * @param Set<Artist\Id> $artists
@@ -33,7 +38,7 @@ final class Song
     public function __construct(
         Id $id,
         Name $name,
-        ?Duration $duration,
+        Maybe $duration,
         TrackNumber $trackNumber,
         Set $genres,
         Set $albums,
@@ -58,15 +63,11 @@ final class Song
         return $this->name;
     }
 
-    public function durationKnown(): bool
+    /**
+     * @return Maybe<Duration>
+     */
+    public function duration(): Maybe
     {
-        return $this->duration instanceof Duration;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function duration(): Duration
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->duration;
     }
 

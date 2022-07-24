@@ -38,8 +38,6 @@ class HeightTest extends TestCase
                 $this->assertInstanceOf(Height::class, Height::of($height->toInt()));
                 $this->assertSame($height->toInt(), Height::of($height->toInt())->toInt());
             });
-
-        $this->assertNull(Height::of(null));
     }
 
     public function testNegativeNumbersAreNotAccepted()

@@ -9,7 +9,10 @@ use MusicCompanion\AppleMusic\SDK\Catalog\{
     Album,
     Genre,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
     Song\Id,
@@ -63,7 +66,7 @@ class SongTest extends TestCase
                     $url,
                     $discNumber,
                     $genres,
-                    $duration,
+                    Maybe::of($duration),
                     $release,
                     $name,
                     $isrc,
@@ -79,7 +82,10 @@ class SongTest extends TestCase
                 $this->assertSame($url, $song->url());
                 $this->assertSame($discNumber, $song->discNumber());
                 $this->assertSame($genres, $song->genres());
-                $this->assertSame($duration, $song->duration());
+                $this->assertSame($duration, $song->duration()->match(
+                    static fn($duration) => $duration,
+                    static fn() => null,
+                ));
                 $this->assertSame($release, $song->release());
                 $this->assertSame($name, $song->name());
                 $this->assertSame($isrc, $song->isrc());

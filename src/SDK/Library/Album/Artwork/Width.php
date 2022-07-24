@@ -18,12 +18,8 @@ final class Width
         $this->value = $value;
     }
 
-    public static function of(?int $value): ?self
+    public static function of(int $value): self
     {
-        if (\is_null($value)) {
-            return null;
-        }
-
         return new self($value);
     }
 

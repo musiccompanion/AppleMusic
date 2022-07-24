@@ -8,23 +8,28 @@ use MusicCompanion\AppleMusic\SDK\Library\Album\{
     Name,
     Artwork,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 
 final class Album
 {
     private Id $id;
     private Name $name;
-    private ?Artwork $artwork;
+    /** @var Maybe<Artwork> */
+    private Maybe $artwork;
     /** @var Set<Artist\Id> */
     private Set $artists;
 
     /**
+     * @param Maybe<Artwork> $artwork
      * @param Set<Artist\Id> $artists
      */
     public function __construct(
         Id $id,
         Name $name,
-        ?Artwork $artwork,
+        Maybe $artwork,
         Set $artists,
     ) {
         $this->id = $id;
@@ -43,15 +48,11 @@ final class Album
         return $this->name;
     }
 
-    public function hasArtwork(): bool
+    /**
+     * @return Maybe<Artwork>
+     */
+    public function artwork(): Maybe
     {
-        return $this->artwork instanceof Artwork;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function artwork(): Artwork
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->artwork;
     }
 

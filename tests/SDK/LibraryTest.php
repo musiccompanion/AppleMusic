@@ -398,7 +398,10 @@ JSON
                 $this->assertCount(2, $albums);
                 $this->assertSame('l.wXEf8fr', \current($albums)->id()->toString());
                 $this->assertSame('Skull & Bonus', \current($albums)->name()->toString());
-                $this->assertFalse(\current($albums)->hasArtwork());
+                $this->assertFalse(\current($albums)->artwork()->match(
+                    static fn() => true,
+                    static fn() => false,
+                ));
                 $this->assertCount(1, \current($albums)->artists());
                 $this->assertSame(
                     'r.o860e82',
@@ -412,12 +415,32 @@ JSON
                 );
                 \next($albums);
                 $this->assertSame('l.gACheFi', \current($albums)->id()->toString());
-                $this->assertTrue(\current($albums)->hasArtwork());
-                $this->assertSame('1200', \current($albums)->artwork()->width()->toString());
-                $this->assertSame('1200', \current($albums)->artwork()->height()->toString());
+                $this->assertSame(
+                    '1200',
+                    \current($albums)
+                        ->artwork()
+                        ->flatMap(static fn($artwork) => $artwork->width())
+                        ->match(
+                            static fn($width) => $width->toString(),
+                            static fn() => null,
+                        ),
+                );
+                $this->assertSame(
+                    '1200',
+                    \current($albums)
+                        ->artwork()
+                        ->flatMap(static fn($artwork) => $artwork->height())
+                        ->match(
+                            static fn($height) => $height->toString(),
+                            static fn() => null,
+                        ),
+                );
                 $this->assertSame(
                     'https://is2-ssl.mzstatic.com/image/thumb/Music/c5/98/81/mzi.ljuovcvg.jpg/{w}x{h}bb.jpeg',
-                    \current($albums)->artwork()->url()->toString(),
+                    \current($albums)->artwork()->match(
+                        static fn($artwork) => $artwork->url()->toString(),
+                        static fn() => null,
+                    ),
                 );
             });
     }
@@ -630,7 +653,10 @@ JSON
                 $this->assertCount(2, $songs);
                 $this->assertSame('i.mmpYYzeu4J0XGD', \current($songs)->id()->toString());
                 $this->assertSame('Judgement Day', \current($songs)->name()->toString());
-                $this->assertSame('325459', \current($songs)->duration()->toString());
+                $this->assertSame('325459', \current($songs)->duration()->match(
+                    static fn($duration) => $duration->toString(),
+                    static fn() => null,
+                ));
                 $this->assertSame('1', \current($songs)->trackNumber()->toString());
                 $this->assertCount(1, \current($songs)->genres());
                 $this->assertSame(

@@ -8,7 +8,10 @@ use MusicCompanion\AppleMusic\SDK\Library\{
     Album,
     Artist,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Song\Id,
     Song\Name,
@@ -45,7 +48,7 @@ class SongTest extends TestCase
                 $song = new Song(
                     $id,
                     $name,
-                    $duration,
+                    Maybe::of($duration),
                     $trackNumber,
                     $genres,
                     $albums,
@@ -54,7 +57,10 @@ class SongTest extends TestCase
 
                 $this->assertSame($id, $song->id());
                 $this->assertSame($name, $song->name());
-                $this->assertSame($duration, $song->duration());
+                $this->assertSame($duration, $song->duration()->match(
+                    static fn($duration) => $duration,
+                    static fn() => null,
+                ));
                 $this->assertSame($genres, $song->genres());
                 $this->assertSame($albums, $song->albums());
                 $this->assertSame($artists, $song->artists());

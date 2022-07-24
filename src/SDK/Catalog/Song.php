@@ -14,7 +14,10 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Song\{
 };
 use Innmind\Url\Url;
 use Innmind\TimeContinuum\PointInTime;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 
 final class Song
 {
@@ -26,7 +29,8 @@ final class Song
     private DiscNumber $discNumber;
     /** @var Set<Genre> */
     private Set $genres;
-    private ?Duration $duration;
+    /** @var Maybe<Duration> */
+    private Maybe $duration;
     private PointInTime $release;
     private Name $name;
     private ISRC $isrc;
@@ -40,6 +44,7 @@ final class Song
     /**
      * @param Set<Url> $previews
      * @param Set<Genre> $genres
+     * @param Maybe<Duration> $duration
      * @param Set<Artist\Id> $artists
      * @param Set<Album\Id> $albums
      */
@@ -50,7 +55,7 @@ final class Song
         Url $url,
         DiscNumber $discNumber,
         Set $genres,
-        ?Duration $duration,
+        Maybe $duration,
         PointInTime $release,
         Name $name,
         ISRC $isrc,
@@ -111,15 +116,11 @@ final class Song
         return $this->genres;
     }
 
-    public function durationKnown(): bool
+    /**
+     * @return Maybe<Duration>
+     */
+    public function duration(): Maybe
     {
-        return $this->duration instanceof Duration;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function duration(): Duration
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->duration;
     }
 

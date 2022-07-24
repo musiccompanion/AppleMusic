@@ -21,6 +21,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Song as SongSet,
     Artist as ArtistSet,
 };
+use Innmind\Immutable\Maybe;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -56,7 +57,7 @@ class AlbumTest extends TestCase
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $album = new Album(
                     $id,
-                    $artwork,
+                    Maybe::of($artwork),
                     $name,
                     $single,
                     $url,
@@ -72,7 +73,10 @@ class AlbumTest extends TestCase
                 );
 
                 $this->assertSame($id, $album->id());
-                $this->assertSame($artwork, $album->artwork());
+                $this->assertSame($artwork, $album->artwork()->match(
+                    static fn($artwork) => $artwork,
+                    static fn() => null,
+                ));
                 $this->assertSame($name, $album->name());
                 $this->assertSame($single, $album->single());
                 $this->assertSame($url, $album->url());

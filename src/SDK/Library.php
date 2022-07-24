@@ -21,6 +21,7 @@ use Innmind\Json\Json;
 use Innmind\Immutable\{
     Set,
     Sequence,
+    Maybe,
 };
 
 final class Library
@@ -102,11 +103,13 @@ final class Library
                 $albums = ($albums)(new Album(
                     new Album\Id($album['id']),
                     new Album\Name($album['attributes']['name']),
-                    \array_key_exists('artwork', $album['attributes']) ? new Album\Artwork(
-                        Album\Artwork\Width::of($album['attributes']['artwork']['width']),
-                        Album\Artwork\Height::of($album['attributes']['artwork']['height']),
-                        Url::of($album['attributes']['artwork']['url']),
-                    ) : null,
+                    Maybe::of($album['attributes']['artwork'] ?? null)->map(
+                        static fn($artwork) => new Album\Artwork(
+                            Maybe::of($artwork['width'])->map(Album\Artwork\Width::of(...)),
+                            Maybe::of($artwork['height'])->map(Album\Artwork\Height::of(...)),
+                            Url::of($artwork['url']),
+                        ),
+                    ),
                     Set::of(...$album['relationships']['artists']['data'])->map(
                         static fn($artist) => new Artist\Id($artist['id']),
                     ),
@@ -139,7 +142,7 @@ final class Library
                 $songs = ($songs)(new Song(
                     new Song\Id($song['id']),
                     new Song\Name($song['attributes']['name']),
-                    Song\Duration::of($song['attributes']['durationInMillis'] ?? null),
+                    Maybe::of($song['attributes']['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
                     new Song\TrackNumber($song['attributes']['trackNumber']),
                     Set::of(...$song['attributes']['genreNames'])->map(
                         static fn($genre) => new Song\Genre($genre),

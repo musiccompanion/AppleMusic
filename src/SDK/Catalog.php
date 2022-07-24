@@ -27,6 +27,7 @@ use Innmind\Immutable\{
     Set,
     Sequence,
     Str,
+    Maybe,
 };
 
 final class Catalog
@@ -69,11 +70,6 @@ final class Catalog
         /** @var array{data: array{0: array{attributes: array{artwork?: array{width: int, height: int, url: string, bgColor?: string, textColor1?: string, textColor2?: string, textColor3?: string, textColor4?: string}, name: string, isSingle: bool, url: string, isComplete: bool, genreNames: list<string>, isMasteredForItunes: bool, releaseDate: string, recordLabel: string, copyright?: string, editorialNotes?: array{standard: string, short: string}}, relationships: array{tracks: array{data: list<array{id: int}>}, artists: array{data: list<array{id: int}>}}}}} */
         $resource = $this->get($this->url("albums/{$id->toString()}"));
         $attributes = $resource['data'][0]['attributes'];
-        $bgColor = $attributes['artwork']['bgColor'] ?? null;
-        $textColor1 = $attributes['artwork']['textColor1'] ?? null;
-        $textColor2 = $attributes['artwork']['textColor2'] ?? null;
-        $textColor3 = $attributes['artwork']['textColor3'] ?? null;
-        $textColor4 = $attributes['artwork']['textColor4'] ?? null;
         $releaseDate = $attributes['releaseDate'];
 
         if (Str::of($releaseDate)->matches('~^\d{4}$~')) {
@@ -90,16 +86,18 @@ final class Catalog
         /** @psalm-suppress RedundantCastGivenDocblockType */
         return new Album(
             $id,
-            \array_key_exists('artwork', $attributes) ? new Artwork(
-                new Artwork\Width($attributes['artwork']['width']),
-                new Artwork\Height($attributes['artwork']['height']),
-                Url::of($attributes['artwork']['url']),
-                \is_string($bgColor) ? RGBA::of($bgColor) : null,
-                \is_string($textColor1) ? RGBA::of($textColor1) : null,
-                \is_string($textColor2) ? RGBA::of($textColor2) : null,
-                \is_string($textColor3) ? RGBA::of($textColor3) : null,
-                \is_string($textColor4) ? RGBA::of($textColor4) : null,
-            ) : null,
+            Maybe::of($attributes['artwork'] ?? null)->map(
+                static fn($artwork) => new Artwork(
+                    new Artwork\Width($artwork['width']),
+                    new Artwork\Height($artwork['height']),
+                    Url::of($artwork['url']),
+                    Maybe::of($artwork['bgColor'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($artwork['textColor1'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($artwork['textColor2'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($artwork['textColor3'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($artwork['textColor4'] ?? null)->map(RGBA::of(...)),
+                ),
+            ),
             new Album\Name($attributes['name']),
             $attributes['isSingle'],
             Url::of($attributes['url']),
@@ -132,11 +130,6 @@ final class Catalog
         /** @var array{data: array{0: array{attributes: array{previews: list<array{url: string}>, artwork: array{width: int, height: int, url: string, bgColor?: string, textColor1?: string, textColor2?: string, textColor3?: string, textColor4?: string}, url: string, discNumber: int, genreNames: list<string>, durationInMillis?: int, releaseDate: string, name: string, isrc: string, trackNumber: int, composerName?: string}, relationships: array{artists: array{data: list<array{id: int}>}, albums: array{data: list<array{id: int}>}}}}} */
         $resource = $this->get($this->url("songs/{$id->toString()}"));
         $attributes = $resource['data'][0]['attributes'];
-        $bgColor = $attributes['artwork']['bgColor'] ?? null;
-        $textColor1 = $attributes['artwork']['textColor1'] ?? null;
-        $textColor2 = $attributes['artwork']['textColor2'] ?? null;
-        $textColor3 = $attributes['artwork']['textColor3'] ?? null;
-        $textColor4 = $attributes['artwork']['textColor4'] ?? null;
 
         /** @psalm-suppress RedundantCastGivenDocblockType */
         return new Song(
@@ -148,18 +141,18 @@ final class Catalog
                 new Artwork\Width($attributes['artwork']['width']),
                 new Artwork\Height($attributes['artwork']['height']),
                 Url::of($attributes['artwork']['url']),
-                \is_string($bgColor) ? RGBA::of($bgColor) : null,
-                \is_string($textColor1) ? RGBA::of($textColor1) : null,
-                \is_string($textColor2) ? RGBA::of($textColor2) : null,
-                \is_string($textColor3) ? RGBA::of($textColor3) : null,
-                \is_string($textColor4) ? RGBA::of($textColor4) : null,
+                Maybe::of($attributes['artwork']['bgColor'] ?? null)->map(RGBA::of(...)),
+                Maybe::of($attributes['artwork']['textColor1'] ?? null)->map(RGBA::of(...)),
+                Maybe::of($attributes['artwork']['textColor2'] ?? null)->map(RGBA::of(...)),
+                Maybe::of($attributes['artwork']['textColor3'] ?? null)->map(RGBA::of(...)),
+                Maybe::of($attributes['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
             ),
             Url::of($attributes['url']),
             new Song\DiscNumber($attributes['discNumber']),
             Set::of(...$attributes['genreNames'])->map(
                 static fn($genre) => new Genre($genre),
             ),
-            Song\Duration::of($attributes['durationInMillis'] ?? null),
+            Maybe::of($attributes['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
             $this->clock->at($attributes['releaseDate'])->match(
                 static fn($date) => $date,
                 static fn() => throw new \RuntimeException,

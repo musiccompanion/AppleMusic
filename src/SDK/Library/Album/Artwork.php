@@ -11,17 +11,26 @@ use Innmind\Url\{
     Url,
     Path,
 };
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
+};
 
 final class Artwork
 {
-    private ?Width $width;
-    private ?Height $height;
+    /** @var Maybe<Width> */
+    private Maybe $width;
+    /** @var Maybe<Height> */
+    private Maybe $height;
     private Url $url;
 
+    /**
+     * @param Maybe<Width> $width
+     * @param Maybe<Height> $height
+     */
     public function __construct(
-        ?Width $width,
-        ?Height $height,
+        Maybe $width,
+        Maybe $height,
         Url $url,
     ) {
         $this->width = $width;
@@ -29,27 +38,19 @@ final class Artwork
         $this->url = $url;
     }
 
-    public function widthKnown(): bool
+    /**
+     * @return Maybe<Width>
+     */
+    public function width(): Maybe
     {
-        return $this->width instanceof Width;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function width(): Width
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->width;
     }
 
-    public function heightKnown(): bool
+    /**
+     * @return Maybe<Height>
+     */
+    public function height(): Maybe
     {
-        return $this->height instanceof Height;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function height(): Height
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->height;
     }
 

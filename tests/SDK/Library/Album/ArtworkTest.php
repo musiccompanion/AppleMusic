@@ -9,6 +9,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Library\Album\Artwork\{
     Height,
 };
 use Innmind\Url\Url as ConcreteUrl;
+use Innmind\Immutable\Maybe;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -30,13 +31,19 @@ class ArtworkTest extends TestCase
             )
             ->then(function($width, $height, $url) {
                 $artwork = new Artwork(
-                    $width,
-                    $height,
+                    Maybe::of($width),
+                    Maybe::of($height),
                     $url,
                 );
 
-                $this->assertSame($width, $artwork->width());
-                $this->assertSame($height, $artwork->height());
+                $this->assertSame($width, $artwork->width()->match(
+                    static fn($width) => $width,
+                    static fn() => null,
+                ));
+                $this->assertSame($height, $artwork->height()->match(
+                    static fn($height) => $height,
+                    static fn() => null,
+                ));
                 $this->assertSame($url, $artwork->url());
             });
     }
@@ -50,8 +57,8 @@ class ArtworkTest extends TestCase
             )
             ->then(function($width, $height) {
                 $artwork = new Artwork(
-                    $width,
-                    $height,
+                    Maybe::of($width),
+                    Maybe::of($height),
                     ConcreteUrl::of('https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg'),
                 );
 
