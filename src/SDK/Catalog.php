@@ -61,7 +61,17 @@ final class Catalog
          *             attributes: array{
          *                 name: string,
          *                 url: string,
-         *                 genreNames: list<string>
+         *                 genreNames: list<string>,
+         *                 artwork?: array{
+         *                     url: string,
+         *                     height: int,
+         *                     width: int,
+         *                     bgColor?: string,
+         *                     textColor1?: string,
+         *                     textColor2?: string,
+         *                     textColor3?: string,
+         *                     textColor4?: string,
+         *                 },
          *             },
          *             relationships: array{
          *                 albums: array{
@@ -81,6 +91,18 @@ final class Catalog
             Url::of($resource['data'][0]['attributes']['url']),
             Set::of(...$resource['data'][0]['attributes']['genreNames'])->map(Genre::of(...)),
             $this->artistAlbums($resource['data'][0]['relationships']['albums']),
+            Maybe::of($resource['data'][0]['attributes']['artwork'] ?? null)->map(
+                static fn($artwork) => new Artwork(
+                    new Artwork\Width($artwork['width']),
+                    new Artwork\Height($artwork['height']),
+                    Url::of($artwork['url']),
+                    Maybe::of($artwork['bgColor'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($artwork['textColor1'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($artwork['textColor2'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($artwork['textColor3'] ?? null)->map(RGBA::of(...)),
+                    Maybe::of($artwork['textColor4'] ?? null)->map(RGBA::of(...)),
+                ),
+            ),
         );
     }
 
