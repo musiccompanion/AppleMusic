@@ -112,7 +112,6 @@ class SDKTest extends TestCase
 
                 $this->assertInstanceOf(Storefronts::class, $sdk->storefronts());
                 $this->assertInstanceOf(Catalog::class, $sdk->catalog($storefront));
-                $this->assertInstanceOf(Library::class, $sdk->library($userToken));
                 $this->assertNotEmpty($sdk->jwt());
                 $sdk->storefronts()->all(); // trigger the assertion on the transport
             });

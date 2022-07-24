@@ -11,6 +11,7 @@ use MusicCompanion\AppleMusic\SDK\{
 };
 use Innmind\Http\{
     Message\Request\Request,
+    Message\Response,
     Message\Method,
     ProtocolVersion,
     Headers,
@@ -29,41 +30,56 @@ final class Library
     private HttpTransport $fulfill;
     private Header $authorization;
     private Header $userToken;
+    private Storefront $storefront;
 
     public function __construct(
         HttpTransport $fulfill,
         Header $authorization,
         Header $userToken,
+        Storefront $storefront,
     ) {
         $this->fulfill = $fulfill;
         $this->authorization = $authorization;
         $this->userToken = $userToken;
+        $this->storefront = $storefront;
+    }
+
+    /**
+     * @return Maybe<self>
+     */
+    public static function of(
+        HttpTransport $fulfill,
+        Header $authorization,
+        Header $userToken,
+    ): Maybe {
+        return $fulfill(new Request(
+            Url::of('/v1/me/storefront'),
+            Method::get,
+            ProtocolVersion::v20,
+            Headers::of(
+                $authorization,
+                $userToken,
+            ),
+        ))
+            ->map(self::decoreStorefronts(...))
+            ->map(static fn($storefronts) => Sequence::of(...$storefronts['data']))
+            ->flatMap(static fn($storefronts) => $storefronts->first())
+            ->map(static fn($storefront) => new self(
+                $fulfill,
+                $authorization,
+                $userToken,
+                new Storefront(
+                    new Storefront\Id($storefront['id']),
+                    new Storefront\Name($storefront['attributes']['name']),
+                    Storefront\Language::of($storefront['attributes']['defaultLanguageTag']),
+                    Set::of(...$storefront['attributes']['supportedLanguageTags'])->map(Storefront\Language::of(...)),
+                ),
+            ));
     }
 
     public function storefront(): Storefront
     {
-        /**
-         * @var array{
-         *     data: array{
-         *         0: array{
-         *             id: string,
-         *             attributes: array{
-         *                 name: string,
-         *                 defaultLanguageTag: string,
-         *                 supportedLanguageTags: list<string>
-         *             }
-         *         }
-         *     }
-         * }
-         */
-        $resource = $this->get(Url::of('/v1/me/storefront'));
-
-        return new Storefront(
-            new Storefront\Id($resource['data'][0]['id']),
-            new Storefront\Name($resource['data'][0]['attributes']['name']),
-            Storefront\Language::of($resource['data'][0]['attributes']['defaultLanguageTag']),
-            Set::of(...$resource['data'][0]['attributes']['supportedLanguageTags'])->map(Storefront\Language::of(...)),
-        );
+        return $this->storefront;
     }
 
     /**
@@ -258,5 +274,34 @@ final class Library
     private function url(string $path): Url
     {
         return Url::of("/v1/me/library/$path");
+    }
+
+    /**
+     * @return array{
+     *     data: list<array{
+     *         id: string,
+     *         attributes: array{
+     *             name: string,
+     *             defaultLanguageTag: string,
+     *             supportedLanguageTags: list<string>
+     *         }
+     *     }>
+     * }
+     */
+    private static function decoreStorefronts(Response $response): array
+    {
+        /**
+         * @var array{
+         *     data: list<array{
+         *         id: string,
+         *         attributes: array{
+         *             name: string,
+         *             defaultLanguageTag: string,
+         *             supportedLanguageTags: list<string>
+         *         }
+         *     }>
+         * }
+         */
+        return Json::decode($response->body()->toString());
     }
 }

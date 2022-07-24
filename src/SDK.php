@@ -13,6 +13,7 @@ use Innmind\Http\Header\{
     Header,
     Value\Value,
 };
+use Innmind\Immutable\Maybe;
 use Lcobucci\JWT\{
     Configuration,
     Signer\Ecdsa\Sha256,
@@ -71,9 +72,12 @@ final class SDK
         return new SDK\Storefronts($this->transport, $this->authorization);
     }
 
-    public function library(string $userToken): SDK\Library
+    /**
+     * @return Maybe<SDK\Library>
+     */
+    public function library(string $userToken): Maybe
     {
-        return new SDK\Library(
+        return SDK\Library::of(
             $this->transport,
             $this->authorization,
             new Header('Music-User-Token', new Value($userToken)),
