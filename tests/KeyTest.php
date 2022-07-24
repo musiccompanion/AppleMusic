@@ -29,7 +29,7 @@ class KeyTest extends TestCase
                 $id = \implode(\array_pad([], 10, $id));
                 $teamId = \implode(\array_pad([], 10, $teamId));
 
-                $key = new Key(
+                $key = Key::of(
                     $id,
                     $teamId,
                     $content = $this->createMock(Content::class),
@@ -54,7 +54,7 @@ class KeyTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage("Invalid key id '$id'");
 
-                new Key(
+                Key::of(
                     $id,
                     $teamId,
                     Content\None::of(),
@@ -75,7 +75,7 @@ class KeyTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage("Invalid team id '$teamId'");
 
-                new Key(
+                Key::of(
                     $id,
                     $teamId,
                     Content\None::of(),

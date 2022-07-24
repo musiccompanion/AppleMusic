@@ -51,7 +51,7 @@ class SDKTest extends TestCase
             ->then(function($storefront, $userToken) {
                 $clock = $this->createMock(Clock::class);
                 $transport = $this->createMock(Transport::class);
-                $key = new Key(
+                $key = Key::of(
                     'AAAAAAAAAA',
                     'BBBBBBBBBB',
                     // this is a randomly generated key

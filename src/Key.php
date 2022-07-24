@@ -16,7 +16,7 @@ final class Key
     private string $teamId;
     private Content $content;
 
-    public function __construct(string $id, string $teamId, Content $content)
+    private function __construct(string $id, string $teamId, Content $content)
     {
         if (!Str::of($id)->matches('~^[A-Z0-9]{10}$~')) {
             throw new DomainException("Invalid key id '$id'");
@@ -29,6 +29,16 @@ final class Key
         $this->id = $id;
         $this->teamId = $teamId;
         $this->content = $content;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @throws DomainException When the id or teamId are invalid
+     */
+    public static function of(string $id, string $teamId, Content $content): self
+    {
+        return new self($id, $teamId, $content);
     }
 
     public function id(): string
