@@ -833,26 +833,17 @@ JSON
 
                 $this->assertInstanceOf(Album::class, $album);
                 $this->assertSame($id, $album->id());
-                $this->assertSame(6000, $album->artwork()->match(
-                    static fn($artwork) => $artwork->width()->toInt(),
-                    static fn() => null,
-                ));
-                $this->assertSame(6000, $album->artwork()->match(
-                    static fn($artwork) => $artwork->height()->toInt(),
-                    static fn() => null,
-                ));
+                $this->assertSame(6000, $album->artwork()->width()->toInt());
+                $this->assertSame(6000, $album->artwork()->height()->toInt());
                 $this->assertSame(
                     'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg',
-                    $album->artwork()->match(
-                        static fn($artwork) => $artwork->url()->toString(),
-                        static fn() => null,
-                    ),
+                    $album->artwork()->url()->toString(),
                 );
                 $this->assertSame(
                     '#d9c8b6',
                     $album
                         ->artwork()
-                        ->flatMap(static fn($artwork) => $artwork->backgroundColor())
+                        ->backgroundColor()
                         ->match(
                             static fn($color) => $color->toString(),
                             static fn() => null,
@@ -862,7 +853,7 @@ JSON
                     '#100707',
                     $album
                         ->artwork()
-                        ->flatMap(static fn($artwork) => $artwork->textColor1())
+                        ->textColor1()
                         ->match(
                             static fn($color) => $color->toString(),
                             static fn() => null,
@@ -872,7 +863,7 @@ JSON
                     '#441016',
                     $album
                         ->artwork()
-                        ->flatMap(static fn($artwork) => $artwork->textColor2())
+                        ->textColor2()
                         ->match(
                             static fn($color) => $color->toString(),
                             static fn() => null,
@@ -882,7 +873,7 @@ JSON
                     '#382e2a',
                     $album
                         ->artwork()
-                        ->flatMap(static fn($artwork) => $artwork->textColor3())
+                        ->textColor3()
                         ->match(
                             static fn($color) => $color->toString(),
                             static fn() => null,
@@ -892,7 +883,7 @@ JSON
                     '#623436',
                     $album
                         ->artwork()
-                        ->flatMap(static fn($artwork) => $artwork->textColor4())
+                        ->textColor4()
                         ->match(
                             static fn($color) => $color->toString(),
                             static fn() => null,

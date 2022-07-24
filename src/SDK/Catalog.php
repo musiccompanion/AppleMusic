@@ -154,17 +154,15 @@ final class Catalog
 
         return new Album(
             $id,
-            Maybe::of($attributes['artwork'] ?? null)->map(
-                static fn($artwork) => new Artwork(
-                    new Artwork\Width($artwork['width']),
-                    new Artwork\Height($artwork['height']),
-                    Url::of($artwork['url']),
-                    Maybe::of($artwork['bgColor'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($artwork['textColor1'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($artwork['textColor2'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($artwork['textColor3'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($artwork['textColor4'] ?? null)->map(RGBA::of(...)),
-                ),
+            new Artwork(
+                new Artwork\Width($attributes['artwork']['width']),
+                new Artwork\Height($attributes['artwork']['height']),
+                Url::of($attributes['artwork']['url']),
+                Maybe::of($attributes['artwork']['bgColor'] ?? null)->map(RGBA::of(...)),
+                Maybe::of($attributes['artwork']['textColor1'] ?? null)->map(RGBA::of(...)),
+                Maybe::of($attributes['artwork']['textColor2'] ?? null)->map(RGBA::of(...)),
+                Maybe::of($attributes['artwork']['textColor3'] ?? null)->map(RGBA::of(...)),
+                Maybe::of($attributes['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
             ),
             new Album\Name($attributes['name']),
             $attributes['isSingle'],

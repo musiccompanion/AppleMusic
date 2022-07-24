@@ -20,8 +20,7 @@ use Innmind\Immutable\{
 final class Album
 {
     private Id $id;
-    /** @var Maybe<Artwork> */
-    private Maybe $artwork;
+    private Artwork $artwork;
     private Name $name;
     private bool $single;
     private Url $url;
@@ -40,7 +39,6 @@ final class Album
     private Set $artists;
 
     /**
-     * @param Maybe<Artwork> $artwork
      * @param Set<Genre> $genres
      * @param Set<Song\Id> $tracks
      * @param Maybe<PointInTime> $release
@@ -48,7 +46,7 @@ final class Album
      */
     public function __construct(
         Id $id,
-        Maybe $artwork,
+        Artwork $artwork,
         Name $name,
         bool $single,
         Url $url,
@@ -83,10 +81,7 @@ final class Album
         return $this->id;
     }
 
-    /**
-     * @return Maybe<Artwork>
-     */
-    public function artwork(): Maybe
+    public function artwork(): Artwork
     {
         return $this->artwork;
     }

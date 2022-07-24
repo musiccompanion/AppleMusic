@@ -57,7 +57,7 @@ class AlbumTest extends TestCase
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $album = new Album(
                     $id,
-                    Maybe::of($artwork),
+                    $artwork,
                     $name,
                     $single,
                     $url,
@@ -73,10 +73,7 @@ class AlbumTest extends TestCase
                 );
 
                 $this->assertSame($id, $album->id());
-                $this->assertSame($artwork, $album->artwork()->match(
-                    static fn($artwork) => $artwork,
-                    static fn() => null,
-                ));
+                $this->assertSame($artwork, $album->artwork());
                 $this->assertSame($name, $album->name());
                 $this->assertSame($single, $album->single());
                 $this->assertSame($url, $album->url());
