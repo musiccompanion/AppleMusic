@@ -46,7 +46,7 @@ class SDKTest extends TestCase
         $this
             ->forAll(
                 Storefront\Id::any(),
-                new Set\Strings,
+                Set\Strings::any(),
             )
             ->then(function($storefront, $userToken) {
                 $clock = $this->createMock(Clock::class);

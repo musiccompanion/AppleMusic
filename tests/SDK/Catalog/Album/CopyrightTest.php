@@ -17,7 +17,7 @@ class CopyrightTest extends TestCase
     public function testAnyStringIsAccepted()
     {
         $this
-            ->forAll(new Set\Strings)
+            ->forAll(Set\Strings::any())
             ->then(function(string $string) {
                 $copyright = new Copyright($string);
 

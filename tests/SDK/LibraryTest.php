@@ -149,44 +149,41 @@ JSON
                     ->method('body')
                     ->willReturn($body2 = $this->createMock(Content::class));
                 $fulfill
-                    ->expects($this->exactly(2))
+                    ->expects($matcher = $this->exactly(2))
                     ->method('__invoke')
-                    ->withConsecutive(
-                        [$this->callback(static function($request) use ($authorization, $userToken): bool {
-                            return $request->url()->toString() === 'https://api.music.apple.com/v1/me/library/artists?include=catalog' &&
-                                $request->method()->toString() === 'GET' &&
-                                $authorization === $request->headers()->get('authorization')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                ) &&
-                                $userToken === $request->headers()->get('music-user-token')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                );
-                        })],
-                        [$this->callback(static function($request) use ($authorization, $userToken): bool {
-                            return $request->url()->toString() === 'https://api.music.apple.com/v1/me/library/artists?offset=25&include=catalog' &&
-                                $request->method()->toString() === 'GET' &&
-                                $authorization === $request->headers()->get('authorization')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                ) &&
-                                $userToken === $request->headers()->get('music-user-token')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                );
-                        })],
-                    )
-                    ->will($this->onConsecutiveCalls(
-                        Either::right(new Success(
-                            $this->createMock(Request::class),
-                            $response1,
-                        )),
-                        Either::right(new Success(
-                            $this->createMock(Request::class),
-                            $response2,
-                        )),
-                    ));
+                    ->willReturnCallback(function($request) use ($matcher, $authorization, $userToken, $response1, $response2) {
+                        $this->assertSame('GET', $request->method()->toString());
+                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ));
+                        $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ));
+
+                        match ($matcher->numberOfInvocations()) {
+                            1 => $this->assertSame(
+                                'https://api.music.apple.com/v1/me/library/artists?include=catalog',
+                                $request->url()->toString(),
+                            ),
+                            2 => $this->assertSame(
+                                'https://api.music.apple.com/v1/me/library/artists?offset=25&include=catalog',
+                                $request->url()->toString(),
+                            ),
+                        };
+
+                        return match ($matcher->numberOfInvocations()) {
+                            1 => Either::right(new Success(
+                                $this->createMock(Request::class),
+                                $response1,
+                            )),
+                            2 => Either::right(new Success(
+                                $this->createMock(Request::class),
+                                $response2,
+                            )),
+                        };
+                    });
                 $body1
                     ->expects($this->once())
                     ->method('toString')
@@ -294,44 +291,41 @@ JSON
                     ->method('body')
                     ->willReturn($body2 = $this->createMock(Content::class));
                 $fulfill
-                    ->expects($this->exactly(2))
+                    ->expects($matcher = $this->exactly(2))
                     ->method('__invoke')
-                    ->withConsecutive(
-                        [$this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
-                            return $request->url()->toString() === "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?include=artists" &&
-                                $request->method()->toString() === 'GET' &&
-                                $authorization === $request->headers()->get('authorization')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                ) &&
-                                $userToken === $request->headers()->get('music-user-token')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                );
-                        })],
-                        [$this->callback(static function($request) use ($artist, $authorization, $userToken): bool {
-                            return $request->url()->toString() === "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists" &&
-                                $request->method()->toString() === 'GET' &&
-                                $authorization === $request->headers()->get('authorization')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                ) &&
-                                $userToken === $request->headers()->get('music-user-token')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                );
-                        })],
-                    )
-                    ->will($this->onConsecutiveCalls(
-                        Either::right(new Success(
-                            $this->createMock(Request::class),
-                            $response1,
-                        )),
-                        Either::right(new Success(
-                            $this->createMock(Request::class),
-                            $response2,
-                        )),
-                    ));
+                    ->willReturnCallback(function($request) use ($matcher, $artist, $authorization, $userToken, $response1, $response2) {
+                        $this->assertSame('GET', $request->method()->toString());
+                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ));
+                        $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ));
+
+                        match ($matcher->numberOfInvocations()) {
+                            1 => $this->assertSame(
+                                "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?include=artists",
+                                $request->url()->toString(),
+                            ),
+                            2 => $this->assertSame(
+                                "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists",
+                                $request->url()->toString(),
+                            ),
+                        };
+
+                        return match ($matcher->numberOfInvocations()) {
+                            1 => Either::right(new Success(
+                                $this->createMock(Request::class),
+                                $response1,
+                            )),
+                            2 => Either::right(new Success(
+                                $this->createMock(Request::class),
+                                $response2,
+                            )),
+                        };
+                    });
                 $body1
                     ->expects($this->once())
                     ->method('toString')
@@ -509,44 +503,41 @@ JSON
                     ->method('body')
                     ->willReturn($body2 = $this->createMock(Content::class));
                 $fulfill
-                    ->expects($this->exactly(2))
+                    ->expects($matcher = $this->exactly(2))
                     ->method('__invoke')
-                    ->withConsecutive(
-                        [$this->callback(static function($request) use ($album, $authorization, $userToken): bool {
-                            return $request->url()->toString() === "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists" &&
-                                $request->method()->toString() === 'GET' &&
-                                $authorization === $request->headers()->get('authorization')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                ) &&
-                                $userToken === $request->headers()->get('music-user-token')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                );
-                        })],
-                        [$this->callback(static function($request) use ($album, $authorization, $userToken): bool {
-                            return $request->url()->toString() === "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists" &&
-                                $request->method()->toString() === 'GET' &&
-                                $authorization === $request->headers()->get('authorization')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                ) &&
-                                $userToken === $request->headers()->get('music-user-token')->match(
-                                    static fn($header) => $header,
-                                    static fn() => null,
-                                );
-                        })],
-                    )
-                    ->will($this->onConsecutiveCalls(
-                        Either::right(new Success(
-                            $this->createMock(Request::class),
-                            $response1,
-                        )),
-                        Either::right(new Success(
-                            $this->createMock(Request::class),
-                            $response2,
-                        )),
-                    ));
+                    ->willReturnCallback(function($request) use ($matcher, $album, $authorization, $userToken, $response1, $response2) {
+                        $this->assertSame('GET', $request->method()->toString());
+                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ));
+                        $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ));
+
+                        match ($matcher->numberOfInvocations()) {
+                            1 => $this->assertSame(
+                                "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists",
+                                $request->url()->toString(),
+                            ),
+                            2 => $this->assertSame(
+                                "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists",
+                                $request->url()->toString(),
+                            ),
+                        };
+
+                        return match ($matcher->numberOfInvocations()) {
+                            1 => Either::right(new Success(
+                                $this->createMock(Request::class),
+                                $response1,
+                            )),
+                            2 => Either::right(new Success(
+                                $this->createMock(Request::class),
+                                $response2,
+                            )),
+                        };
+                    });
                 $body1
                     ->expects($this->once())
                     ->method('toString')

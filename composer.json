@@ -15,13 +15,13 @@
         "issues": "http://github.com/MusicCompanion/AppleMusic/issues"
     },
     "require": {
-        "php": "~8.1",
-        "innmind/immutable": "~4.4",
+        "php": "~8.2",
+        "innmind/immutable": "~4.4|~5.0",
         "innmind/url": "~4.1",
         "innmind/colour": "~4.0",
         "innmind/operating-system": "~3.1",
         "innmind/json": "^1.1",
-        "lcobucci/jwt": "~4.0"
+        "lcobucci/jwt": "~4.3|~5.0"
     },
     "autoload": {
         "psr-4": {
@@ -35,9 +35,9 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "~9.0",
-        "innmind/black-box": "~4.9",
-        "vimeo/psalm": "~4.4",
+        "phpunit/phpunit": "~10.2",
+        "innmind/black-box": "~5.5",
+        "vimeo/psalm": "~5.15",
         "innmind/coding-standard": "~2.0"
     }
 }

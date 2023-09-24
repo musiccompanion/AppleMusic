@@ -51,7 +51,7 @@ class ISRCTest extends TestCase
     public function testAnyRandomStringWillThrowAnException()
     {
         $this
-            ->forAll(new Set\Strings)
+            ->forAll(Set\Strings::any())
             ->then(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);

@@ -26,8 +26,8 @@ final class Artist
             Artist\Id::any(),
             Artist\Name::any(),
             Url::any(),
-            ISet::of(GenreModel::class, Genre::any()),
-            ISet::of(AlbumModel\Id::class, Album\Id::any()),
+            ISet::of(Genre::any()),
+            ISet::of(Album\Id::any()),
         );
     }
 }

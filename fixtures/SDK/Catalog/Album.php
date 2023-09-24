@@ -26,7 +26,7 @@ final class Album
                 return new Model($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists);
             },
             Album\Id::any(),
-            new Set\Either(
+            Set\Either::any(
                 Artwork::any(),
                 Set\Elements::of(null),
             ),
@@ -34,14 +34,14 @@ final class Album
             Set\Elements::of(true, false),
             Url::any(),
             Set\Elements::of(true, false),
-            ISet::of(GenreModel::class, Genre::any()),
-            ISet::of(SongModel\Id::class, Song\Id::any()),
+            ISet::of(Genre::any()),
+            ISet::of(Song\Id::any()),
             Set\Elements::of(true, false),
             PointInTime::any(),
             Album\RecordLabel::any(),
             Album\Copyright::any(),
             Album\EditorialNotes::any(),
-            ISet::of(ArtistModel\Id::class, Artist\Id::any()),
+            ISet::of(Artist\Id::any()),
         );
     }
 }

@@ -33,10 +33,12 @@ final class SDK
         Key $key,
         Period $tokenValidity,
     ) {
+        /** @psalm-suppress ArgumentTypeCoercion */
         $config = Configuration::forSymmetricSigner(
-            Sha256::create(),
+            new Sha256,
             InMemory::plainText($key->content()->toString()),
         );
+        /** @psalm-suppress ArgumentTypeCoercion */
         $jwt = $config
             ->builder()
             ->withHeader('alg', 'ES256')

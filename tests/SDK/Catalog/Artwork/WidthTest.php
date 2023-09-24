@@ -34,10 +34,12 @@ class WidthTest extends TestCase
         $this
             ->forAll(Set\Integers::below(1))
             ->then(function(int $negative) {
-                $this->expectException(DomainException::class);
-                $this->expectExceptionMessage((string) $negative);
-
-                new Width($negative);
+                try {
+                    new Width($negative);
+                    $this->fail('it should throw');
+                } catch (DomainException $e) {
+                    $this->assertSame((string) $negative, $e->getMessage());
+                }
             });
     }
 }

@@ -18,14 +18,13 @@ final class Id
             Set\Sequence::of(
                 Set\Decorate::immutable(
                     static fn($ord) => \chr($ord),
-                    new Set\Either(
+                    Set\Either::any(
                         Set\Integers::between(48, 57), // 0-9
                         Set\Integers::between(65, 90), // A-Z
                         Set\Integers::between(97, 122), // a-z
                     ),
                 ),
-                Set\Integers::between(1, 15),
-            ),
+            )->between(1, 15),
         );
 
         return Set\Decorate::immutable(

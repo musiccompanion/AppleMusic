@@ -19,14 +19,8 @@ final class Artwork
             static function($width, $height, $url): Model {
                 return new Model(Maybe::of($width), Maybe::of($height), $url);
             },
-            new Set\Either(
-                Artwork\Width::any(),
-                Set\Elements::of(null),
-            ),
-            new Set\Either(
-                Artwork\Height::any(),
-                Set\Elements::of(null),
-            ),
+            Set\Nullable::of(Artwork\Width::any()),
+            Set\Nullable::of(Artwork\Height::any()),
             Url::any(),
         );
     }
