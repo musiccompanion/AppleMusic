@@ -24,7 +24,7 @@ final class Album
             Album\Id::any(),
             Album\Name::any(),
             Album\Artwork::any(),
-            ISet::of(ArtistModel\Id::class, Artist\Id::any()),
+            ISet::of(Artist\Id::any()),
         );
     }
 }

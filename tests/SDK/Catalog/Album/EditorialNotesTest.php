@@ -17,7 +17,7 @@ class EditorialNotesTest extends TestCase
     public function testAnyStringIsAccepted()
     {
         $this
-            ->forAll(new Set\Strings, new Set\Strings)
+            ->forAll(Set\Strings::any(), Set\Strings::any())
             ->then(function(string $standard, string $short) {
                 $editorialNotes = new EditorialNotes($standard, $short);
 

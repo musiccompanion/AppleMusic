@@ -32,26 +32,11 @@ final class Artwork
             Artwork\Width::any(),
             Artwork\Height::any(),
             Url::any(),
-            new Set\Either(
-                Colour::any(),
-                Set\Elements::of(null),
-            ),
-            new Set\Either(
-                Colour::any(),
-                Set\Elements::of(null),
-            ),
-            new Set\Either(
-                Colour::any(),
-                Set\Elements::of(null),
-            ),
-            new Set\Either(
-                Colour::any(),
-                Set\Elements::of(null),
-            ),
-            new Set\Either(
-                Colour::any(),
-                Set\Elements::of(null),
-            ),
+            Set\Nullable::of(Colour::any()),
+            Set\Nullable::of(Colour::any()),
+            Set\Nullable::of(Colour::any()),
+            Set\Nullable::of(Colour::any()),
+            Set\Nullable::of(Colour::any()),
         );
     }
 }

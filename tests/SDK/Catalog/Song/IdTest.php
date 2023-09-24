@@ -34,10 +34,12 @@ class IdTest extends TestCase
         $this
             ->forAll(Set\Integers::below(0))
             ->then(function(int $negative) {
-                $this->expectException(DomainException::class);
-                $this->expectExceptionMessage((string) $negative);
-
-                Id::of($negative);
+                try {
+                    Id::of($negative);
+                    $this->fail('it should throw');
+                } catch (DomainException $e) {
+                    $this->assertSame((string) $negative, $e->getMessage());
+                }
             });
     }
 }
