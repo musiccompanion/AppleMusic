@@ -38,6 +38,7 @@ final class SDK
             new Sha256,
             InMemory::plainText($key->content()->toString()),
         );
+        /** @psalm-suppress ArgumentTypeCoercion */
         $jwt = $config
             ->builder()
             ->withHeader('alg', 'ES256')
