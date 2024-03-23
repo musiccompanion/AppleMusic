@@ -271,7 +271,7 @@ final class Library
             ),
         ))
             ->map(static fn($response) => $response->body()->toString())
-            ->map(Json::decode(...));
+            ->flatMap(Json::maybeDecode(...));
     }
 
     private function url(string $path): Url

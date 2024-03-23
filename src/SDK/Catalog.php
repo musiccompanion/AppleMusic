@@ -304,7 +304,7 @@ final class Catalog
                  */
                 $resource = $this
                     ->get($url)
-                    ->map(Json::decode(...))
+                    ->flatMap(Json::maybeDecode(...))
                     ->match(
                         static fn($genres): mixed => $genres,
                         static fn() => ['data' => []],
@@ -329,7 +329,7 @@ final class Catalog
         /** @var Search */
         $resource = $this
             ->get($url)
-            ->map(Json::decode(...))
+            ->flatMap(Json::maybeDecode(...))
             ->match(
                 static fn($result): mixed => $result,
                 static fn() => ['results' => []],
@@ -351,7 +351,7 @@ final class Catalog
                     /** @var Search */
                     $resource = $this
                         ->get(Url::of($artists['next']))
-                        ->map(Json::decode(...))
+                        ->flatMap(Json::maybeDecode(...))
                         ->match(
                             static fn($result): mixed => $result,
                             static fn() => ['results' => []],
@@ -376,7 +376,7 @@ final class Catalog
                     /** @var Search */
                     $resource = $this
                         ->get(Url::of($albums['next']))
-                        ->map(Json::decode(...))
+                        ->flatMap(Json::maybeDecode(...))
                         ->match(
                             static fn($result): mixed => $result,
                             static fn() => ['results' => []],
@@ -401,7 +401,7 @@ final class Catalog
                     /** @var Search */
                     $resource = $this
                         ->get(Url::of($songs['next']))
-                        ->map(Json::decode(...))
+                        ->flatMap(Json::maybeDecode(...))
                         ->match(
                             static fn($result): mixed => $result,
                             static fn() => ['results' => []],
@@ -433,7 +433,7 @@ final class Catalog
                 /** @var array{data: list<array{id: string}>, next?: string} */
                 $resources = $this
                     ->get(Url::of($resources['next']))
-                    ->map(Json::decode(...))
+                    ->flatMap(Json::maybeDecode(...))
                     ->match(
                         static fn($albums): mixed => $albums,
                         static fn() => ['data' => []],
