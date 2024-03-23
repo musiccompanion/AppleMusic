@@ -19,7 +19,7 @@
         "innmind/immutable": "~4.4|~5.0",
         "innmind/url": "~4.1",
         "innmind/colour": "~4.0",
-        "innmind/operating-system": "~4.0",
+        "innmind/operating-system": "~4.0|~5.0",
         "innmind/json": "^1.1",
         "lcobucci/jwt": "~4.3|~5.0"
     },

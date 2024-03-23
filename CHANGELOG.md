@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Support for `innmind/operating-system:~5.0`
+
 ### Changed
 
 - Requires `innmind/operating-system:~4.0`
