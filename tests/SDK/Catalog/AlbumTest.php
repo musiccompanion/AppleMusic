@@ -3,13 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\{
-    Album,
-    Genre,
-    Song,
-    Artist,
-};
-use Innmind\Immutable\Set;
+use MusicCompanion\AppleMusic\SDK\Catalog\Album;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
     Genre as GenreSet,

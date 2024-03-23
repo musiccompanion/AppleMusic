@@ -5,9 +5,6 @@ namespace Tests\MusicCompanion\AppleMusic\SDK;
 
 use MusicCompanion\AppleMusic\SDK\{
     Library,
-    Library\Artist,
-    Library\Album,
-    Library\Song,
     Storefront,
     HttpTransport,
 };
@@ -26,7 +23,6 @@ use Innmind\Http\{
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\{
-    Set,
     Sequence,
     Either,
 };

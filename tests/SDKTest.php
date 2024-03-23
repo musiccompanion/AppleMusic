@@ -7,7 +7,6 @@ use MusicCompanion\AppleMusic\{
     SDK,
     SDK\Storefronts,
     SDK\Catalog,
-    SDK\Library,
     Key,
 };
 use Innmind\TimeContinuum\{

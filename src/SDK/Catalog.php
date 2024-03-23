@@ -10,7 +10,6 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog\Song,
     Catalog\Artwork,
     Catalog\Search,
-    Storefront,
 };
 use Innmind\TimeContinuum\{
     Clock,

@@ -5,7 +5,6 @@ namespace Tests\MusicCompanion\AppleMusic\SDK;
 
 use MusicCompanion\AppleMusic\SDK\{
     Storefronts,
-    Storefront,
     HttpTransport,
 };
 use Innmind\HttpTransport\{

@@ -11,10 +11,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Library\Album\Artwork\{
 use Innmind\Url\Url as ConcreteUrl;
 use Innmind\Immutable\Maybe;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Url\Url;
 
 class ArtworkTest extends TestCase

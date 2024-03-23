@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Fixtures\MusicCompanion\AppleMusic\SDK\Library;
 
-use MusicCompanion\AppleMusic\SDK\Library\{
-    Album as Model,
-    Artist as ArtistModel,
-};
+use MusicCompanion\AppleMusic\SDK\Library\Album as Model;
 use Innmind\BlackBox\Set;
 use Fixtures\Innmind\Immutable\Set as ISet;
 

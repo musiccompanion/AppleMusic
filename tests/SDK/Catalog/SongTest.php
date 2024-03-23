@@ -3,16 +3,8 @@ declare(strict_types = 1);
 
 namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\{
-    Song,
-    Artist,
-    Album,
-    Genre,
-};
-use Innmind\Immutable\{
-    Set,
-    Maybe,
-};
+use MusicCompanion\AppleMusic\SDK\Catalog\Song;
+use Innmind\Immutable\Maybe;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
     Song\Id,
@@ -27,10 +19,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Album as AlbumSet,
 };
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set as DataSet,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Immutable\Set as ISet;
 use Fixtures\Innmind\Url\Url as FUrl;
 use Fixtures\Innmind\TimeContinuum\Earth\PointInTime;

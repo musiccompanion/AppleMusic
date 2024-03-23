@@ -7,7 +7,6 @@ use MusicCompanion\AppleMusic\SDK\{
     Library\Artist,
     Library\Album,
     Library\Song,
-    Storefront,
 };
 use Innmind\Http\{
     Message\Request\Request,

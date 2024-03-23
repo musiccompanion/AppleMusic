@@ -3,11 +3,7 @@ declare(strict_types = 1);
 
 namespace Fixtures\MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\{
-    Artist as Model,
-    Album as AlbumModel,
-    Genre as GenreModel,
-};
+use MusicCompanion\AppleMusic\SDK\Catalog\Artist as Model;
 use Innmind\BlackBox\Set;
 use Fixtures\Innmind\Immutable\Set as ISet;
 use Fixtures\Innmind\Url\Url;

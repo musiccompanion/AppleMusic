@@ -7,7 +7,6 @@ use Innmind\HttpTransport\Transport;
 use Innmind\Http\Message\{
     Request,
     Response,
-    StatusCode,
 };
 use Innmind\Url\Url;
 use Innmind\Immutable\Maybe;

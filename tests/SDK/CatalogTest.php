@@ -8,15 +8,12 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog\Artist,
     Catalog\Album,
     Catalog\Song,
-    Catalog\Genre,
     Catalog\Search,
     HttpTransport,
 };
 use Innmind\TimeContinuum\{
     Clock,
     PointInTime,
-    Earth,
-    Format,
 };
 use Innmind\HttpTransport\{
     Transport,
@@ -31,7 +28,6 @@ use Innmind\Http\{
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\{
-    Set,
     Either,
     Maybe,
     Sequence,
