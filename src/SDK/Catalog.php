@@ -17,8 +17,8 @@ use Innmind\TimeContinuum\{
 };
 use Innmind\Http\{
     Header,
-    Message\Request\Request,
-    Message\Method,
+    Request,
+    Method,
     ProtocolVersion,
     Headers,
 };
@@ -447,7 +447,7 @@ final class Catalog
      */
     private function get(Url $url): Maybe
     {
-        return ($this->fulfill)(new Request(
+        return ($this->fulfill)(Request::of(
             $url,
             Method::get,
             ProtocolVersion::v20,

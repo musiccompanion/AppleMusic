@@ -5,9 +5,9 @@ namespace MusicCompanion\AppleMusic\SDK;
 
 use Innmind\Http\{
     Header,
-    Message\Request\Request,
-    Message\Response,
-    Message\Method,
+    Request,
+    Response,
+    Method,
     ProtocolVersion,
     Headers,
 };
@@ -31,7 +31,7 @@ final class Storefronts
      */
     public function all(): Set
     {
-        return ($this->fulfill)(new Request(
+        return ($this->fulfill)(Request::of(
             Url::of('/v1/storefronts'),
             Method::get,
             ProtocolVersion::v20,

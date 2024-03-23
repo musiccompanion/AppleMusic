@@ -17,9 +17,9 @@ use Innmind\Http\{
     Header\AuthorizationValue,
     Header\Header,
     Header\Value\Value,
-    Message\Request,
-    Message\Response,
-    Message\StatusCode,
+    ProtocolVersion,
+    Response,
+    Response\StatusCode,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\{
@@ -43,14 +43,31 @@ class LibraryTest extends TestCase
         $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt'));
         $userToken = new Header('Music-User-Token', new Value('token'));
         $fulfill = $this->createMock(Transport::class);
-        $response = $this->createMock(Response::class);
-        $response
-            ->method('statusCode')
-            ->willReturn(StatusCode::ok);
-        $response
-            ->expects($this->once())
-            ->method('body')
-            ->willReturn($body = $this->createMock(Content::class));
+        $response = Response::of(
+            StatusCode::ok,
+            ProtocolVersion::v11,
+            null,
+            Content::ofString(<<<JSON
+            {
+              "data": [
+                {
+                  "id": "fr",
+                  "type": "storefronts",
+                  "href": "/v1/storefronts/fr",
+                  "attributes": {
+                    "explicitContentPolicy": "allowed",
+                    "defaultLanguageTag": "fr-FR",
+                    "name": "France",
+                    "supportedLanguageTags": [
+                      "fr-FR",
+                      "en-GB"
+                    ]
+                  }
+                }
+              ]
+            }
+            JSON),
+        );
         $fulfill
             ->expects($this->once())
             ->method('__invoke')
@@ -66,34 +83,10 @@ class LibraryTest extends TestCase
                         static fn() => null,
                     );
             }))
-            ->willReturn(Either::right(new Success(
-                $this->createMock(Request::class),
+            ->willReturnCallback(static fn($request) => Either::right(new Success(
+                $request,
                 $response,
             )));
-        $body
-            ->expects($this->once())
-            ->method('toString')
-            ->willReturn(<<<JSON
-{
-  "data": [
-    {
-      "id": "fr",
-      "type": "storefronts",
-      "href": "/v1/storefronts/fr",
-      "attributes": {
-        "explicitContentPolicy": "allowed",
-        "defaultLanguageTag": "fr-FR",
-        "name": "France",
-        "supportedLanguageTags": [
-          "fr-FR",
-          "en-GB"
-        ]
-      }
-    }
-  ]
-}
-JSON
-            );
 
         $library = Library::of(
             new HttpTransport($fulfill),
@@ -128,22 +121,63 @@ JSON
                     $userToken = new Header('Music-User-Token', new Value('token')),
                     $storefront,
                 );
-                $response1 = $this->createMock(Response::class);
-                $response2 = $this->createMock(Response::class);
-                $response1
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::ok);
-                $response1
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body1 = $this->createMock(Content::class));
-                $response2
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::ok);
-                $response2
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body2 = $this->createMock(Content::class));
+                $response1 = Response::of(
+                    StatusCode::ok,
+                    ProtocolVersion::v11,
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                      "next": "/v1/me/library/artists?offset=25",
+                      "data": [
+                        {
+                          "id": "r.2S6SRHl",
+                          "type": "library-artists",
+                          "href": "/v1/me/library/artists/r.2S6SRHl",
+                          "attributes": {
+                            "name": "\"Weird Al\" Yankovic"
+                          },
+                          "relationships": {
+                            "catalog": {
+                                "data": [{
+                                    "id": "1234"
+                                }]
+                            }
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "total": 1158
+                      }
+                    }
+                    JSON),
+                );
+                $response2 = Response::of(
+                    StatusCode::ok,
+                    ProtocolVersion::v11,
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                      "data": [
+                        {
+                          "id": "r.o860e82",
+                          "type": "library-artists",
+                          "href": "/v1/me/library/artists/r.o860e82",
+                          "attributes": {
+                            "name": "(hed) p.e."
+                          },
+                          "relationships": {
+                            "catalog": {
+                                "data": []
+                            }
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "total": 1158
+                      }
+                    }
+                    JSON),
+                );
                 $fulfill
                     ->expects($matcher = $this->exactly(2))
                     ->method('__invoke')
@@ -171,70 +205,15 @@ JSON
 
                         return match ($matcher->numberOfInvocations()) {
                             1 => Either::right(new Success(
-                                $this->createMock(Request::class),
+                                $request,
                                 $response1,
                             )),
                             2 => Either::right(new Success(
-                                $this->createMock(Request::class),
+                                $request,
                                 $response2,
                             )),
                         };
                     });
-                $body1
-                    ->expects($this->once())
-                    ->method('toString')
-                    ->willReturn(<<<JSON
-{
-  "next": "/v1/me/library/artists?offset=25",
-  "data": [
-    {
-      "id": "r.2S6SRHl",
-      "type": "library-artists",
-      "href": "/v1/me/library/artists/r.2S6SRHl",
-      "attributes": {
-        "name": "\"Weird Al\" Yankovic"
-      },
-      "relationships": {
-        "catalog": {
-            "data": [{
-                "id": "1234"
-            }]
-        }
-      }
-    }
-  ],
-  "meta": {
-    "total": 1158
-  }
-}
-JSON
-                    );
-                $body2
-                    ->expects($this->once())
-                    ->method('toString')
-                    ->willReturn(<<<JSON
-{
-  "data": [
-    {
-      "id": "r.o860e82",
-      "type": "library-artists",
-      "href": "/v1/me/library/artists/r.o860e82",
-      "attributes": {
-        "name": "(hed) p.e."
-      },
-      "relationships": {
-        "catalog": {
-            "data": []
-        }
-      }
-    }
-  ],
-  "meta": {
-    "total": 1158
-  }
-}
-JSON
-                    );
 
                 $artists = $library->artists();
 
@@ -270,22 +249,100 @@ JSON
                     $userToken = new Header('Music-User-Token', new Value('token')),
                     $storefront,
                 );
-                $response1 = $this->createMock(Response::class);
-                $response2 = $this->createMock(Response::class);
-                $response1
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::ok);
-                $response1
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body1 = $this->createMock(Content::class));
-                $response2
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::ok);
-                $response2
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body2 = $this->createMock(Content::class));
+                $response1 = Response::of(
+                    StatusCode::ok,
+                    ProtocolVersion::v11,
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                      "next": "/v1/me/library/artists/{$artist->toString()}/albums?offset=1",
+                      "data": [
+                        {
+                          "id": "l.wXEf8fr",
+                          "type": "library-albums",
+                          "href": "/v1/me/library/albums/l.wXEf8fr",
+                          "attributes": {
+                            "playParams": {
+                              "id": "l.wXEf8fr",
+                              "kind": "album",
+                              "isLibrary": true
+                            },
+                            "artistName": "(hed) p.e.",
+                            "trackCount": 5,
+                            "name": "Skull & Bonus"
+                          },
+                          "relationships": {
+                            "artists": {
+                              "data": [
+                                {
+                                  "id": "r.o860e82",
+                                  "type": "library-artists",
+                                  "href": "/v1/me/library/artists/r.o860e82",
+                                  "attributes": {
+                                    "name": "(hed) p.e."
+                                  }
+                                }
+                              ],
+                              "href": "/v1/me/library/albums/l.wXEf8fr/artists"
+                            }
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "total": 2
+                      }
+                    }
+                    JSON),
+                );
+                $response2 = Response::of(
+                    StatusCode::ok,
+                    ProtocolVersion::v11,
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                      "data": [
+                        {
+                          "id": "l.gACheFi",
+                          "type": "library-albums",
+                          "href": "/v1/me/library/albums/l.gACheFi",
+                          "attributes": {
+                            "trackCount": 22,
+                            "artistName": "(hed) p.e.",
+                            "name": "Truth Rising",
+                            "playParams": {
+                              "id": "l.gACheFi",
+                              "kind": "album",
+                              "isLibrary": true
+                            },
+                            "artwork": {
+                              "width": 1200,
+                              "height": 1200,
+                              "url": "https://is2-ssl.mzstatic.com/image/thumb/Music/c5/98/81/mzi.ljuovcvg.jpg/{w}x{h}bb.jpeg"
+                            }
+                          },
+                          "relationships": {
+                            "artists": {
+                              "data": [
+                                {
+                                  "id": "r.o860e82",
+                                  "type": "library-artists",
+                                  "href": "/v1/me/library/artists/r.o860e82",
+                                  "attributes": {
+                                    "name": "(hed) p.e."
+                                  }
+                                }
+                              ],
+                              "href": "/v1/me/library/albums/l.gACheFi/artists"
+                            }
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "total": 2
+                      }
+                    }
+                    JSON),
+                );
                 $fulfill
                     ->expects($matcher = $this->exactly(2))
                     ->method('__invoke')
@@ -313,107 +370,15 @@ JSON
 
                         return match ($matcher->numberOfInvocations()) {
                             1 => Either::right(new Success(
-                                $this->createMock(Request::class),
+                                $request,
                                 $response1,
                             )),
                             2 => Either::right(new Success(
-                                $this->createMock(Request::class),
+                                $request,
                                 $response2,
                             )),
                         };
                     });
-                $body1
-                    ->expects($this->once())
-                    ->method('toString')
-                    ->willReturn(<<<JSON
-{
-  "next": "/v1/me/library/artists/{$artist->toString()}/albums?offset=1",
-  "data": [
-    {
-      "id": "l.wXEf8fr",
-      "type": "library-albums",
-      "href": "/v1/me/library/albums/l.wXEf8fr",
-      "attributes": {
-        "playParams": {
-          "id": "l.wXEf8fr",
-          "kind": "album",
-          "isLibrary": true
-        },
-        "artistName": "(hed) p.e.",
-        "trackCount": 5,
-        "name": "Skull & Bonus"
-      },
-      "relationships": {
-        "artists": {
-          "data": [
-            {
-              "id": "r.o860e82",
-              "type": "library-artists",
-              "href": "/v1/me/library/artists/r.o860e82",
-              "attributes": {
-                "name": "(hed) p.e."
-              }
-            }
-          ],
-          "href": "/v1/me/library/albums/l.wXEf8fr/artists"
-        }
-      }
-    }
-  ],
-  "meta": {
-    "total": 2
-  }
-}
-JSON
-                    );
-                $body2
-                    ->expects($this->once())
-                    ->method('toString')
-                    ->willReturn(<<<JSON
-{
-  "data": [
-    {
-      "id": "l.gACheFi",
-      "type": "library-albums",
-      "href": "/v1/me/library/albums/l.gACheFi",
-      "attributes": {
-        "trackCount": 22,
-        "artistName": "(hed) p.e.",
-        "name": "Truth Rising",
-        "playParams": {
-          "id": "l.gACheFi",
-          "kind": "album",
-          "isLibrary": true
-        },
-        "artwork": {
-          "width": 1200,
-          "height": 1200,
-          "url": "https://is2-ssl.mzstatic.com/image/thumb/Music/c5/98/81/mzi.ljuovcvg.jpg/{w}x{h}bb.jpeg"
-        }
-      },
-      "relationships": {
-        "artists": {
-          "data": [
-            {
-              "id": "r.o860e82",
-              "type": "library-artists",
-              "href": "/v1/me/library/artists/r.o860e82",
-              "attributes": {
-                "name": "(hed) p.e."
-              }
-            }
-          ],
-          "href": "/v1/me/library/albums/l.gACheFi/artists"
-        }
-      }
-    }
-  ],
-  "meta": {
-    "total": 2
-  }
-}
-JSON
-                    );
 
                 $albums = $library->albums($artist);
 
@@ -482,22 +447,141 @@ JSON
                     $userToken = new Header('Music-User-Token', new Value('token')),
                     $storefront,
                 );
-                $response1 = $this->createMock(Response::class);
-                $response2 = $this->createMock(Response::class);
-                $response1
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::ok);
-                $response1
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body1 = $this->createMock(Content::class));
-                $response2
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::ok);
-                $response2
-                    ->expects($this->once())
-                    ->method('body')
-                    ->willReturn($body2 = $this->createMock(Content::class));
+                $response1 = Response::of(
+                    StatusCode::ok,
+                    ProtocolVersion::v11,
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                      "next": "/v1/me/library/albums/{$album->toString()}/tracks?offset=1",
+                      "data": [
+                        {
+                          "id": "i.mmpYYzeu4J0XGD",
+                          "type": "library-songs",
+                          "href": "/v1/me/library/songs/i.mmpYYzeu4J0XGD",
+                          "attributes": {
+                            "artistName": "(hed) p.e.",
+                            "durationInMillis": 325459,
+                            "albumName": "Skull & Bonus",
+                            "trackNumber": 1,
+                            "name": "Judgement Day",
+                            "genreNames": [
+                              "Rapcore, Punk, Rap"
+                            ]
+                          },
+                          "relationships": {
+                            "artists": {
+                              "data": [
+                                {
+                                  "id": "r.o860e82",
+                                  "type": "library-artists",
+                                  "href": "/v1/me/library/artists/r.o860e82",
+                                  "attributes": {
+                                    "name": "(hed) p.e."
+                                  }
+                                }
+                              ],
+                              "href": "/v1/me/library/songs/i.mmpYYzeu4J0XGD/artists"
+                            },
+                            "albums": {
+                              "data": [
+                                {
+                                  "id": "l.wXEf8fr",
+                                  "type": "library-albums",
+                                  "href": "/v1/me/library/albums/l.wXEf8fr",
+                                  "attributes": {
+                                    "artistName": "(hed) p.e.",
+                                    "name": "Skull & Bonus",
+                                    "playParams": {
+                                      "id": "l.wXEf8fr",
+                                      "kind": "album",
+                                      "isLibrary": true
+                                    },
+                                    "trackCount": 5
+                                  }
+                                }
+                              ],
+                              "href": "/v1/me/library/songs/i.mmpYYzeu4J0XGD/albums"
+                            }
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "total": 2
+                      }
+                    }
+                    JSON),
+                );
+                $response2 = Response::of(
+                    StatusCode::ok,
+                    ProtocolVersion::v11,
+                    null,
+                    Content::ofString(<<<JSON
+                    {
+                      "data": [
+                        {
+                          "id": "i.b1Jvv08sqZgz8A",
+                          "type": "library-songs",
+                          "href": "/v1/me/library/songs/i.b1Jvv08sqZgz8A",
+                          "attributes": {
+                            "albumName": "Skull & Bonus",
+                            "playParams": {
+                              "id": "i.b1Jvv08sqZgz8A",
+                              "kind": "song",
+                              "isLibrary": true,
+                              "reporting": false
+                            },
+                            "trackNumber": 2,
+                            "artistName": "(hed) p.e.",
+                            "durationInMillis": 435487,
+                            "genreNames": [
+                              "Rapcore, Punk, Rap"
+                            ],
+                            "name": "Takeover (feat. Axe Murder Boyz & DGAF)"
+                          },
+                          "relationships": {
+                            "artists": {
+                              "data": [
+                                {
+                                  "id": "r.o860e82",
+                                  "type": "library-artists",
+                                  "href": "/v1/me/library/artists/r.o860e82",
+                                  "attributes": {
+                                    "name": "(hed) p.e."
+                                  }
+                                }
+                              ],
+                              "href": "/v1/me/library/songs/i.b1Jvv08sqZgz8A/artists"
+                            },
+                            "albums": {
+                              "data": [
+                                {
+                                  "id": "l.wXEf8fr",
+                                  "type": "library-albums",
+                                  "href": "/v1/me/library/albums/l.wXEf8fr",
+                                  "attributes": {
+                                    "playParams": {
+                                      "id": "l.wXEf8fr",
+                                      "kind": "album",
+                                      "isLibrary": true
+                                    },
+                                    "trackCount": 5,
+                                    "artistName": "(hed) p.e.",
+                                    "name": "Skull & Bonus"
+                                  }
+                                }
+                              ],
+                              "href": "/v1/me/library/songs/i.b1Jvv08sqZgz8A/albums"
+                            }
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "total": 2
+                      }
+                    }
+                    JSON),
+                );
                 $fulfill
                     ->expects($matcher = $this->exactly(2))
                     ->method('__invoke')
@@ -525,148 +609,15 @@ JSON
 
                         return match ($matcher->numberOfInvocations()) {
                             1 => Either::right(new Success(
-                                $this->createMock(Request::class),
+                                $request,
                                 $response1,
                             )),
                             2 => Either::right(new Success(
-                                $this->createMock(Request::class),
+                                $request,
                                 $response2,
                             )),
                         };
                     });
-                $body1
-                    ->expects($this->once())
-                    ->method('toString')
-                    ->willReturn(<<<JSON
-{
-  "next": "/v1/me/library/albums/{$album->toString()}/tracks?offset=1",
-  "data": [
-    {
-      "id": "i.mmpYYzeu4J0XGD",
-      "type": "library-songs",
-      "href": "/v1/me/library/songs/i.mmpYYzeu4J0XGD",
-      "attributes": {
-        "artistName": "(hed) p.e.",
-        "durationInMillis": 325459,
-        "albumName": "Skull & Bonus",
-        "trackNumber": 1,
-        "name": "Judgement Day",
-        "genreNames": [
-          "Rapcore, Punk, Rap"
-        ]
-      },
-      "relationships": {
-        "artists": {
-          "data": [
-            {
-              "id": "r.o860e82",
-              "type": "library-artists",
-              "href": "/v1/me/library/artists/r.o860e82",
-              "attributes": {
-                "name": "(hed) p.e."
-              }
-            }
-          ],
-          "href": "/v1/me/library/songs/i.mmpYYzeu4J0XGD/artists"
-        },
-        "albums": {
-          "data": [
-            {
-              "id": "l.wXEf8fr",
-              "type": "library-albums",
-              "href": "/v1/me/library/albums/l.wXEf8fr",
-              "attributes": {
-                "artistName": "(hed) p.e.",
-                "name": "Skull & Bonus",
-                "playParams": {
-                  "id": "l.wXEf8fr",
-                  "kind": "album",
-                  "isLibrary": true
-                },
-                "trackCount": 5
-              }
-            }
-          ],
-          "href": "/v1/me/library/songs/i.mmpYYzeu4J0XGD/albums"
-        }
-      }
-    }
-  ],
-  "meta": {
-    "total": 2
-  }
-}
-JSON
-                    );
-                $body2
-                    ->expects($this->once())
-                    ->method('toString')
-                    ->willReturn(<<<JSON
-{
-  "data": [
-    {
-      "id": "i.b1Jvv08sqZgz8A",
-      "type": "library-songs",
-      "href": "/v1/me/library/songs/i.b1Jvv08sqZgz8A",
-      "attributes": {
-        "albumName": "Skull & Bonus",
-        "playParams": {
-          "id": "i.b1Jvv08sqZgz8A",
-          "kind": "song",
-          "isLibrary": true,
-          "reporting": false
-        },
-        "trackNumber": 2,
-        "artistName": "(hed) p.e.",
-        "durationInMillis": 435487,
-        "genreNames": [
-          "Rapcore, Punk, Rap"
-        ],
-        "name": "Takeover (feat. Axe Murder Boyz & DGAF)"
-      },
-      "relationships": {
-        "artists": {
-          "data": [
-            {
-              "id": "r.o860e82",
-              "type": "library-artists",
-              "href": "/v1/me/library/artists/r.o860e82",
-              "attributes": {
-                "name": "(hed) p.e."
-              }
-            }
-          ],
-          "href": "/v1/me/library/songs/i.b1Jvv08sqZgz8A/artists"
-        },
-        "albums": {
-          "data": [
-            {
-              "id": "l.wXEf8fr",
-              "type": "library-albums",
-              "href": "/v1/me/library/albums/l.wXEf8fr",
-              "attributes": {
-                "playParams": {
-                  "id": "l.wXEf8fr",
-                  "kind": "album",
-                  "isLibrary": true
-                },
-                "trackCount": 5,
-                "artistName": "(hed) p.e.",
-                "name": "Skull & Bonus"
-              }
-            }
-          ],
-          "href": "/v1/me/library/songs/i.b1Jvv08sqZgz8A/albums"
-        }
-      }
-    }
-  ],
-  "meta": {
-    "total": 2
-  }
-}
-JSON
-                    );
 
                 $songs = $library->songs($album);
 

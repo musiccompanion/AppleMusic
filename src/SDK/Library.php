@@ -9,9 +9,9 @@ use MusicCompanion\AppleMusic\SDK\{
     Library\Song,
 };
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Response,
-    Message\Method,
+    Request,
+    Response,
+    Method,
     ProtocolVersion,
     Headers,
     Header,
@@ -51,7 +51,7 @@ final class Library
         Header $authorization,
         Header $userToken,
     ): Maybe {
-        return $fulfill(new Request(
+        return $fulfill(Request::of(
             Url::of('/v1/me/storefront'),
             Method::get,
             ProtocolVersion::v20,
@@ -261,7 +261,7 @@ final class Library
     private function get(Url $url): Maybe
     {
         /** @var Maybe<array> */
-        return ($this->fulfill)(new Request(
+        return ($this->fulfill)(Request::of(
             $url,
             Method::get,
             ProtocolVersion::v20,

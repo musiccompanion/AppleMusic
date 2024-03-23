@@ -11,10 +11,10 @@ use Innmind\HttpTransport\{
     ServerError,
 };
 use Innmind\Http\{
-    Message\Request\Request,
-    Message\Response,
-    Message\Method,
-    Message\StatusCode,
+    Request,
+    Response,
+    Method,
+    Response\StatusCode,
     ProtocolVersion,
 };
 use Innmind\Immutable\Either;
@@ -40,20 +40,19 @@ class HttpTransportTest extends TestCase
                 $fulfill = new HttpTransport(
                     $inner = $this->createMock(Transport::class),
                 );
-                $initial = new Request(
+                $initial = Request::of(
                     $url,
                     Method::get,
                     ProtocolVersion::v20,
                 );
-                $response = $this->createMock(Response::class);
-                $response
-                    ->expects($this->any())
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::of($statusCode));
+                $response = Response::of(
+                    StatusCode::of($statusCode),
+                    ProtocolVersion::v20,
+                );
                 $inner
                     ->expects($this->once())
                     ->method('__invoke')
-                    ->with($this->callback(static function($request) use ($url, $initial): bool {
+                    ->with($this->callback(static function($request) use ($initial): bool {
                         return $request->url()->scheme()->toString() === 'https' &&
                             $request->url()->authority()->toString() === 'api.music.apple.com' &&
                             $request->url()->path() === $initial->url()->path() &&
@@ -86,16 +85,15 @@ class HttpTransportTest extends TestCase
                 $fulfill = new HttpTransport(
                     $inner = $this->createMock(Transport::class),
                 );
-                $initial = new Request(
+                $initial = Request::of(
                     $url,
                     Method::get,
                     ProtocolVersion::v20,
                 );
-                $response = $this->createMock(Response::class);
-                $response
-                    ->expects($this->any())
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::of($statusCode));
+                $response = Response::of(
+                    StatusCode::of($statusCode),
+                    ProtocolVersion::v20,
+                );
                 $inner
                     ->expects($this->once())
                     ->method('__invoke')
@@ -122,16 +120,15 @@ class HttpTransportTest extends TestCase
                 $fulfill = new HttpTransport(
                     $inner = $this->createMock(Transport::class),
                 );
-                $initial = new Request(
+                $initial = Request::of(
                     $url,
                     Method::get,
                     ProtocolVersion::v20,
                 );
-                $response = $this->createMock(Response::class);
-                $response
-                    ->expects($this->any())
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::of($statusCode));
+                $response = Response::of(
+                    StatusCode::of($statusCode),
+                    ProtocolVersion::v20,
+                );
                 $inner
                     ->expects($this->once())
                     ->method('__invoke')

@@ -32,7 +32,7 @@ class KeyTest extends TestCase
                 $key = Key::of(
                     $id,
                     $teamId,
-                    $content = $this->createMock(Content::class),
+                    $content = Content::none(),
                 );
 
                 $this->assertSame($id, $key->id());
@@ -57,7 +57,7 @@ class KeyTest extends TestCase
                 Key::of(
                     $id,
                     $teamId,
-                    Content\None::of(),
+                    Content::none(),
                 );
             });
     }
@@ -78,7 +78,7 @@ class KeyTest extends TestCase
                 Key::of(
                     $id,
                     $teamId,
-                    Content\None::of(),
+                    Content::none(),
                 );
             });
     }

@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Requires `innmind/operating-system:~4.0`
+
+### Removed
+
+- Support for `innmind/operating-system:~3.1`
+
 ## 3.1.0 - 2023-09-24
 
 ### Added
