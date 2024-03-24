@@ -9,6 +9,7 @@
 ### Changed
 
 - Requires `innmind/operating-system:~4.0`
+- All value objects constructors are now private, use `::of()` named constructors instead
 
 ### Removed
 

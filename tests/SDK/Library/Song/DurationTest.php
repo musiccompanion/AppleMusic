@@ -22,7 +22,7 @@ class DurationTest extends TestCase
         $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
-                $duration = new Duration($number);
+                $duration = Duration::of($number);
 
                 $this->assertSame($number, $duration->toInt());
                 $this->assertSame((string) $number, $duration->toString());
@@ -37,7 +37,7 @@ class DurationTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $number);
 
-                new Duration($number);
+                Duration::of($number);
             });
     }
 }

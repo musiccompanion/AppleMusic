@@ -37,7 +37,7 @@ class ArtistTest extends TestCase
                 Artwork::any(),
             )
             ->then(function($id, $name, $url, $genres, $albums, $artwork) {
-                $artist = new Artist(
+                $artist = Artist::of(
                     $id,
                     $name,
                     $url,

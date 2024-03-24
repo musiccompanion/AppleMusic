@@ -17,9 +17,7 @@ final class Album
     public static function any(): Set
     {
         return Set\Composite::immutable(
-            static function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists): Model {
-                return new Model($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists);
-            },
+            Model::of(...),
             Album\Id::any(),
             Set\Either::any(
                 Artwork::any(),

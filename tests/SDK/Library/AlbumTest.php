@@ -29,7 +29,7 @@ class AlbumTest extends TestCase
                 ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $artwork, $artists) {
-                $album = new Album($id, $name, Maybe::just($artwork), $artists);
+                $album = Album::of($id, $name, Maybe::just($artwork), $artists);
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());
@@ -50,7 +50,7 @@ class AlbumTest extends TestCase
                 ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $artists) {
-                $album = new Album($id, $name, Maybe::nothing(), $artists);
+                $album = Album::of($id, $name, Maybe::nothing(), $artists);
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());

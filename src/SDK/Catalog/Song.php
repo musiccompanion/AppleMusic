@@ -59,7 +59,7 @@ final class Song
      * @param Set<Artist\Id> $artists
      * @param Set<Album\Id> $albums
      */
-    public function __construct(
+    private function __construct(
         Id $id,
         Set $previews,
         Artwork $artwork,
@@ -89,6 +89,53 @@ final class Song
         $this->composer = $composer;
         $this->artists = $artists;
         $this->albums = $albums;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Set<Url> $previews
+     * @param Maybe<DiscNumber> $discNumber
+     * @param Set<Genre> $genres
+     * @param Maybe<Duration> $duration
+     * @param Maybe<PointInTime> $release
+     * @param Maybe<ISRC> $isrc
+     * @param Maybe<TrackNumber> $trackNumber
+     * @param Set<Artist\Id> $artists
+     * @param Set<Album\Id> $albums
+     */
+    public static function of(
+        Id $id,
+        Set $previews,
+        Artwork $artwork,
+        Url $url,
+        Maybe $discNumber,
+        Set $genres,
+        Maybe $duration,
+        Maybe $release,
+        Name $name,
+        Maybe $isrc,
+        Maybe $trackNumber,
+        Composer $composer,
+        Set $artists,
+        Set $albums,
+    ): self {
+        return new self(
+            $id,
+            $previews,
+            $artwork,
+            $url,
+            $discNumber,
+            $genres,
+            $duration,
+            $release,
+            $name,
+            $isrc,
+            $trackNumber,
+            $composer,
+            $artists,
+            $albums,
+        );
     }
 
     public function id(): Id

@@ -102,7 +102,7 @@ final class Library
                         )
                             ->with('attributes', Is::shape(
                                 'name',
-                                Is::string()->map(static fn($name) => new Artist\Name($name)),
+                                Is::string()->map(Artist\Name::of(...)),
                             ))
                             ->with('relationships', Is::shape(
                                 'catalog',
@@ -123,7 +123,7 @@ final class Library
                                     ),
                                 ),
                             ))
-                            ->map(static fn($artist) => new Artist(
+                            ->map(static fn($artist) => Artist::of(
                                 $artist['id'],
                                 $artist['attributes']['name'],
                                 $artist['relationships']['catalog']['data'],
@@ -177,7 +177,7 @@ final class Library
                             'attributes',
                             Is::shape(
                                 'name',
-                                Is::string()->map(static fn($name) => new Album\Name($name)),
+                                Is::string()->map(Album\Name::of(...)),
                             )
                                 ->optional(
                                     'artwork',
@@ -193,7 +193,7 @@ final class Library
                                             'height',
                                             Is::int()->map(Album\Artwork\Height::of(...)),
                                         )
-                                        ->map(static fn($artwork) => new Album\Artwork(
+                                        ->map(static fn($artwork) => Album\Artwork::of(
                                             Maybe::of($artwork['width'] ?? null),
                                             Maybe::of($artwork['height'] ?? null),
                                             $artwork['url'],
@@ -212,7 +212,7 @@ final class Library
                                 )->map(static fn($values) => Set::of(...$values)),
                             ),
                         ))
-                        ->map(static fn($album) => new Album(
+                        ->map(static fn($album) => Album::of(
                             $album['id'],
                             $album['attributes']['name'],
                             Maybe::of($album['attributes']['artwork'] ?? null),
@@ -260,13 +260,13 @@ final class Library
                 Is::list(
                     Is::shape(
                         'id',
-                        Is::string()->map(static fn($id) => new Song\Id($id)),
+                        Is::string()->map(Song\Id::of(...)),
                     )
                         ->with(
                             'attributes',
                             Is::shape(
                                 'name',
-                                Is::string()->map(static fn($name) => new Song\Name($name)),
+                                Is::string()->map(Song\Name::of(...)),
                             )
                                 ->optional(
                                     'durationInMillis',
@@ -310,7 +310,7 @@ final class Library
                                     ),
                                 ),
                         )
-                        ->map(static fn($song) => new Song(
+                        ->map(static fn($song) => Song::of(
                             $song['id'],
                             $song['attributes']['name'],
                             Maybe::of($song['attributes']['durationInMillis'] ?? null),
@@ -381,13 +381,13 @@ final class Library
             Is::list(
                 Is::shape(
                     'id',
-                    Is::string()->map(static fn($id) => new Storefront\Id($id)),
+                    Is::string()->map(Storefront\Id::of(...)),
                 )
                     ->with(
                         'attributes',
                         Is::shape(
                             'name',
-                            Is::string()->map(static fn($name) => new Storefront\Name($name)),
+                            Is::string()->map(Storefront\Name::of(...)),
                         )
                             ->with(
                                 'defaultLanguageTag',
@@ -400,7 +400,7 @@ final class Library
                                 )->map(static fn($values) => Set::of(...$values)),
                             ),
                     )
-                    ->map(static fn($storefront) => new Storefront(
+                    ->map(static fn($storefront) => Storefront::of(
                         $storefront['id'],
                         $storefront['attributes']['name'],
                         $storefront['attributes']['defaultLanguageTag'],

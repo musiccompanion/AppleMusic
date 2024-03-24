@@ -49,7 +49,7 @@ class AlbumTest extends TestCase
                 ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
-                $album = new Album(
+                $album = Album::of(
                     $id,
                     $artwork,
                     $name,

@@ -30,7 +30,7 @@ class SearchTest extends TestCase
                 ISequence::of(SongSet\Id::any()),
             )
             ->then(function($term, $artists, $albums, $songs) {
-                $search = new Search($term, $artists, $albums, $songs);
+                $search = Search::of($term, $artists, $albums, $songs);
 
                 $this->assertSame($term, $search->term());
                 $this->assertSame($artists, $search->artists());

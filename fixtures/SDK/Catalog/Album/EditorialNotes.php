@@ -14,9 +14,7 @@ final class EditorialNotes
     public static function any(): Set
     {
         return Set\Composite::immutable(
-            static function($standard, $short): Model {
-                return new Model($standard, $short);
-            },
+            Model::of(...),
             Set\Strings::any(),
             Set\Strings::any(),
         );

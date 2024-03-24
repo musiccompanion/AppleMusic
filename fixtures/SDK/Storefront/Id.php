@@ -16,9 +16,7 @@ final class Id
         $char = Set\Elements::of(...\range('a', 'z'));
 
         return Set\Composite::immutable(
-            static function(string $char1, string $char2): Model {
-                return new Model($char1.$char2);
-            },
+            static fn(string $char1, string $char2) => Model::of($char1.$char2),
             $char,
             $char,
         )->take(100);

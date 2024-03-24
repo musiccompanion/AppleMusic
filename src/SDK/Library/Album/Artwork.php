@@ -31,7 +31,7 @@ final class Artwork
      * @param Maybe<Width> $width
      * @param Maybe<Height> $height
      */
-    public function __construct(
+    private function __construct(
         Maybe $width,
         Maybe $height,
         Url $url,
@@ -39,6 +39,24 @@ final class Artwork
         $this->width = $width;
         $this->height = $height;
         $this->url = $url;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Maybe<Width> $width
+     * @param Maybe<Height> $height
+     */
+    public static function of(
+        Maybe $width,
+        Maybe $height,
+        Url $url,
+    ): self {
+        return new self(
+            $width,
+            $height,
+            $url,
+        );
     }
 
     /**

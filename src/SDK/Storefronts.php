@@ -67,13 +67,13 @@ final class Storefronts
             Is::list(
                 Is::shape(
                     'id',
-                    Is::string()->map(static fn($id) => new Storefront\Id($id)),
+                    Is::string()->map(Storefront\Id::of(...)),
                 )
                     ->with(
                         'attributes',
                         Is::shape(
                             'name',
-                            Is::string()->map(static fn($name) => new Storefront\Name($name)),
+                            Is::string()->map(Storefront\Name::of(...)),
                         )
                             ->with(
                                 'defaultLanguageTag',
@@ -86,7 +86,7 @@ final class Storefronts
                                 )->map(static fn($values) => Set::of(...$values)),
                             ),
                     )
-                    ->map(static fn($shape) => new Storefront(
+                    ->map(static fn($shape) => Storefront::of(
                         $shape['id'],
                         $shape['attributes']['name'],
                         $shape['attributes']['defaultLanguageTag'],

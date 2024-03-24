@@ -13,9 +13,6 @@ final class Id
      */
     public static function any(): Set
     {
-        return Set\Decorate::immutable(
-            Model::of(...),
-            Set\NaturalNumbers::any(),
-        );
+        return Set\NaturalNumbers::any()->map(Model::of(...));
     }
 }

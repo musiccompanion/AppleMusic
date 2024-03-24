@@ -23,7 +23,7 @@ class WidthTest extends TestCase
         $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
-                $width = new Width($number);
+                $width = Width::of($number);
 
                 $this->assertSame($number, $width->toInt());
                 $this->assertSame((string) $number, $width->toString());
@@ -48,7 +48,7 @@ class WidthTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);
 
-                new Width($negative);
+                Width::of($negative);
             });
     }
 }

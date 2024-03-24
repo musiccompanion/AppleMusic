@@ -19,7 +19,7 @@ class ComposerTest extends TestCase
         $this
             ->forAll(Set\Strings::any())
             ->then(function(string $string) {
-                $composer = new Composer($string);
+                $composer = Composer::of($string);
 
                 $this->assertSame($string, $composer->name());
             });

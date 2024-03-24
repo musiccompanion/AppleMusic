@@ -17,9 +17,7 @@ final class Language
         $region = Set\Elements::of(...\range('A', 'Z'));
 
         return Set\Composite::immutable(
-            static function(string $char1, string $char2, string $region1, string $region2): Model {
-                return Model::of($char1.$char2.'-'.$region1.$region2);
-            },
+            static fn(string $char1, string $char2, string $region1, string $region2) => Model::of($char1.$char2.'-'.$region1.$region2),
             $char,
             $char,
             $region,

@@ -273,7 +273,7 @@ final class Catalog
             },
         )->flatMap(static fn($songs) => $songs);
 
-        return new Search($term, $artists, $albums, $songs);
+        return Search::of($term, $artists, $albums, $songs);
     }
 
     /**
@@ -325,7 +325,7 @@ final class Catalog
                     'attributes',
                     Is::shape(
                         'name',
-                        Is::string()->map(static fn($name) => new Artist\Name($name)),
+                        Is::string()->map(Artist\Name::of(...)),
                     )
                         ->with(
                             'url',
@@ -345,11 +345,11 @@ final class Catalog
                             )
                                 ->with(
                                     'height',
-                                    Is::int()->map(static fn($height) => new Artwork\Height($height)),
+                                    Is::int()->map(Artwork\Height::of(...)),
                                 )
                                 ->with(
                                     'width',
-                                    Is::int()->map(static fn($width) => new Artwork\Width($width)),
+                                    Is::int()->map(Artwork\Width::of(...)),
                                 )
                                 ->optional(
                                     'bgColor',
@@ -371,7 +371,7 @@ final class Catalog
                                     'textColor4',
                                     Is::string()->map(RGBA::of(...)),
                                 )
-                                ->map(static fn($artwork) => new Artwork(
+                                ->map(static fn($artwork) => Artwork::of(
                                     $artwork['width'],
                                     $artwork['height'],
                                     $artwork['url'],
@@ -413,7 +413,7 @@ final class Catalog
                             ),
                         ),
                     )
-                    ->map(static fn($artist) => new Artist(
+                    ->map(static fn($artist) => Artist::of(
                         $artist['id'],
                         $artist['attributes']['name'],
                         $artist['attributes']['url'],
@@ -456,11 +456,11 @@ final class Catalog
                             'artwork',
                             Is::shape(
                                 'width',
-                                Is::int()->map(static fn($width) => new Artwork\Width($width)),
+                                Is::int()->map(Artwork\Width::of(...)),
                             )
                                 ->with(
                                     'height',
-                                    Is::int()->map(static fn($height) => new Artwork\Height($height)),
+                                    Is::int()->map(Artwork\Height::of(...)),
                                 )
                                 ->with(
                                     'url',
@@ -486,7 +486,7 @@ final class Catalog
                                     'textColor4',
                                     Is::string()->map(RGBA::of(...)),
                                 )
-                                ->map(static fn($artwork) => new Artwork(
+                                ->map(static fn($artwork) => Artwork::of(
                                     $artwork['width'],
                                     $artwork['height'],
                                     $artwork['url'],
@@ -499,7 +499,7 @@ final class Catalog
                         )
                             ->with(
                                 'name',
-                                Is::string()->map(static fn($name) => new Album\Name($name)),
+                                Is::string()->map(Album\Name::of(...)),
                             )
                             ->with(
                                 'isSingle',
@@ -573,7 +573,7 @@ final class Catalog
                                 ),
                             ),
                     )
-                    ->map(static fn($album) => new Album(
+                    ->map(static fn($album) => Album::of(
                         $album['id'],
                         $album['attributes']['artwork'],
                         $album['attributes']['name'],
@@ -586,9 +586,9 @@ final class Catalog
                         Maybe::of($album['attributes']['releaseDate'] ?? null)->flatMap(
                             static fn($point): mixed => $point,
                         ),
-                        new Album\RecordLabel($album['attributes']['recordLabel'] ?? ''),
-                        new Album\Copyright($album['attributes']['copyright'] ?? ''),
-                        new Album\EditorialNotes(
+                        Album\RecordLabel::of($album['attributes']['recordLabel'] ?? ''),
+                        Album\Copyright::of($album['attributes']['copyright'] ?? ''),
+                        Album\EditorialNotes::of(
                             $album['attributes']['editorialNotes']['standard'] ?? '',
                             $album['attributes']['editorialNotes']['short'] ?? '',
                         ),
@@ -638,11 +638,11 @@ final class Catalog
                                 'artwork',
                                 Is::shape(
                                     'width',
-                                    Is::int()->map(static fn($width) => new Artwork\Width($width)),
+                                    Is::int()->map(Artwork\Width::of(...)),
                                 )
                                     ->with(
                                         'height',
-                                        Is::int()->map(static fn($height) => new Artwork\Height($height)),
+                                        Is::int()->map(Artwork\Height::of(...)),
                                     )
                                     ->with(
                                         'url',
@@ -668,7 +668,7 @@ final class Catalog
                                         'textColor4',
                                         Is::string()->map(RGBA::of(...)),
                                     )
-                                    ->map(static fn($artwork) => new Artwork(
+                                    ->map(static fn($artwork) => Artwork::of(
                                         $artwork['width'],
                                         $artwork['height'],
                                         $artwork['url'],
@@ -703,7 +703,7 @@ final class Catalog
                             )
                             ->with(
                                 'name',
-                                Is::string()->map(static fn($name) => new Song\Name($name)),
+                                Is::string()->map(Song\Name::of(...)),
                             )
                             ->optional(
                                 'isrc',
@@ -749,7 +749,7 @@ final class Catalog
                                 ),
                             ),
                     )
-                    ->map(static fn($song) => new Song(
+                    ->map(static fn($song) => Song::of(
                         $song['id'],
                         $song['attributes']['previews'],
                         $song['attributes']['artwork'],
@@ -763,7 +763,7 @@ final class Catalog
                         $song['attributes']['name'],
                         Maybe::of($song['attributes']['isrc'] ?? null),
                         Maybe::of($song['attributes']['trackNumber'] ?? null),
-                        new Song\Composer($song['attributes']['composerName'] ?? ''),
+                        Song\Composer::of($song['attributes']['composerName'] ?? ''),
                         $song['relationships']['artists']['data'],
                         $song['relationships']['albums']['data'],
                     )),

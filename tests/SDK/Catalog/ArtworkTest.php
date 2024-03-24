@@ -33,7 +33,7 @@ class ArtworkTest extends TestCase
                 Colour::any(),
             )
             ->then(function($width, $height, $url, $background, $text1, $text2, $text3, $text4) {
-                $artwork = new Artwork(
+                $artwork = Artwork::of(
                     $width,
                     $height,
                     $url,
@@ -83,7 +83,7 @@ class ArtworkTest extends TestCase
                 Colour::any(),
             )
             ->then(function($width, $height, $background, $text1, $text2, $text3, $text4) {
-                $artwork = new Artwork(
+                $artwork = Artwork::of(
                     $width,
                     $height,
                     ConcreteUrl::of('https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg'),
@@ -95,8 +95,8 @@ class ArtworkTest extends TestCase
                 );
 
                 $url = $artwork->ofSize(
-                    new Artwork\Width(42),
-                    new Artwork\Height(24),
+                    Artwork\Width::of(42),
+                    Artwork\Height::of(24),
                 );
 
                 $this->assertInstanceOf(ConcreteUrl::class, $url);

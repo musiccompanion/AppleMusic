@@ -23,11 +23,21 @@ final class Artist
     /**
      * @param Maybe<Catalog> $catalog
      */
-    public function __construct(Id $id, Name $name, Maybe $catalog)
+    private function __construct(Id $id, Name $name, Maybe $catalog)
     {
         $this->id = $id;
         $this->name = $name;
         $this->catalog = $catalog;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Maybe<Catalog> $catalog
+     */
+    public static function of(Id $id, Name $name, Maybe $catalog): self
+    {
+        return new self($id, $name, $catalog);
     }
 
     public function id(): Id

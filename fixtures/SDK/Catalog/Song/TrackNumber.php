@@ -13,9 +13,6 @@ final class TrackNumber
      */
     public static function any(): Set
     {
-        return Set\Decorate::immutable(
-            Model::of(...),
-            Set\NaturalNumbersExceptZero::any(),
-        );
+        return Set\NaturalNumbersExceptZero::any()->map(Model::of(...));
     }
 }

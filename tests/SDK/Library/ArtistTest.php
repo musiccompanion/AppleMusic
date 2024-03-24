@@ -22,7 +22,7 @@ class ArtistTest extends TestCase
         $this
             ->forAll(Id::any(), Name::any(), Catalog::any())
             ->then(function($id, $name, $catalog) {
-                $artist = new Artist($id, $name, Maybe::of($catalog));
+                $artist = Artist::of($id, $name, Maybe::of($catalog));
 
                 $this->assertSame($id, $artist->id());
                 $this->assertSame($name, $artist->name());

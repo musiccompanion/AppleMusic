@@ -48,7 +48,7 @@ class SongTest extends TestCase
                 ISet::of(AlbumSet\Id::any()),
             )
             ->then(function($id, $previews, $artwork, $url, $discNumber, $genres, $duration, $release, $name, $isrc, $trackNumber, $composer, $artists, $albums) {
-                $song = new Song(
+                $song = Song::of(
                     $id,
                     $previews,
                     $artwork,

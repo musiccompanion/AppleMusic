@@ -16,9 +16,7 @@ final class Artist
     public static function any(): Set
     {
         return Set\Composite::immutable(
-            static function($id, $name, $url, $genres, $albums): Model {
-                return new Model($id, $name, $url, $genres, $albums);
-            },
+            Model::of(...),
             Artist\Id::any(),
             Artist\Name::any(),
             Url::any(),

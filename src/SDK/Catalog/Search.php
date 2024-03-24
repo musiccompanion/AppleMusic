@@ -23,7 +23,7 @@ final class Search
      * @param Sequence<Album\Id> $albums
      * @param Sequence<Song\Id> $songs
      */
-    public function __construct(
+    private function __construct(
         string $term,
         Sequence $artists,
         Sequence $albums,
@@ -33,6 +33,27 @@ final class Search
         $this->artists = $artists;
         $this->albums = $albums;
         $this->songs = $songs;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Sequence<Artist\Id> $artists
+     * @param Sequence<Album\Id> $albums
+     * @param Sequence<Song\Id> $songs
+     */
+    public static function of(
+        string $term,
+        Sequence $artists,
+        Sequence $albums,
+        Sequence $songs,
+    ): self {
+        return new self(
+            $term,
+            $artists,
+            $albums,
+            $songs,
+        );
     }
 
     public function term(): string
