@@ -5,11 +5,8 @@ namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog;
 
 use MusicCompanion\AppleMusic\SDK\Catalog\{
     Artist,
-    Album,
-    Genre,
 };
 use Innmind\Immutable\{
-    Set,
     Maybe,
 };
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
@@ -20,10 +17,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
 };
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set as DataSet,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Immutable\Set as ISet;
 use Fixtures\Innmind\Url\Url;
 
@@ -43,7 +37,7 @@ class ArtistTest extends TestCase
                 Artwork::any(),
             )
             ->then(function($id, $name, $url, $genres, $albums, $artwork) {
-                $artist = new Artist(
+                $artist = Artist::of(
                     $id,
                     $name,
                     $url,

@@ -22,7 +22,7 @@ class HeightTest extends TestCase
         $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
-                $height = new Height($number);
+                $height = Height::of($number);
 
                 $this->assertSame($number, $height->toInt());
                 $this->assertSame((string) $number, $height->toString());
@@ -37,7 +37,7 @@ class HeightTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);
 
-                new Height($negative);
+                Height::of($negative);
             });
     }
 }

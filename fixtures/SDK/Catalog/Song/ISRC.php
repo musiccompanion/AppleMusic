@@ -19,9 +19,7 @@ final class ISRC
         $n = Set\Elements::of(...\range(0, 9));
 
         return Set\Composite::immutable(
-            static function(...$bits): Model {
-                return Model::of(\implode('', $bits));
-            },
+            static fn(...$bits) => Model::of(\implode('', $bits)),
             $c,
             $c,
             $x,

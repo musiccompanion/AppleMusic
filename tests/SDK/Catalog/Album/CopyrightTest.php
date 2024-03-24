@@ -19,7 +19,7 @@ class CopyrightTest extends TestCase
         $this
             ->forAll(Set\Strings::any())
             ->then(function(string $string) {
-                $copyright = new Copyright($string);
+                $copyright = Copyright::of($string);
 
                 $this->assertSame($string, $copyright->toString());
             });

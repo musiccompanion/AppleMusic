@@ -3,15 +3,8 @@ declare(strict_types = 1);
 
 namespace Tests\MusicCompanion\AppleMusic\SDK\Library;
 
-use MusicCompanion\AppleMusic\SDK\Library\{
-    Song,
-    Album,
-    Artist,
-};
-use Innmind\Immutable\{
-    Set,
-    Maybe,
-};
+use MusicCompanion\AppleMusic\SDK\Library\Song;
+use Innmind\Immutable\Maybe;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Song\Id,
     Song\Name,
@@ -22,10 +15,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Artist as ArtistSet,
 };
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set as DataSet,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Immutable\Set as ISet;
 
 class SongTest extends TestCase
@@ -45,7 +35,7 @@ class SongTest extends TestCase
                 ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $duration, $trackNumber, $genres, $albums, $artists) {
-                $song = new Song(
+                $song = Song::of(
                     $id,
                     $name,
                     Maybe::of($duration),

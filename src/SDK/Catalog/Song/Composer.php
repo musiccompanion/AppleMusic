@@ -10,9 +10,17 @@ final class Composer
 {
     private string $name;
 
-    public function __construct(string $name)
+    private function __construct(string $name)
     {
         $this->name = $name;
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function of(string $name): self
+    {
+        return new self($name);
     }
 
     public function name(): string

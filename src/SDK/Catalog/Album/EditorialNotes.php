@@ -11,10 +11,18 @@ final class EditorialNotes
     private string $standard;
     private string $short;
 
-    public function __construct(string $standard, string $short)
+    private function __construct(string $standard, string $short)
     {
         $this->standard = $standard;
         $this->short = $short;
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function of(string $standard, string $short): self
+    {
+        return new self($standard, $short);
     }
 
     public function standard(): string

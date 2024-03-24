@@ -7,7 +7,6 @@ use MusicCompanion\AppleMusic\{
     SDK,
     SDK\Storefronts,
     SDK\Catalog,
-    SDK\Library,
     Key,
 };
 use Innmind\TimeContinuum\{
@@ -19,10 +18,10 @@ use Innmind\HttpTransport\{
     Transport,
     Success,
 };
-use Innmind\Http\Message\{
-    Request,
+use Innmind\Http\{
     Response,
-    StatusCode,
+    Response\StatusCode,
+    ProtocolVersion,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\Either;
@@ -55,7 +54,7 @@ class SDKTest extends TestCase
                     'AAAAAAAAAA',
                     'BBBBBBBBBB',
                     // this is a randomly generated key
-                    Content\Lines::ofContent(<<<KEY
+                    Content::ofString(<<<KEY
                         -----BEGIN PRIVATE KEY-----
                         MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgSmB1mBZDN7uKBA4p
                         auujhPQ6DSqMCQj5i/8GWKBTSD2gCgYIKoZIzj0DAQehRANCAARy8AXnCbwjw49e
@@ -68,16 +67,12 @@ class SDKTest extends TestCase
                 $clock
                     ->method('now')
                     ->willReturn(new PointInTime('2019-01-01T00:00:00+00:00'));
-                $response = $this->createMock(Response::class);
-                $response
-                    ->method('statusCode')
-                    ->willReturn(StatusCode::ok);
-                $response
-                    ->method('body')
-                    ->willReturn($body = $this->createMock(Content::class));
-                $body
-                    ->method('toString')
-                    ->willReturn('{"data":[]}');
+                $response = Response::of(
+                    StatusCode::ok,
+                    ProtocolVersion::v11,
+                    null,
+                    Content::ofString('{"data":[]}'),
+                );
                 $transport
                     ->expects($this->any())
                     ->method('__invoke')
@@ -98,8 +93,8 @@ class SDKTest extends TestCase
                             $jwt->claims()->get('iat')->format(\DateTime::ATOM) === '2019-01-01T00:00:00+00:00' &&
                             $jwt->claims()->get('exp')->format(\DateTime::ATOM) === '2019-01-01T00:01:00+00:00';
                     }))
-                    ->willReturn(Either::right(new Success(
-                        $this->createMock(Request::class),
+                    ->willReturnCallback(static fn($request) => Either::right(new Success(
+                        $request,
                         $response,
                     )));
 

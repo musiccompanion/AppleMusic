@@ -4,10 +4,9 @@ declare(strict_types = 1);
 namespace MusicCompanion\AppleMusic\SDK;
 
 use Innmind\HttpTransport\Transport;
-use Innmind\Http\Message\{
+use Innmind\Http\{
     Request,
     Response,
-    StatusCode,
 };
 use Innmind\Url\Url;
 use Innmind\Immutable\Maybe;
@@ -28,7 +27,7 @@ final class HttpTransport
      */
     public function __invoke(Request $request): Maybe
     {
-        return ($this->fulfill)(new Request\Request(
+        return ($this->fulfill)(Request::of(
             $this
                 ->url
                 ->withPath($request->url()->path())

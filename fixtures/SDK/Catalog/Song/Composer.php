@@ -13,11 +13,6 @@ final class Composer
      */
     public static function any(): Set
     {
-        return Set\Decorate::immutable(
-            static function(string $name): Model {
-                return new Model($name);
-            },
-            Set\Strings::any(),
-        );
+        return Set\Strings::any()->map(Model::of(...));
     }
 }

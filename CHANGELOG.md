@@ -1,5 +1,20 @@
 # Changelog
 
+## 4.0.0 - 2024-03-24
+
+### Added
+
+- Support for `innmind/operating-system:~5.0`
+
+### Changed
+
+- Requires `innmind/operating-system:~4.0`
+- All value objects constructors are now private, use `::of()` named constructors instead
+
+### Removed
+
+- Support for `innmind/operating-system:~3.1`
+
 ## 3.1.0 - 2023-09-24
 
 ### Added

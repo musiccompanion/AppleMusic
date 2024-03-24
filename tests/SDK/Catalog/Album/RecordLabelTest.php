@@ -19,7 +19,7 @@ class RecordLabelTest extends TestCase
         $this
             ->forAll(Set\Strings::any())
             ->then(function(string $string) {
-                $recordLabel = new RecordLabel($string);
+                $recordLabel = RecordLabel::of($string);
 
                 $this->assertSame($string, $recordLabel->toString());
             });

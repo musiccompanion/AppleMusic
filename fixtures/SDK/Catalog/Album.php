@@ -3,12 +3,7 @@ declare(strict_types = 1);
 
 namespace Fixtures\MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\{
-    Album as Model,
-    Genre as GenreModel,
-    Song as SongModel,
-    Artist as ArtistModel,
-};
+use MusicCompanion\AppleMusic\SDK\Catalog\Album as Model;
 use Innmind\BlackBox\Set;
 use Fixtures\Innmind\Immutable\Set as ISet;
 use Fixtures\Innmind\Url\Url;
@@ -22,9 +17,7 @@ final class Album
     public static function any(): Set
     {
         return Set\Composite::immutable(
-            static function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists): Model {
-                return new Model($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists);
-            },
+            Model::of(...),
             Album\Id::any(),
             Set\Either::any(
                 Artwork::any(),

@@ -19,7 +19,7 @@ class EditorialNotesTest extends TestCase
         $this
             ->forAll(Set\Strings::any(), Set\Strings::any())
             ->then(function(string $standard, string $short) {
-                $editorialNotes = new EditorialNotes($standard, $short);
+                $editorialNotes = EditorialNotes::of($standard, $short);
 
                 $this->assertSame($standard, $editorialNotes->standard());
                 $this->assertSame($short, $editorialNotes->short());

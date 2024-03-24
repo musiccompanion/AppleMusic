@@ -24,7 +24,7 @@ final class Storefront
     /**
      * @param Set<Language> $supportedLanguages
      */
-    public function __construct(
+    private function __construct(
         Id $id,
         Name $name,
         Language $defaultLanguage,
@@ -34,6 +34,25 @@ final class Storefront
         $this->name = $name;
         $this->defaultLanguage = $defaultLanguage;
         $this->supportedLanguages = $supportedLanguages;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Set<Language> $supportedLanguages
+     */
+    public static function of(
+        Id $id,
+        Name $name,
+        Language $defaultLanguage,
+        Set $supportedLanguages,
+    ): self {
+        return new self(
+            $id,
+            $name,
+            $defaultLanguage,
+            $supportedLanguages,
+        );
     }
 
     public function id(): Id

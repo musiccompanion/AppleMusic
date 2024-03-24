@@ -15,9 +15,7 @@ final class Storefront
     public static function any(): Set
     {
         return Set\Composite::immutable(
-            static function($id, $name, $default, $languages): Model {
-                return new Model($id, $name, $default, $languages);
-            },
+            Model::of(...),
             Storefront\Id::any(),
             Storefront\Name::any(),
             Storefront\Language::any(),

@@ -12,13 +12,21 @@ final class Width
 {
     private int $value;
 
-    public function __construct(int $value)
+    private function __construct(int $value)
     {
         if ($value < 0) {
             throw new DomainException((string) $value);
         }
 
         $this->value = $value;
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function of(int $value): self
+    {
+        return new self($value);
     }
 
     public function toInt(): int

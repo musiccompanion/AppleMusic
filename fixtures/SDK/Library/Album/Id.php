@@ -28,9 +28,7 @@ final class Id
         );
 
         return Set\Decorate::immutable(
-            static function(string $chars): Model {
-                return Model::of('l.'.$chars);
-            },
+            static fn(string $chars) => Model::of('l.'.$chars),
             $chars,
         )->take(100);
     }

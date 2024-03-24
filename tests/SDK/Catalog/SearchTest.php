@@ -3,12 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\{
-    Search,
-    Artist,
-    Album,
-    Song,
-};
+use MusicCompanion\AppleMusic\SDK\Catalog\Search;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artist as ArtistSet,
     Album as AlbumSet,
@@ -35,7 +30,7 @@ class SearchTest extends TestCase
                 ISequence::of(SongSet\Id::any()),
             )
             ->then(function($term, $artists, $albums, $songs) {
-                $search = new Search($term, $artists, $albums, $songs);
+                $search = Search::of($term, $artists, $albums, $songs);
 
                 $this->assertSame($term, $search->term());
                 $this->assertSame($artists, $search->artists());

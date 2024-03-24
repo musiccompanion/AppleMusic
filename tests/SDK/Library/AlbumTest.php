@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\MusicCompanion\AppleMusic\SDK\Library;
 
-use MusicCompanion\AppleMusic\SDK\Library\{
-    Album,
-    Artist,
-};
+use MusicCompanion\AppleMusic\SDK\Library\Album;
 use Innmind\Immutable\Maybe;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Album\Id,
@@ -15,10 +12,7 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Artist as ArtistSet,
 };
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Immutable\Set as ISet;
 
 class AlbumTest extends TestCase
@@ -35,7 +29,7 @@ class AlbumTest extends TestCase
                 ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $artwork, $artists) {
-                $album = new Album($id, $name, Maybe::just($artwork), $artists);
+                $album = Album::of($id, $name, Maybe::just($artwork), $artists);
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());
@@ -56,7 +50,7 @@ class AlbumTest extends TestCase
                 ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $name, $artists) {
-                $album = new Album($id, $name, Maybe::nothing(), $artists);
+                $album = Album::of($id, $name, Maybe::nothing(), $artists);
 
                 $this->assertSame($id, $album->id());
                 $this->assertSame($name, $album->name());

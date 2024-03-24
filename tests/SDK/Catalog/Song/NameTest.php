@@ -19,7 +19,7 @@ class NameTest extends TestCase
         $this
             ->forAll(Set\Strings::any())
             ->then(function(string $string) {
-                $name = new Name($string);
+                $name = Name::of($string);
 
                 $this->assertSame($string, $name->toString());
             });

@@ -22,7 +22,7 @@ class WidthTest extends TestCase
         $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
             ->then(function(int $number) {
-                $width = new Width($number);
+                $width = Width::of($number);
 
                 $this->assertSame($number, $width->toInt());
                 $this->assertSame((string) $number, $width->toString());
@@ -35,7 +35,7 @@ class WidthTest extends TestCase
             ->forAll(Set\Integers::below(1))
             ->then(function(int $negative) {
                 try {
-                    new Width($negative);
+                    Width::of($negative);
                     $this->fail('it should throw');
                 } catch (DomainException $e) {
                     $this->assertSame((string) $negative, $e->getMessage());

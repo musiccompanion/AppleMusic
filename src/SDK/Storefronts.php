@@ -5,15 +5,22 @@ namespace MusicCompanion\AppleMusic\SDK;
 
 use Innmind\Http\{
     Header,
-    Message\Request\Request,
-    Message\Response,
-    Message\Method,
+    Request,
+    Response,
+    Method,
     ProtocolVersion,
     Headers,
 };
 use Innmind\Url\Url;
+use Innmind\Validation\{
+    Constraint,
+    Is,
+};
 use Innmind\Json\Json;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 
 final class Storefronts
 {
@@ -31,7 +38,7 @@ final class Storefronts
      */
     public function all(): Set
     {
-        return ($this->fulfill)(new Request(
+        return ($this->fulfill)(Request::of(
             Url::of('/v1/storefronts'),
             Method::get,
             ProtocolVersion::v20,
@@ -39,48 +46,57 @@ final class Storefronts
                 $this->authorization,
             ),
         ))
-            ->map($this->decode(...))
-            ->map(static fn($storefronts) => Set::of(...$storefronts['data']))
-            ->map(static fn($storefronts) => $storefronts->map(
-                static fn($storefront) => new Storefront(
-                    new Storefront\Id($storefront['id']),
-                    new Storefront\Name($storefront['attributes']['name']),
-                    Storefront\Language::of($storefront['attributes']['defaultLanguageTag']),
-                    Set::of(...$storefront['attributes']['supportedLanguageTags'])->map(Storefront\Language::of(...)),
-                ),
-            ))
-            ->match(
-                static fn($storefronts) => $storefronts,
-                static fn() => Set::of(),
-            );
+            ->flatMap($this->decode(...))
+            ->toSequence()
+            ->toSet()
+            ->flatMap(static fn($storefronts) => $storefronts);
     }
 
     /**
-     * @return array{
-     *     data: list<array{
-     *         id: string,
-     *         attributes: array{
-     *             name: string,
-     *             defaultLanguageTag: string,
-     *             supportedLanguageTags: list<string>
-     *         }
-     *     }>
-     * }
+     * @return Maybe<Set<Storefront>>
      */
-    private function decode(Response $response): array
+    private function decode(Response $response): Maybe
     {
         /**
-         * @var array{
-         *     data: list<array{
-         *         id: string,
-         *         attributes: array{
-         *             name: string,
-         *             defaultLanguageTag: string,
-         *             supportedLanguageTags: list<string>
-         *         }
-         *     }>
-         * }
+         * @psalm-suppress MixedArrayAccess
+         * @psalm-suppress MixedArgument
+         * @var Constraint<mixed, Set<Storefront>>
          */
-        return Json::decode($response->body()->toString());
+        $validate = Is::shape(
+            'data',
+            Is::list(
+                Is::shape(
+                    'id',
+                    Is::string()->map(Storefront\Id::of(...)),
+                )
+                    ->with(
+                        'attributes',
+                        Is::shape(
+                            'name',
+                            Is::string()->map(Storefront\Name::of(...)),
+                        )
+                            ->with(
+                                'defaultLanguageTag',
+                                Is::string()->map(Storefront\Language::of(...)),
+                            )
+                            ->with(
+                                'supportedLanguageTags',
+                                Is::list(
+                                    Is::string()->map(Storefront\Language::of(...)),
+                                )->map(static fn($values) => Set::of(...$values)),
+                            ),
+                    )
+                    ->map(static fn($shape) => Storefront::of(
+                        $shape['id'],
+                        $shape['attributes']['name'],
+                        $shape['attributes']['defaultLanguageTag'],
+                        $shape['attributes']['supportedLanguageTags'],
+                    )),
+            )->map(static fn($values) => Set::of(...$values)),
+        )->map(static fn($response): mixed => $response['data']);
+
+        return Json::maybeDecode($response->body()->toString())->flatMap(
+            static fn($response) => $validate($response)->maybe(),
+        );
     }
 }

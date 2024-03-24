@@ -43,7 +43,7 @@ final class Artwork
      * @param Maybe<RGBA> $textColor3
      * @param Maybe<RGBA> $textColor4
      */
-    public function __construct(
+    private function __construct(
         Width $width,
         Height $height,
         Url $url,
@@ -61,6 +61,37 @@ final class Artwork
         $this->textColor2 = $textColor2;
         $this->textColor3 = $textColor3;
         $this->textColor4 = $textColor4;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Maybe<RGBA> $backgroundColor
+     * @param Maybe<RGBA> $textColor1
+     * @param Maybe<RGBA> $textColor2
+     * @param Maybe<RGBA> $textColor3
+     * @param Maybe<RGBA> $textColor4
+     */
+    public static function of(
+        Width $width,
+        Height $height,
+        Url $url,
+        Maybe $backgroundColor,
+        Maybe $textColor1,
+        Maybe $textColor2,
+        Maybe $textColor3,
+        Maybe $textColor4,
+    ): self {
+        return new self(
+            $width,
+            $height,
+            $url,
+            $backgroundColor,
+            $textColor1,
+            $textColor2,
+            $textColor3,
+            $textColor4,
+        );
     }
 
     public function width(): Width

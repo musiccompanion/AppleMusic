@@ -29,7 +29,7 @@ final class Album
      * @param Maybe<Artwork> $artwork
      * @param Set<Artist\Id> $artists
      */
-    public function __construct(
+    private function __construct(
         Id $id,
         Name $name,
         Maybe $artwork,
@@ -39,6 +39,26 @@ final class Album
         $this->name = $name;
         $this->artwork = $artwork;
         $this->artists = $artists;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Maybe<Artwork> $artwork
+     * @param Set<Artist\Id> $artists
+     */
+    public static function of(
+        Id $id,
+        Name $name,
+        Maybe $artwork,
+        Set $artists,
+    ): self {
+        return new self(
+            $id,
+            $name,
+            $artwork,
+            $artists,
+        );
     }
 
     public function id(): Id

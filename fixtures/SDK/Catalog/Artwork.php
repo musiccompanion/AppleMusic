@@ -17,26 +17,15 @@ final class Artwork
     public static function any(): Set
     {
         return Set\Composite::immutable(
-            static function($width, $height, $url, $background, $text1, $text2, $text3, $text4): Model {
-                return new Model(
-                    $width,
-                    $height,
-                    $url,
-                    Maybe::of($background),
-                    Maybe::of($text1),
-                    Maybe::of($text2),
-                    Maybe::of($text3),
-                    Maybe::of($text4),
-                );
-            },
+            Model::of(...),
             Artwork\Width::any(),
             Artwork\Height::any(),
             Url::any(),
-            Set\Nullable::of(Colour::any()),
-            Set\Nullable::of(Colour::any()),
-            Set\Nullable::of(Colour::any()),
-            Set\Nullable::of(Colour::any()),
-            Set\Nullable::of(Colour::any()),
+            Set\Nullable::of(Colour::any())->map(Maybe::of(...)),
+            Set\Nullable::of(Colour::any())->map(Maybe::of(...)),
+            Set\Nullable::of(Colour::any())->map(Maybe::of(...)),
+            Set\Nullable::of(Colour::any())->map(Maybe::of(...)),
+            Set\Nullable::of(Colour::any())->map(Maybe::of(...)),
         );
     }
 }

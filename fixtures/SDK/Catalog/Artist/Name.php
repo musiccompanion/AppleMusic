@@ -13,11 +13,6 @@ final class Name
      */
     public static function any(): Set
     {
-        return Set\Decorate::immutable(
-            static function(string $string): Model {
-                return new Model($string);
-            },
-            Set\Strings::any(),
-        );
+        return Set\Strings::any()->map(Model::of(...));
     }
 }

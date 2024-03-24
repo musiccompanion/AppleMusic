@@ -3,13 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\MusicCompanion\AppleMusic\SDK\Catalog;
 
-use MusicCompanion\AppleMusic\SDK\Catalog\{
-    Album,
-    Genre,
-    Song,
-    Artist,
-};
-use Innmind\Immutable\Set;
+use MusicCompanion\AppleMusic\SDK\Catalog\Album;
 use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artwork,
     Genre as GenreSet,
@@ -55,7 +49,7 @@ class AlbumTest extends TestCase
                 ISet::of(ArtistSet\Id::any()),
             )
             ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
-                $album = new Album(
+                $album = Album::of(
                     $id,
                     $artwork,
                     $name,
