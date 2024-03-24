@@ -197,7 +197,7 @@ class CatalogTest extends TestCase
                 );
 
                 $this->assertInstanceOf(Artist::class, $artist);
-                $this->assertSame($id, $artist->id());
+                $this->assertSame(178834, $artist->id()->toInt());
                 $this->assertSame('Bruce Springsteen', $artist->name()->toString());
                 $this->assertSame(
                     'https://music.apple.com/fr/artist/bruce-springsteen/178834',
@@ -812,7 +812,7 @@ class CatalogTest extends TestCase
                 );
 
                 $this->assertInstanceOf(Album::class, $album);
-                $this->assertSame($id, $album->id());
+                $this->assertSame(203708420, $album->id()->toInt());
                 $this->assertSame(6000, $album->artwork()->width()->toInt());
                 $this->assertSame(6000, $album->artwork()->height()->toInt());
                 $this->assertSame(
@@ -1015,7 +1015,7 @@ class CatalogTest extends TestCase
                 );
 
                 $this->assertInstanceOf(Song::class, $song);
-                $this->assertSame($id, $song->id());
+                $this->assertSame(203708455, $song->id()->toInt());
                 $this->assertCount(1, $song->previews());
                 $this->assertSame(
                     'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview71/v4/c4/e7/0d/c4e70dda-9011-caf6-bc47-e80c93412dba/mzaf_702934268268391713.plus.aac.p.m4a',

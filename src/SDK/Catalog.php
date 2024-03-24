@@ -24,6 +24,10 @@ use Innmind\Http\{
 };
 use Innmind\Url\Url;
 use Innmind\Colour\RGBA;
+use Innmind\Validation\{
+    Constraint,
+    Is,
+};
 use Innmind\Json\Json;
 use Innmind\Immutable\{
     Set,
@@ -32,120 +36,6 @@ use Innmind\Immutable\{
     Maybe,
 };
 
-/**
- * @psalm-type Artists = array{
- *     data: list<array{
- *         attributes: array{
- *             name: string,
- *             url: string,
- *             genreNames: list<string>,
- *             artwork?: array{
- *                 url: string,
- *                 height: int,
- *                 width: int,
- *                 bgColor?: string,
- *                 textColor1?: string,
- *                 textColor2?: string,
- *                 textColor3?: string,
- *                 textColor4?: string,
- *             },
- *         },
- *         relationships: array{
- *             albums: array{
- *                 data: list<array{id: string}>,
- *                 next?: string
- *             }
- *         }
- *     }>
- * }
- * @psalm-type Albums = array{
- *     data: list<array{
- *         attributes: array{
- *             artwork: array{
- *                 width: int,
- *                 height: int,
- *                 url: string,
- *                 bgColor?: string,
- *                 textColor1?: string,
- *                 textColor2?: string,
- *                 textColor3?: string,
- *                 textColor4?: string
- *             },
- *             name: string,
- *             isSingle: bool,
- *             url: string,
- *             isComplete: bool,
- *             genreNames: list<string>,
- *             isMasteredForItunes: bool,
- *             releaseDate?: string,
- *             recordLabel?: string,
- *             copyright?: string,
- *             editorialNotes?: array{
- *                 standard?: string,
- *                 short?: string
- *             }
- *         },
- *         relationships: array{
- *             tracks: array{
- *                 data: list<array{id: string}>
- *             },
- *             artists: array{
- *                 data: list<array{id: string}>
- *             }
- *         }
- *     }>
- * }
- * @psalm-type Songs = array{
- *     data: list<array{
- *         attributes: array{
- *             previews: list<array{url: string}>,
- *             artwork: array{
- *                 width: int,
- *                 height: int,
- *                 url: string,
- *                 bgColor?: string,
- *                 textColor1?: string,
- *                 textColor2?: string,
- *                 textColor3?: string,
- *                 textColor4?: string
- *             },
- *             url: string,
- *             discNumber?: int,
- *             genreNames: list<string>,
- *             durationInMillis: int,
- *             releaseDate?: string,
- *             name: string,
- *             isrc?: string,
- *             trackNumber?: int,
- *             composerName?: string
- *         },
- *         relationships: array{
- *             artists: array{
- *                 data: list<array{id: string}>
- *             },
- *             albums: array{
- *                 data: list<array{id: string}>
- *             }
- *         }
- *     }>
- * }
- * @psalm-type Search = array{
- *     results: array{
- *         artists?: array{
- *             data: list<array{id: string}>,
- *             next?: string
- *         },
- *         albums?: array{
- *             data: list<array{id: string}>,
- *             next?: string
- *         },
- *         songs?: array{
- *             data: list<array{id: string}>,
- *             next?: string
- *         }
- *     }
- * }
- */
 final class Catalog
 {
     private Clock $clock;
@@ -172,28 +62,8 @@ final class Catalog
     {
         return $this
             ->get($this->url("artists/{$id->toString()}?include=albums"))
-            ->map($this->decodeArtists(...))
-            ->map(static fn($artists) => Sequence::of(...$artists['data']))
-            ->flatMap(static fn($artists) => $artists->first())
-            ->map(fn($artist) => new Artist(
-                $id,
-                new Artist\Name($artist['attributes']['name']),
-                Url::of($artist['attributes']['url']),
-                Set::of(...$artist['attributes']['genreNames'])->map(Genre::of(...)),
-                $this->artistAlbums($artist['relationships']['albums']),
-                Maybe::of($artist['attributes']['artwork'] ?? null)->map(
-                    static fn($artwork) => new Artwork(
-                        new Artwork\Width($artwork['width']),
-                        new Artwork\Height($artwork['height']),
-                        Url::of($artwork['url']),
-                        Maybe::of($artwork['bgColor'] ?? null)->map(RGBA::of(...)),
-                        Maybe::of($artwork['textColor1'] ?? null)->map(RGBA::of(...)),
-                        Maybe::of($artwork['textColor2'] ?? null)->map(RGBA::of(...)),
-                        Maybe::of($artwork['textColor3'] ?? null)->map(RGBA::of(...)),
-                        Maybe::of($artwork['textColor4'] ?? null)->map(RGBA::of(...)),
-                    ),
-                ),
-            ));
+            ->flatMap($this->decodeArtists(...))
+            ->flatMap(static fn($artists) => $artists->first());
     }
 
     /**
@@ -203,41 +73,8 @@ final class Catalog
     {
         return $this
             ->get($this->url("albums/{$id->toString()}?include=artists,tracks"))
-            ->map($this->decodeAlbums(...))
-            ->map(static fn($albums) => Sequence::of(...$albums['data']))
-            ->flatMap(static fn($albums) => $albums->first())
-            ->map(fn($album) => new Album(
-                $id,
-                new Artwork(
-                    new Artwork\Width($album['attributes']['artwork']['width']),
-                    new Artwork\Height($album['attributes']['artwork']['height']),
-                    Url::of($album['attributes']['artwork']['url']),
-                    Maybe::of($album['attributes']['artwork']['bgColor'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($album['attributes']['artwork']['textColor1'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($album['attributes']['artwork']['textColor2'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($album['attributes']['artwork']['textColor3'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($album['attributes']['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
-                ),
-                new Album\Name($album['attributes']['name']),
-                $album['attributes']['isSingle'],
-                Url::of($album['attributes']['url']),
-                $album['attributes']['isComplete'],
-                Set::of(...$album['attributes']['genreNames'])->map(Genre::of(...)),
-                Set::of(...$album['relationships']['tracks']['data'])
-                    ->map(static fn($song) => (int) $song['id'])
-                    ->map(Song\Id::of(...)),
-                $album['attributes']['isMasteredForItunes'],
-                $this->releaseDate($album['attributes']['releaseDate'] ?? null),
-                new Album\RecordLabel($album['attributes']['recordLabel'] ?? ''),
-                new Album\Copyright($album['attributes']['copyright'] ?? ''),
-                new Album\EditorialNotes(
-                    $album['attributes']['editorialNotes']['standard'] ?? '',
-                    $album['attributes']['editorialNotes']['short'] ?? '',
-                ),
-                Set::of(...$album['relationships']['artists']['data'])
-                    ->map(static fn($artist) => (int) $artist['id'])
-                    ->map(Artist\Id::of(...)),
-            ));
+            ->flatMap($this->decodeAlbums(...))
+            ->flatMap(static fn($albums) => $albums->first());
     }
 
     /**
@@ -247,40 +84,8 @@ final class Catalog
     {
         return $this
             ->get($this->url("songs/{$id->toString()}?include=artists,albums"))
-            ->map($this->decodeSongs(...))
-            ->map(static fn($songs) => Sequence::of(...$songs['data']))
-            ->flatMap(static fn($songs) => $songs->first())
-            ->map(fn($song) => new Song(
-                $id,
-                Set::of(...$song['attributes']['previews'])->map(
-                    static fn($preview) => Url::of($preview['url']),
-                ),
-                new Artwork(
-                    new Artwork\Width($song['attributes']['artwork']['width']),
-                    new Artwork\Height($song['attributes']['artwork']['height']),
-                    Url::of($song['attributes']['artwork']['url']),
-                    Maybe::of($song['attributes']['artwork']['bgColor'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($song['attributes']['artwork']['textColor1'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($song['attributes']['artwork']['textColor2'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($song['attributes']['artwork']['textColor3'] ?? null)->map(RGBA::of(...)),
-                    Maybe::of($song['attributes']['artwork']['textColor4'] ?? null)->map(RGBA::of(...)),
-                ),
-                Url::of($song['attributes']['url']),
-                Maybe::of($song['attributes']['discNumber'] ?? null)->map(Song\DiscNumber::of(...)),
-                Set::of(...$song['attributes']['genreNames'])->map(Genre::of(...)),
-                Maybe::of($song['attributes']['durationInMillis'] ?? null)->map(Song\Duration::of(...)),
-                $this->releaseDate($song['attributes']['releaseDate'] ?? null),
-                new Song\Name($song['attributes']['name']),
-                Maybe::of($song['attributes']['isrc'] ?? null)->map(Song\ISRC::of(...)),
-                Maybe::of($song['attributes']['trackNumber'] ?? null)->map(Song\TrackNumber::of(...)),
-                new Song\Composer($song['attributes']['composerName'] ?? ''),
-                Set::of(...$song['relationships']['artists']['data'])
-                    ->map(static fn($artist) => (int) $artist['id'])
-                    ->map(Artist\Id::of(...)),
-                Set::of(...$song['relationships']['albums']['data'])
-                    ->map(static fn($album) => (int) $album['id'])
-                    ->map(Album\Id::of(...)),
-            ));
+            ->flatMap($this->decodeSongs(...))
+            ->flatMap(static fn($songs) => $songs->first());
     }
 
     /**
@@ -290,156 +95,185 @@ final class Catalog
     {
         return Sequence::lazy(function() {
             $url = $this->url('genres');
+            /**
+             * @psalm-suppress MixedArrayAccess
+             * @var Constraint<mixed, array{data: Sequence<Genre>, next?: Url}>
+             */
+            $validate = Is::shape(
+                'data',
+                Is::list(
+                    Is::shape(
+                        'attributes',
+                        Is::shape(
+                            'name',
+                            Is::string()->map(Genre::of(...)),
+                        ),
+                    )->map(static fn($genre): mixed => $genre['attributes']['name']),
+                )->map(static fn($genres) => Sequence::of(...$genres)),
+            )
+                ->optional(
+                    'next',
+                    Is::string()->map(Url::of(...)),
+                );
 
             do {
-                /**
-                 * @var array{
-                 *     data: list<array{
-                 *         attributes: array{
-                 *             name: string
-                 *         }
-                 *     }>,
-                 *     next?: string
-                 * }
-                 */
-                $resource = $this
+                [$genres, $url] = $this
                     ->get($url)
                     ->flatMap(Json::maybeDecode(...))
+                    ->flatMap(static fn($response) => $validate($response)->maybe())
                     ->match(
-                        static fn($genres): mixed => $genres,
-                        static fn() => ['data' => []],
+                        static fn($response) => [$response['data'], $response['next'] ?? null],
+                        static fn() => [Sequence::of(), null],
                     );
-                $url = null;
 
-                foreach ($resource['data'] as $genre) {
-                    yield Genre::of($genre['attributes']['name']);
-                }
-
-                if (\array_key_exists('next', $resource)) {
-                    $url = Url::of($resource['next']);
-                }
+                yield $genres;
             } while ($url instanceof Url);
-        });
+        })->flatMap(static fn($genres) => $genres);
     }
 
     public function search(string $term): Search
     {
+        /**
+         * @psalm-suppress MixedArrayAccess
+         * @var Constraint<
+         *      mixed,
+         *      array{
+         *          artists?: array{
+         *              data: Sequence<Artist\Id>,
+         *              next?: Url,
+         *          },
+         *          albums?: array{
+         *              data: Sequence<Album\Id>,
+         *              next?: Url,
+         *          },
+         *          songs?: array{
+         *              data: Sequence<Song\Id>,
+         *              next?: Url,
+         *          },
+         *      }
+         * >
+         */
+        $validate = Is::shape(
+            'results',
+            Is::shape(
+                'artists',
+                Is::shape(
+                    'data',
+                    Is::list(
+                        Is::shape(
+                            'id',
+                            Is::string()
+                                ->map(static fn($id) => (int) $id)
+                                ->map(Artist\Id::of(...)),
+                        )->map(static fn($artist): mixed => $artist['id']),
+                    )->map(static fn($artists) => Sequence::of(...$artists)),
+                )
+                    ->optional(
+                        'next',
+                        Is::string()->map(Url::of(...)),
+                    ),
+            )
+                ->optional('artists')
+                ->optional(
+                    'albums',
+                    Is::shape(
+                        'data',
+                        Is::list(
+                            Is::shape(
+                                'id',
+                                Is::string()
+                                    ->map(static fn($id) => (int) $id)
+                                    ->map(Album\Id::of(...)),
+                            )->map(static fn($album): mixed => $album['id']),
+                        )->map(static fn($albums) => Sequence::of(...$albums)),
+                    )
+                        ->optional(
+                            'next',
+                            Is::string()->map(Url::of(...)),
+                        ),
+                )
+                ->optional(
+                    'songs',
+                    Is::shape(
+                        'data',
+                        Is::list(
+                            Is::shape(
+                                'id',
+                                Is::string()
+                                    ->map(static fn($id) => (int) $id)
+                                    ->map(Song\Id::of(...)),
+                            )->map(static fn($song): mixed => $song['id']),
+                        )->map(static fn($songs) => Sequence::of(...$songs)),
+                    )
+                        ->optional(
+                            'next',
+                            Is::string()->map(Url::of(...)),
+                        ),
+                ),
+        )->map(static fn($response): mixed => $response['results']);
         $encodedTerm = \urlencode($term);
         $url = $this->url("search?term=$encodedTerm&types=artists,albums,songs&limit=25");
-        /** @var Search */
-        $resource = $this
+        $response = $this
             ->get($url)
             ->flatMap(Json::maybeDecode(...))
+            ->flatMap(static fn($response) => $validate($response)->maybe())
             ->match(
-                static fn($result): mixed => $result,
-                static fn() => ['results' => []],
+                static fn($response) => $response,
+                static fn() => [],
             );
 
         $artists = Sequence::lazy(
-            function() use ($resource): \Generator {
+            function() use ($response, $validate): \Generator {
                 do {
-                    $artists = $resource['results']['artists'] ?? [];
+                    yield $response['artists']['data'] ?? Sequence::of();
 
-                    foreach ($artists['data'] ?? [] as $artist) {
-                        yield Artist\Id::of((int) $artist['id']);
-                    }
-
-                    if (!\array_key_exists('next', $artists)) {
-                        return;
-                    }
-
-                    /** @var Search */
-                    $resource = $this
-                        ->get(Url::of($artists['next']))
+                    $response = Maybe::of($response['artists']['next'] ?? null)
+                        ->flatMap($this->get(...))
                         ->flatMap(Json::maybeDecode(...))
+                        ->flatMap(static fn($response) => $validate($response)->maybe())
                         ->match(
-                            static fn($result): mixed => $result,
-                            static fn() => ['results' => []],
+                            static fn($response) => $response,
+                            static fn() => null,
                         );
-                } while (true);
+                } while (\is_array($response));
             },
-        );
+        )->flatMap(static fn($artists) => $artists);
 
         $albums = Sequence::lazy(
-            function() use ($resource): \Generator {
+            function() use ($response, $validate): \Generator {
                 do {
-                    $albums = $resource['results']['albums'] ?? [];
+                    yield $response['albums']['data'] ?? Sequence::of();
 
-                    foreach ($albums['data'] ?? [] as $album) {
-                        yield Album\Id::of((int) $album['id']);
-                    }
-
-                    if (!\array_key_exists('next', $albums)) {
-                        return;
-                    }
-
-                    /** @var Search */
-                    $resource = $this
-                        ->get(Url::of($albums['next']))
+                    $response = Maybe::of($response['albums']['next'] ?? null)
+                        ->flatMap($this->get(...))
                         ->flatMap(Json::maybeDecode(...))
+                        ->flatMap(static fn($response) => $validate($response)->maybe())
                         ->match(
-                            static fn($result): mixed => $result,
-                            static fn() => ['results' => []],
+                            static fn($response) => $response,
+                            static fn() => null,
                         );
-                } while (true);
+                } while (\is_array($response));
             },
-        );
+        )->flatMap(static fn($albums) => $albums);
 
         $songs = Sequence::lazy(
-            function() use ($resource): \Generator {
+            function() use ($response, $validate): \Generator {
                 do {
-                    $songs = $resource['results']['songs'] ?? [];
+                    yield $response['songs']['data'] ?? Sequence::of();
 
-                    foreach ($songs['data'] ?? [] as $song) {
-                        yield Song\Id::of((int) $song['id']);
-                    }
-
-                    if (!\array_key_exists('next', $songs)) {
-                        return;
-                    }
-
-                    /** @var Search */
-                    $resource = $this
-                        ->get(Url::of($songs['next']))
+                    $response = Maybe::of($response['songs']['next'] ?? null)
+                        ->flatMap($this->get(...))
                         ->flatMap(Json::maybeDecode(...))
+                        ->flatMap(static fn($response) => $validate($response)->maybe())
                         ->match(
-                            static fn($result): mixed => $result,
-                            static fn() => ['results' => []],
+                            static fn($response) => $response,
+                            static fn() => null,
                         );
-                } while (true);
+                } while (\is_array($response));
             },
-        );
+        )->flatMap(static fn($songs) => $songs);
 
         return new Search($term, $artists, $albums, $songs);
-    }
-
-    /**
-     * @param array{data: list<array{id: string}>, next?: string} $resources
-     *
-     * @return Set<Album\Id>
-     */
-    private function artistAlbums(array $resources): Set
-    {
-        return Set::lazy(function() use ($resources) {
-            do {
-                foreach ($resources['data'] as $album) {
-                    yield (int) $album['id'];
-                }
-
-                if (!\array_key_exists('next', $resources)) {
-                    return;
-                }
-
-                /** @var array{data: list<array{id: string}>, next?: string} */
-                $resources = $this
-                    ->get(Url::of($resources['next']))
-                    ->flatMap(Json::maybeDecode(...))
-                    ->match(
-                        static fn($albums): mixed => $albums,
-                        static fn() => ['data' => []],
-                    );
-            } while (true);
-        })->map(Album\Id::of(...));
     }
 
     /**
@@ -456,30 +290,489 @@ final class Catalog
     }
 
     /**
-     * @return Artists
+     * @return Maybe<Sequence<Artist>>
      */
-    private function decodeArtists(string $content): array
+    private function decodeArtists(string $content): Maybe
     {
-        /** @var Artists */
-        return Json::decode($content);
+        /** @var Constraint<mixed, array{data: Sequence<Album\Id>, next?: Url}> */
+        $validateAlbums = Is::shape(
+            'data',
+            Is::list(
+                Is::shape(
+                    'id',
+                    Is::string()
+                        ->map(static fn($id) => (int) $id)
+                        ->map(Album\Id::of(...)),
+                )->map(static fn($album): mixed => $album['id']),
+            )->map(static fn($ids) => Sequence::of(...$ids)),
+        )
+            ->optional(
+                'next',
+                Is::string()->map(Url::of(...)),
+            );
+
+        /**
+         * @psalm-suppress MixedArrayAccess
+         * @psalm-suppress MixedArgument
+         * @psalm-suppress MixedArgumentTypeCoercion
+         * @psalm-suppress InvalidArgument
+         * @var Constraint<mixed, Sequence<Artist>>
+         */
+        $validate = Is::shape(
+            'data',
+            Is::list(
+                Is::shape(
+                    'attributes',
+                    Is::shape(
+                        'name',
+                        Is::string()->map(static fn($name) => new Artist\Name($name)),
+                    )
+                        ->with(
+                            'url',
+                            Is::string()->map(Url::of(...)),
+                        )
+                        ->with(
+                            'genreNames',
+                            Is::list(
+                                Is::string()->map(Genre::of(...)),
+                            )->map(static fn($genres) => Set::of(...$genres)),
+                        )
+                        ->optional(
+                            'artwork',
+                            Is::shape(
+                                'url',
+                                Is::string()->map(Url::of(...)),
+                            )
+                                ->with(
+                                    'height',
+                                    Is::int()->map(static fn($height) => new Artwork\Height($height)),
+                                )
+                                ->with(
+                                    'width',
+                                    Is::int()->map(static fn($width) => new Artwork\Width($width)),
+                                )
+                                ->optional(
+                                    'bgColor',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->optional(
+                                    'textColor1',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->optional(
+                                    'textColor2',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->optional(
+                                    'textColor3',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->optional(
+                                    'textColor4',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->map(static fn($artwork) => new Artwork(
+                                    $artwork['width'],
+                                    $artwork['height'],
+                                    $artwork['url'],
+                                    Maybe::of($artwork['bgColor'] ?? null),
+                                    Maybe::of($artwork['textColor1'] ?? null),
+                                    Maybe::of($artwork['textColor2'] ?? null),
+                                    Maybe::of($artwork['textColor3'] ?? null),
+                                    Maybe::of($artwork['textColor4'] ?? null),
+                                )),
+                        ),
+                )
+                    ->with(
+                        'id',
+                        Is::string()
+                            ->map(static fn($id) => (int) $id)
+                            ->map(Artist\Id::of(...)),
+                    )
+                    ->with(
+                        'relationships',
+                        Is::shape(
+                            'albums',
+                            $validateAlbums->map(
+                                fn($response) => Sequence::lazy(function() use ($response, $validateAlbums) {
+                                    do {
+                                        yield $response['data'];
+
+                                        $response = Maybe::of($response['next'] ?? null)
+                                            ->flatMap($this->get(...))
+                                            ->flatMap(Json::maybeDecode(...))
+                                            ->flatMap(static fn($response) => $validateAlbums($response)->maybe())
+                                            ->match(
+                                                static fn($response) => $response,
+                                                static fn() => ['data' => Sequence::of()],
+                                            );
+                                    } while (!$response['data']->empty());
+                                })
+                                    ->flatMap(static fn($albums) => $albums)
+                                    ->toSet(),
+                            ),
+                        ),
+                    )
+                    ->map(static fn($artist) => new Artist(
+                        $artist['id'],
+                        $artist['attributes']['name'],
+                        $artist['attributes']['url'],
+                        $artist['attributes']['genreNames'],
+                        $artist['relationships']['albums'],
+                        Maybe::of($artist['attributes']['artwork'] ?? null),
+                    )),
+            )->map(static fn($artists) => Sequence::of(...$artists)),
+        )->map(static fn($response): mixed => $response['data']);
+
+        return Json::maybeDecode($content)->flatMap(
+            static fn($response) => $validate($response)->maybe(),
+        );
     }
 
     /**
-     * @return Albums
+     * @return Maybe<Sequence<Album>>
      */
-    private function decodeAlbums(string $content): array
+    private function decodeAlbums(string $content): Maybe
     {
-        /** @var Albums */
-        return Json::decode($content);
+        /**
+         * @psalm-suppress MixedArrayAccess
+         * @psalm-suppress MixedArgument
+         * @psalm-suppress MixedArgumentTypeCoercion
+         * @psalm-suppress InvalidArgument
+         * @var Constraint<mixed, Sequence<Album>>
+         */
+        $validate = Is::shape(
+            'data',
+            Is::list(
+                Is::shape(
+                    'id',
+                    Is::string()
+                        ->map(static fn($id) => (int) $id)
+                        ->map(Album\Id::of(...)),
+                )
+                    ->with(
+                        'attributes',
+                        Is::shape(
+                            'artwork',
+                            Is::shape(
+                                'width',
+                                Is::int()->map(static fn($width) => new Artwork\Width($width)),
+                            )
+                                ->with(
+                                    'height',
+                                    Is::int()->map(static fn($height) => new Artwork\Height($height)),
+                                )
+                                ->with(
+                                    'url',
+                                    Is::string()->map(Url::of(...)),
+                                )
+                                ->optional(
+                                    'bgColor',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->optional(
+                                    'textColor1',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->optional(
+                                    'textColor2',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->optional(
+                                    'textColor3',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->optional(
+                                    'textColor4',
+                                    Is::string()->map(RGBA::of(...)),
+                                )
+                                ->map(static fn($artwork) => new Artwork(
+                                    $artwork['width'],
+                                    $artwork['height'],
+                                    $artwork['url'],
+                                    Maybe::of($artwork['bgColor'] ?? null),
+                                    Maybe::of($artwork['textColor1'] ?? null),
+                                    Maybe::of($artwork['textColor2'] ?? null),
+                                    Maybe::of($artwork['textColor3'] ?? null),
+                                    Maybe::of($artwork['textColor4'] ?? null),
+                                )),
+                        )
+                            ->with(
+                                'name',
+                                Is::string()->map(static fn($name) => new Album\Name($name)),
+                            )
+                            ->with(
+                                'isSingle',
+                                Is::bool(),
+                            )
+                            ->with(
+                                'url',
+                                Is::string()->map(Url::of(...)),
+                            )
+                            ->with(
+                                'isComplete',
+                                Is::bool(),
+                            )
+                            ->with(
+                                'genreNames',
+                                Is::list(
+                                    Is::string()->map(Genre::of(...)),
+                                )->map(static fn($genres) => Set::of(...$genres)),
+                            )
+                            ->with(
+                                'isMasteredForItunes',
+                                Is::bool(),
+                            )
+                            ->optional(
+                                'releaseDate',
+                                Is::string()->map($this->releaseDate(...)),
+                            )
+                            ->optional(
+                                'recordLabel',
+                                Is::string(),
+                            )
+                            ->optional(
+                                'copyright',
+                                Is::string(),
+                            )
+                            ->optional(
+                                'editorialNotes',
+                                Is::shape('standard', Is::string())
+                                    ->optional('standard')
+                                    ->optional('short', Is::string()),
+                            ),
+                    )
+                    ->with(
+                        'relationships',
+                        Is::shape(
+                            'tracks',
+                            Is::shape(
+                                'data',
+                                Is::list(
+                                    Is::shape(
+                                        'id',
+                                        Is::string()
+                                            ->map(static fn($id) => (int) $id)
+                                            ->map(Song\Id::of(...)),
+                                    )->map(static fn($song): mixed => $song['id']),
+                                )->map(static fn($songs) => Set::of(...$songs)),
+                            ),
+                        )
+                            ->with(
+                                'artists',
+                                Is::shape(
+                                    'data',
+                                    Is::list(
+                                        Is::shape(
+                                            'id',
+                                            Is::string()
+                                                ->map(static fn($id) => (int) $id)
+                                                ->map(Artist\Id::of(...)),
+                                        )->map(static fn($artist): mixed => $artist['id']),
+                                    )->map(static fn($artists) => Set::of(...$artists)),
+                                ),
+                            ),
+                    )
+                    ->map(static fn($album) => new Album(
+                        $album['id'],
+                        $album['attributes']['artwork'],
+                        $album['attributes']['name'],
+                        $album['attributes']['isSingle'],
+                        $album['attributes']['url'],
+                        $album['attributes']['isComplete'],
+                        $album['attributes']['genreNames'],
+                        $album['relationships']['tracks']['data'],
+                        $album['attributes']['isMasteredForItunes'],
+                        Maybe::of($album['attributes']['releaseDate'] ?? null)->flatMap(
+                            static fn($point): mixed => $point,
+                        ),
+                        new Album\RecordLabel($album['attributes']['recordLabel'] ?? ''),
+                        new Album\Copyright($album['attributes']['copyright'] ?? ''),
+                        new Album\EditorialNotes(
+                            $album['attributes']['editorialNotes']['standard'] ?? '',
+                            $album['attributes']['editorialNotes']['short'] ?? '',
+                        ),
+                        $album['relationships']['artists']['data'],
+                    )),
+            )->map(static fn($albums) => Sequence::of(...$albums)),
+        )->map(static fn($response): mixed => $response['data']);
+
+        return Json::maybeDecode($content)->flatMap(
+            static fn($response) => $validate($response)->maybe(),
+        );
     }
 
     /**
-     * @return Songs
+     * @return Maybe<Sequence<Song>>
      */
-    private function decodeSongs(string $content): array
+    private function decodeSongs(string $content): Maybe
     {
-        /** @var Songs */
-        return Json::decode($content);
+        /**
+         * @psalm-suppress MixedArrayAccess
+         * @psalm-suppress MixedArgument
+         * @psalm-suppress MixedArgumentTypeCoercion
+         * @psalm-suppress InvalidArgument
+         * @var Constraint<mixed, Sequence<Song>>
+         */
+        $validate = Is::shape(
+            'data',
+            Is::list(
+                Is::shape(
+                    'id',
+                    Is::string()
+                        ->map(static fn($id) => (int) $id)
+                        ->map(Song\Id::of(...)),
+                )
+                    ->with(
+                        'attributes',
+                        Is::shape(
+                            'previews',
+                            Is::list(
+                                Is::shape(
+                                    'url',
+                                    Is::string()->map(Url::of(...)),
+                                )->map(static fn($preview): mixed => $preview['url']),
+                            )->map(static fn($urls) => Set::of(...$urls)),
+                        )
+                            ->with(
+                                'artwork',
+                                Is::shape(
+                                    'width',
+                                    Is::int()->map(static fn($width) => new Artwork\Width($width)),
+                                )
+                                    ->with(
+                                        'height',
+                                        Is::int()->map(static fn($height) => new Artwork\Height($height)),
+                                    )
+                                    ->with(
+                                        'url',
+                                        Is::string()->map(Url::of(...)),
+                                    )
+                                    ->optional(
+                                        'bgColor',
+                                        Is::string()->map(RGBA::of(...)),
+                                    )
+                                    ->optional(
+                                        'textColor1',
+                                        Is::string()->map(RGBA::of(...)),
+                                    )
+                                    ->optional(
+                                        'textColor2',
+                                        Is::string()->map(RGBA::of(...)),
+                                    )
+                                    ->optional(
+                                        'textColor3',
+                                        Is::string()->map(RGBA::of(...)),
+                                    )
+                                    ->optional(
+                                        'textColor4',
+                                        Is::string()->map(RGBA::of(...)),
+                                    )
+                                    ->map(static fn($artwork) => new Artwork(
+                                        $artwork['width'],
+                                        $artwork['height'],
+                                        $artwork['url'],
+                                        Maybe::of($artwork['bgColor'] ?? null),
+                                        Maybe::of($artwork['textColor1'] ?? null),
+                                        Maybe::of($artwork['textColor2'] ?? null),
+                                        Maybe::of($artwork['textColor3'] ?? null),
+                                        Maybe::of($artwork['textColor4'] ?? null),
+                                    )),
+                            )
+                            ->with(
+                                'url',
+                                Is::string()->map(Url::of(...)),
+                            )
+                            ->optional(
+                                'discNumber',
+                                Is::int()->map(Song\DiscNumber::of(...)),
+                            )
+                            ->with(
+                                'genreNames',
+                                Is::list(
+                                    Is::string()->map(Genre::of(...)),
+                                )->map(static fn($genres) => Set::of(...$genres)),
+                            )
+                            ->optional(
+                                'durationInMillis',
+                                Is::int()->map(Song\Duration::of(...)),
+                            )
+                            ->optional(
+                                'releaseDate',
+                                Is::string()->map($this->releaseDate(...)),
+                            )
+                            ->with(
+                                'name',
+                                Is::string()->map(static fn($name) => new Song\Name($name)),
+                            )
+                            ->optional(
+                                'isrc',
+                                Is::string()->map(Song\ISRC::of(...)),
+                            )
+                            ->optional(
+                                'trackNumber',
+                                Is::int()->map(Song\TrackNumber::of(...)),
+                            )
+                            ->optional(
+                                'composerName',
+                                Is::string(),
+                            ),
+                    )
+                    ->with(
+                        'relationships',
+                        Is::shape(
+                            'artists',
+                            Is::shape(
+                                'data',
+                                Is::list(
+                                    Is::shape(
+                                        'id',
+                                        Is::string()
+                                            ->map(static fn($id) => (int) $id)
+                                            ->map(Artist\Id::of(...)),
+                                    )->map(static fn($artist): mixed => $artist['id']),
+                                )->map(static fn($artists) => Set::of(...$artists)),
+                            ),
+                        )
+                            ->with(
+                                'albums',
+                                Is::shape(
+                                    'data',
+                                    Is::list(
+                                        Is::shape(
+                                            'id',
+                                            Is::string()
+                                                ->map(static fn($id) => (int) $id)
+                                                ->map(Album\Id::of(...)),
+                                        )->map(static fn($album): mixed => $album['id']),
+                                    )->map(static fn($albums) => Set::of(...$albums)),
+                                ),
+                            ),
+                    )
+                    ->map(static fn($song) => new Song(
+                        $song['id'],
+                        $song['attributes']['previews'],
+                        $song['attributes']['artwork'],
+                        $song['attributes']['url'],
+                        Maybe::of($song['attributes']['discNumber'] ?? null),
+                        $song['attributes']['genreNames'],
+                        Maybe::of($song['attributes']['durationInMillis'] ?? null),
+                        Maybe::of($song['attributes']['releaseDate'] ?? null)->flatMap(
+                            static fn($point): mixed => $point,
+                        ),
+                        $song['attributes']['name'],
+                        Maybe::of($song['attributes']['isrc'] ?? null),
+                        Maybe::of($song['attributes']['trackNumber'] ?? null),
+                        new Song\Composer($song['attributes']['composerName'] ?? ''),
+                        $song['relationships']['artists']['data'],
+                        $song['relationships']['albums']['data'],
+                    )),
+            )->map(static fn($songs) => Sequence::of(...$songs)),
+        )->map(static fn($response): mixed => $response['data']);
+
+        return Json::maybeDecode($content)->flatMap(
+            static fn($response) => $validate($response)->maybe(),
+        );
     }
 
     private function url(string $path): Url
@@ -490,7 +783,7 @@ final class Catalog
     /**
      * @return Maybe<PointInTime>
      */
-    private function releaseDate(?string $releaseDate): Maybe
+    private function releaseDate(string $releaseDate): Maybe
     {
         return Maybe::of($releaseDate)
             ->map(Str::of(...))
