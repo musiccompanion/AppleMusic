@@ -13,7 +13,7 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Song\{
     Composer,
 };
 use Innmind\Url\Url;
-use Innmind\TimeContinuum\PointInTime;
+use Innmind\Time\Point;
 use Innmind\Immutable\{
     Set,
     Maybe,
@@ -35,7 +35,7 @@ final class Song
     private Set $genres;
     /** @var Maybe<Duration> */
     private Maybe $duration;
-    /** @var Maybe<PointInTime> */
+    /** @var Maybe<Point> */
     private Maybe $release;
     private Name $name;
     /** @var Maybe<ISRC> */
@@ -53,7 +53,7 @@ final class Song
      * @param Maybe<DiscNumber> $discNumber
      * @param Set<Genre> $genres
      * @param Maybe<Duration> $duration
-     * @param Maybe<PointInTime> $release
+     * @param Maybe<Point> $release
      * @param Maybe<ISRC> $isrc
      * @param Maybe<TrackNumber> $trackNumber
      * @param Set<Artist\Id> $artists
@@ -98,7 +98,7 @@ final class Song
      * @param Maybe<DiscNumber> $discNumber
      * @param Set<Genre> $genres
      * @param Maybe<Duration> $duration
-     * @param Maybe<PointInTime> $release
+     * @param Maybe<Point> $release
      * @param Maybe<ISRC> $isrc
      * @param Maybe<TrackNumber> $trackNumber
      * @param Set<Artist\Id> $artists
@@ -186,7 +186,7 @@ final class Song
     }
 
     /**
-     * @return Maybe<PointInTime>
+     * @return Maybe<Point>
      */
     public function release(): Maybe
     {

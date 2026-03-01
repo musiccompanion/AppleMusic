@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Requires PHP `8.4`
+- Requires `innmind/foundation:~2.1`
+- Requires `innmind/colour:~5.0`
+
 ## 4.0.0 - 2024-03-24
 
 ### Added

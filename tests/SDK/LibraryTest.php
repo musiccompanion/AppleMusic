@@ -14,9 +14,8 @@ use Innmind\HttpTransport\{
 };
 use Innmind\Http\{
     Header\Authorization,
-    Header\AuthorizationValue,
-    Header\Header,
-    Header\Value\Value,
+    Header,
+    Header\Value,
     ProtocolVersion,
     Response,
     Response\StatusCode,
@@ -40,9 +39,8 @@ class LibraryTest extends TestCase
 
     public function testStorefront()
     {
-        $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt'));
-        $userToken = new Header('Music-User-Token', new Value('token'));
-        $fulfill = $this->createMock(Transport::class);
+        $authorization = Authorization::of('Bearer', 'jwt');
+        $userToken = Header::of('Music-User-Token', Value::of('token'));
         $response = Response::of(
             StatusCode::ok,
             ProtocolVersion::v11,
@@ -68,25 +66,35 @@ class LibraryTest extends TestCase
             }
             JSON),
         );
-        $fulfill
-            ->expects($this->once())
-            ->method('__invoke')
-            ->with($this->callback(static function($request) use ($authorization, $userToken): bool {
-                return $request->url()->toString() === 'https://api.music.apple.com/v1/me/storefront' &&
-                    $request->method()->toString() === 'GET' &&
-                    $authorization === $request->headers()->get('authorization')->match(
-                        static fn($header) => $header,
-                        static fn() => null,
-                    ) &&
-                    $userToken === $request->headers()->get('music-user-token')->match(
-                        static fn($header) => $header,
-                        static fn() => null,
-                    );
-            }))
-            ->willReturnCallback(static fn($request) => Either::right(new Success(
+        $fulfill = Transport::via(function($request) use ($authorization, $userToken, $response) {
+            $this->assertSame(
+                'https://api.music.apple.com/v1/me/storefront',
+                $request->url()->toString(),
+            );
+            $this->assertSame(
+                'GET',
+                $request->method()->toString(),
+            );
+            $this->assertEquals(
+                $authorization->normalize(),
+                $request->headers()->get('authorization')->match(
+                    static fn($header) => $header,
+                    static fn() => null,
+                ),
+            );
+            $this->assertSame(
+                $userToken,
+                $request->headers()->get('music-user-token')->match(
+                    static fn($header) => $header,
+                    static fn() => null,
+                ),
+            );
+
+            return Either::right(new Success(
                 $request,
                 $response,
-            )));
+            ));
+        });
 
         $library = Library::of(
             new HttpTransport($fulfill),
@@ -105,7 +113,7 @@ class LibraryTest extends TestCase
         $this->assertSame('fr', $storefront->id()->toString());
         $this->assertSame('France', $storefront->name()->toString());
         $this->assertSame('fr-FR', $storefront->defaultLanguage()->toString());
-        $this->assertCount(2, $storefront->supportedLanguages());
+        $this->assertSame(2, $storefront->supportedLanguages()->size());
     }
 
     public function testArtists()
@@ -113,14 +121,6 @@ class LibraryTest extends TestCase
         $this
             ->forAll(StorefrontSet::any())
             ->then(function($storefront) {
-                $library = new Library(
-                    new HttpTransport(
-                        $fulfill = $this->createMock(Transport::class),
-                    ),
-                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $userToken = new Header('Music-User-Token', new Value('token')),
-                    $storefront,
-                );
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -178,42 +178,52 @@ class LibraryTest extends TestCase
                     }
                     JSON),
                 );
-                $fulfill
-                    ->expects($matcher = $this->exactly(2))
-                    ->method('__invoke')
-                    ->willReturnCallback(function($request) use ($matcher, $authorization, $userToken, $response1, $response2) {
-                        $this->assertSame('GET', $request->method()->toString());
-                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
-                        $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
+                $count = 0;
+                $authorization = Authorization::of('Bearer', 'jwt');
+                $userToken = Header::of('Music-User-Token', Value::of('token'));
+                $library = new Library(
+                    new HttpTransport(
+                        Transport::via(function($request) use (&$count, $authorization, $userToken, $response1, $response2) {
+                            $this->assertSame('GET', $request->method()->toString());
+                            $this->assertEquals(
+                                $authorization->normalize(),
+                                $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ),
+                            );
+                            $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
+                                static fn($header) => $header,
+                                static fn() => null,
+                            ));
 
-                        match ($matcher->numberOfInvocations()) {
-                            1 => $this->assertSame(
-                                'https://api.music.apple.com/v1/me/library/artists?include=catalog',
-                                $request->url()->toString(),
-                            ),
-                            2 => $this->assertSame(
-                                'https://api.music.apple.com/v1/me/library/artists?offset=25&include=catalog',
-                                $request->url()->toString(),
-                            ),
-                        };
+                            match ($count) {
+                                0 => $this->assertSame(
+                                    'https://api.music.apple.com/v1/me/library/artists?include=catalog',
+                                    $request->url()->toString(),
+                                ),
+                                1 => $this->assertSame(
+                                    'https://api.music.apple.com/v1/me/library/artists?offset=25&include=catalog',
+                                    $request->url()->toString(),
+                                ),
+                            };
 
-                        return match ($matcher->numberOfInvocations()) {
-                            1 => Either::right(new Success(
-                                $request,
-                                $response1,
-                            )),
-                            2 => Either::right(new Success(
-                                $request,
-                                $response2,
-                            )),
-                        };
-                    });
+                            return match ($count++) {
+                                0 => Either::right(new Success(
+                                    $request,
+                                    $response1,
+                                )),
+                                1 => Either::right(new Success(
+                                    $request,
+                                    $response2,
+                                )),
+                            };
+                        }),
+                    ),
+                    $authorization,
+                    $userToken,
+                    $storefront,
+                );
 
                 $artists = $library->artists();
 
@@ -241,14 +251,6 @@ class LibraryTest extends TestCase
         $this
             ->forAll(ArtistSet\Id::any(), StorefrontSet::any())
             ->then(function($artist, $storefront) {
-                $library = new Library(
-                    new HttpTransport(
-                        $fulfill = $this->createMock(Transport::class),
-                    ),
-                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $userToken = new Header('Music-User-Token', new Value('token')),
-                    $storefront,
-                );
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -343,42 +345,52 @@ class LibraryTest extends TestCase
                     }
                     JSON),
                 );
-                $fulfill
-                    ->expects($matcher = $this->exactly(2))
-                    ->method('__invoke')
-                    ->willReturnCallback(function($request) use ($matcher, $artist, $authorization, $userToken, $response1, $response2) {
-                        $this->assertSame('GET', $request->method()->toString());
-                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
-                        $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
+                $count = 0;
+                $authorization = Authorization::of('Bearer', 'jwt');
+                $userToken = Header::of('Music-User-Token', Value::of('token'));
+                $library = new Library(
+                    new HttpTransport(
+                        Transport::via(function($request) use (&$count, $artist, $authorization, $userToken, $response1, $response2) {
+                            $this->assertSame('GET', $request->method()->toString());
+                            $this->assertEquals(
+                                $authorization->normalize(),
+                                $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ),
+                            );
+                            $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
+                                static fn($header) => $header,
+                                static fn() => null,
+                            ));
 
-                        match ($matcher->numberOfInvocations()) {
-                            1 => $this->assertSame(
-                                "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?include=artists",
-                                $request->url()->toString(),
-                            ),
-                            2 => $this->assertSame(
-                                "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists",
-                                $request->url()->toString(),
-                            ),
-                        };
+                            match ($count) {
+                                0 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?include=artists",
+                                    $request->url()->toString(),
+                                ),
+                                1 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/me/library/artists/{$artist->toString()}/albums?offset=1&include=artists",
+                                    $request->url()->toString(),
+                                ),
+                            };
 
-                        return match ($matcher->numberOfInvocations()) {
-                            1 => Either::right(new Success(
-                                $request,
-                                $response1,
-                            )),
-                            2 => Either::right(new Success(
-                                $request,
-                                $response2,
-                            )),
-                        };
-                    });
+                            return match ($count++) {
+                                0 => Either::right(new Success(
+                                    $request,
+                                    $response1,
+                                )),
+                                1 => Either::right(new Success(
+                                    $request,
+                                    $response2,
+                                )),
+                            };
+                        }),
+                    ),
+                    $authorization,
+                    $userToken,
+                    $storefront,
+                );
 
                 $albums = $library->albums($artist);
 
@@ -391,7 +403,7 @@ class LibraryTest extends TestCase
                     static fn() => true,
                     static fn() => false,
                 ));
-                $this->assertCount(1, \current($albums)->artists());
+                $this->assertSame(1, \current($albums)->artists()->size());
                 $this->assertSame(
                     'r.o860e82',
                     \current($albums)
@@ -427,7 +439,7 @@ class LibraryTest extends TestCase
                 $this->assertSame(
                     'https://is2-ssl.mzstatic.com/image/thumb/Music/c5/98/81/mzi.ljuovcvg.jpg/{w}x{h}bb.jpeg',
                     \current($albums)->artwork()->match(
-                        static fn($artwork) => $artwork->url()->toString(),
+                        static fn($artwork) => \urldecode($artwork->url()->toString()),
                         static fn() => null,
                     ),
                 );
@@ -439,14 +451,6 @@ class LibraryTest extends TestCase
         $this
             ->forAll(AlbumSet\Id::any(), StorefrontSet::any())
             ->then(function($album, $storefront) {
-                $library = new Library(
-                    new HttpTransport(
-                        $fulfill = $this->createMock(Transport::class),
-                    ),
-                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $userToken = new Header('Music-User-Token', new Value('token')),
-                    $storefront,
-                );
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -582,42 +586,52 @@ class LibraryTest extends TestCase
                     }
                     JSON),
                 );
-                $fulfill
-                    ->expects($matcher = $this->exactly(2))
-                    ->method('__invoke')
-                    ->willReturnCallback(function($request) use ($matcher, $album, $authorization, $userToken, $response1, $response2) {
-                        $this->assertSame('GET', $request->method()->toString());
-                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
-                        $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
+                $count = 0;
+                $authorization = Authorization::of('Bearer', 'jwt');
+                $userToken = Header::of('Music-User-Token', Value::of('token'));
+                $library = new Library(
+                    new HttpTransport(
+                        Transport::via(function($request) use (&$count, $album, $authorization, $userToken, $response1, $response2) {
+                            $this->assertSame('GET', $request->method()->toString());
+                            $this->assertEquals(
+                                $authorization->normalize(),
+                                $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ),
+                            );
+                            $this->assertSame($userToken, $request->headers()->get('music-user-token')->match(
+                                static fn($header) => $header,
+                                static fn() => null,
+                            ));
 
-                        match ($matcher->numberOfInvocations()) {
-                            1 => $this->assertSame(
-                                "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists",
-                                $request->url()->toString(),
-                            ),
-                            2 => $this->assertSame(
-                                "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists",
-                                $request->url()->toString(),
-                            ),
-                        };
+                            match ($count) {
+                                0 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?include=albums,artists",
+                                    $request->url()->toString(),
+                                ),
+                                1 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/me/library/albums/{$album->toString()}/tracks?offset=1&include=albums,artists",
+                                    $request->url()->toString(),
+                                ),
+                            };
 
-                        return match ($matcher->numberOfInvocations()) {
-                            1 => Either::right(new Success(
-                                $request,
-                                $response1,
-                            )),
-                            2 => Either::right(new Success(
-                                $request,
-                                $response2,
-                            )),
-                        };
-                    });
+                            return match ($count++) {
+                                0 => Either::right(new Success(
+                                    $request,
+                                    $response1,
+                                )),
+                                1 => Either::right(new Success(
+                                    $request,
+                                    $response2,
+                                )),
+                            };
+                        }),
+                    ),
+                    $authorization,
+                    $userToken,
+                    $storefront,
+                );
 
                 $songs = $library->songs($album);
 
@@ -634,7 +648,7 @@ class LibraryTest extends TestCase
                     static fn($number) => $number->toString(),
                     static fn() => null,
                 ));
-                $this->assertCount(1, \current($songs)->genres());
+                $this->assertSame(1, \current($songs)->genres()->size());
                 $this->assertSame(
                     'Rapcore, Punk, Rap',
                     \current($songs)
@@ -645,8 +659,8 @@ class LibraryTest extends TestCase
                             static fn() => null,
                         ),
                 );
-                $this->assertCount(1, \current($songs)->artists());
-                $this->assertCount(1, \current($songs)->albums());
+                $this->assertSame(1, \current($songs)->artists()->size());
+                $this->assertSame(1, \current($songs)->albums()->size());
                 $this->assertSame(
                     'r.o860e82',
                     \current($songs)

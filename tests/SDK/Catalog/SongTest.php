@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Immutable\Set as ISet;
 use Fixtures\Innmind\Url\Url as FUrl;
-use Fixtures\Innmind\TimeContinuum\Earth\PointInTime;
+use Fixtures\Innmind\Time\Point;
 
 class SongTest extends TestCase
 {
@@ -39,7 +39,7 @@ class SongTest extends TestCase
                 DiscNumber::any(),
                 ISet::of(GenreSet::any()),
                 Duration::any(),
-                PointInTime::any(),
+                Point::any(),
                 Name::any(),
                 ISRC::any(),
                 TrackNumber::any(),

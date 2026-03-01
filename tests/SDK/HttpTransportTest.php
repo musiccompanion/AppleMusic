@@ -37,9 +37,6 @@ class HttpTransportTest extends TestCase
                 Set\Integers::between(200, 208),
             )
             ->then(function($url, $statusCode) {
-                $fulfill = new HttpTransport(
-                    $inner = $this->createMock(Transport::class),
-                );
                 $initial = Request::of(
                     $url,
                     Method::get,
@@ -49,23 +46,47 @@ class HttpTransportTest extends TestCase
                     StatusCode::of($statusCode),
                     ProtocolVersion::v20,
                 );
-                $inner
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->with($this->callback(static function($request) use ($initial): bool {
-                        return $request->url()->scheme()->toString() === 'https' &&
-                            $request->url()->authority()->toString() === 'api.music.apple.com' &&
-                            $request->url()->path() === $initial->url()->path() &&
-                            $request->url()->query() === $initial->url()->query() &&
-                            $request->method() === $initial->method() &&
-                            $request->protocolVersion() === $initial->protocolVersion() &&
-                            $request->headers() === $initial->headers() &&
-                            $request->body() === $initial->body();
-                    }))
-                    ->willReturn(Either::right(new Success(
-                        $initial,
-                        $response,
-                    )));
+                $fulfill = new HttpTransport(
+                    Transport::via(function($request) use ($initial, $response) {
+                        $this->assertSame(
+                            'https',
+                            $request->url()->scheme()->toString(),
+                        );
+                        $this->assertSame(
+                            'api.music.apple.com',
+                            $request->url()->authority()->toString(),
+                        );
+                        $this->assertSame(
+                            $initial->url()->path(),
+                            $request->url()->path(),
+                        );
+                        $this->assertSame(
+                            $initial->url()->query(),
+                            $request->url()->query(),
+                        );
+                        $this->assertSame(
+                            $initial->method(),
+                            $request->method(),
+                        );
+                        $this->assertSame(
+                            $initial->protocolVersion(),
+                            $request->protocolVersion(),
+                        );
+                        $this->assertSame(
+                            $initial->headers(),
+                            $request->headers(),
+                        );
+                        $this->assertSame(
+                            $initial->body(),
+                            $request->body(),
+                        );
+
+                        return Either::right(new Success(
+                            $initial,
+                            $response,
+                        ));
+                    }),
+                );
 
                 $this->assertSame($response, $fulfill($initial)->match(
                     static fn($response) => $response,
@@ -83,24 +104,19 @@ class HttpTransportTest extends TestCase
             )
             ->then(function($url, $statusCode) {
                 $fulfill = new HttpTransport(
-                    $inner = $this->createMock(Transport::class),
+                    Transport::via(static fn($request) => Either::left(new ClientError(
+                        $request,
+                        Response::of(
+                            StatusCode::of($statusCode),
+                            ProtocolVersion::v20,
+                        ),
+                    ))),
                 );
                 $initial = Request::of(
                     $url,
                     Method::get,
                     ProtocolVersion::v20,
                 );
-                $response = Response::of(
-                    StatusCode::of($statusCode),
-                    ProtocolVersion::v20,
-                );
-                $inner
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->willReturn(Either::left(new ClientError(
-                        $initial,
-                        $response,
-                    )));
 
                 $this->assertNull($fulfill($initial)->match(
                     static fn($response) => $response,
@@ -118,21 +134,19 @@ class HttpTransportTest extends TestCase
             )
             ->then(function($url, $statusCode) {
                 $fulfill = new HttpTransport(
-                    $inner = $this->createMock(Transport::class),
+                    Transport::via(static fn($request) => Either::left(new ServerError(
+                        $request,
+                        Response::of(
+                            StatusCode::of($statusCode),
+                            ProtocolVersion::v20,
+                        ),
+                    ))),
                 );
                 $initial = Request::of(
                     $url,
                     Method::get,
                     ProtocolVersion::v20,
                 );
-                $response = Response::of(
-                    StatusCode::of($statusCode),
-                    ProtocolVersion::v20,
-                );
-                $inner
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->willReturn(Either::left(new ServerError($initial, $response)));
 
                 $this->assertNull($fulfill($initial)->match(
                     static fn($response) => $response,

@@ -23,7 +23,7 @@ use Innmind\BlackBox\{
 };
 use Fixtures\Innmind\Immutable\Set as ISet;
 use Fixtures\Innmind\Url\Url;
-use Fixtures\Innmind\TimeContinuum\Earth\PointInTime;
+use Fixtures\Innmind\Time\Point;
 
 class AlbumTest extends TestCase
 {
@@ -42,7 +42,7 @@ class AlbumTest extends TestCase
                 ISet::of(GenreSet::any()),
                 ISet::of(SongSet\Id::any()),
                 DataSet\Elements::of(true, false),
-                PointInTime::any(),
+                Point::any(),
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any(),

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace MusicCompanion\AppleMusic\SDK;
 
 use Innmind\Http\{
-    Header,
+    Header\Authorization,
     Request,
     Response,
     Method,
@@ -25,9 +25,9 @@ use Innmind\Immutable\{
 final class Storefronts
 {
     private HttpTransport $fulfill;
-    private Header $authorization;
+    private Authorization $authorization;
 
-    public function __construct(HttpTransport $fulfill, Header $authorization)
+    public function __construct(HttpTransport $fulfill, Authorization $authorization)
     {
         $this->fulfill = $fulfill;
         $this->authorization = $authorization;
