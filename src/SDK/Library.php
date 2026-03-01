@@ -15,6 +15,7 @@ use Innmind\Http\{
     ProtocolVersion,
     Headers,
     Header,
+    Header\Authorization,
 };
 use Innmind\Url\Url;
 use Innmind\Validation\{
@@ -31,13 +32,13 @@ use Innmind\Immutable\{
 final class Library
 {
     private HttpTransport $fulfill;
-    private Header $authorization;
+    private Authorization $authorization;
     private Header $userToken;
     private Storefront $storefront;
 
     public function __construct(
         HttpTransport $fulfill,
-        Header $authorization,
+        Authorization $authorization,
         Header $userToken,
         Storefront $storefront,
     ) {
@@ -52,7 +53,7 @@ final class Library
      */
     public static function of(
         HttpTransport $fulfill,
-        Header $authorization,
+        Authorization $authorization,
         Header $userToken,
     ): Maybe {
         return $fulfill(Request::of(

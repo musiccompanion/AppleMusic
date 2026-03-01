@@ -11,12 +11,12 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog\Artwork,
     Catalog\Search,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
-    PointInTime,
+    Point,
 };
 use Innmind\Http\{
-    Header,
+    Header\Authorization,
     Request,
     Method,
     ProtocolVersion,
@@ -40,13 +40,13 @@ final class Catalog
 {
     private Clock $clock;
     private HttpTransport $fulfill;
-    private Header $authorization;
+    private Authorization $authorization;
     private Storefront\Id $storefront;
 
     public function __construct(
         Clock $clock,
         HttpTransport $fulfill,
-        Header $authorization,
+        Authorization $authorization,
         Storefront\Id $storefront,
     ) {
         $this->clock = $clock;
@@ -781,7 +781,7 @@ final class Catalog
     }
 
     /**
-     * @return Maybe<PointInTime>
+     * @return Maybe<Point>
      */
     private function releaseDate(string $releaseDate): Maybe
     {
@@ -794,9 +794,17 @@ final class Catalog
                 true => $date->append('-01-01'),
                 false => $date,
             })
-            ->flatMap(fn($date) => $this->clock->at(
-                $date->toString(),
-                new ReleaseDate,
-            ));
+            ->map(static fn($date) => $date->toString())
+            ->keep(
+                Is::string()
+                    ->nonEmpty()
+                    ->asPredicate(),
+            )
+            ->flatMap(
+                fn($date) => $this
+                    ->clock
+                    ->at($date, new ReleaseDate)
+                    ->maybe(),
+            );
     }
 }

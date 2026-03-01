@@ -3,15 +3,16 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic;
 
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
-    Earth\Format\ISO8601,
+    Format,
 };
 use Innmind\HttpTransport\Transport;
-use Innmind\Http\Header\{
+use Innmind\Http\{
     Header,
-    Value\Value,
+    Header\Authorization,
+    Header\Value,
 };
 use Innmind\Immutable\Maybe;
 use Lcobucci\JWT\{
@@ -24,7 +25,7 @@ final class SDK
 {
     private SDK\HttpTransport $transport;
     private Clock $clock;
-    private Header $authorization;
+    private Authorization $authorization;
     private string $jwt;
 
     private function __construct(
@@ -45,10 +46,10 @@ final class SDK
             ->withHeader('kid', $key->id())
             ->issuedBy($key->teamId())
             ->issuedAt(new \DateTimeImmutable(
-                $clock->now()->format(new ISO8601),
+                $clock->now()->format(Format::iso8601()),
             ))
             ->expiresAt(new \DateTimeImmutable(
-                $clock->now()->goForward($tokenValidity)->format(new ISO8601),
+                $clock->now()->goForward($tokenValidity)->format(Format::iso8601()),
             ))
             ->getToken(
                 $config->signer(),
@@ -58,10 +59,7 @@ final class SDK
         $this->clock = $clock;
         $this->transport = new SDK\HttpTransport($transport);
         $this->jwt = $jwt->toString();
-        $this->authorization = new Header(
-            'Authorization',
-            new Value('Bearer '.$this->jwt),
-        );
+        $this->authorization = Authorization::of('Bearer', $this->jwt);
     }
 
     public static function of(
@@ -91,7 +89,7 @@ final class SDK
         return SDK\Library::of(
             $this->transport,
             $this->authorization,
-            new Header('Music-User-Token', new Value($userToken)),
+            Header::of('Music-User-Token', Value::of($userToken)),
         );
     }
 
