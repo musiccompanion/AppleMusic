@@ -10,6 +10,7 @@ use Innmind\TimeContinuum\Format;
  */
 final class ReleaseDate implements Format
 {
+    #[\Override]
     public function toString(): string
     {
         return 'Y-m-d';
