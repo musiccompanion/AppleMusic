@@ -821,8 +821,8 @@ class CatalogTest extends TestCase
                 $this->assertSame(6000, $album->artwork()->width()->toInt());
                 $this->assertSame(6000, $album->artwork()->height()->toInt());
                 $this->assertSame(
-                    'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/%7Bw%7Dx%7Bh%7Dbb.jpeg',
-                    $album->artwork()->url()->toString(),
+                    'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg',
+                    \urldecode($album->artwork()->url()->toString()),
                 );
                 $this->assertSame(
                     '#d9c8b6',
@@ -1042,8 +1042,8 @@ class CatalogTest extends TestCase
                 $this->assertSame(6000, $song->artwork()->width()->toInt());
                 $this->assertSame(6000, $song->artwork()->height()->toInt());
                 $this->assertSame(
-                    'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/%7Bw%7Dx%7Bh%7Dbb.jpeg',
-                    $song->artwork()->url()->toString(),
+                    'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg',
+                    \urldecode($song->artwork()->url()->toString()),
                 );
                 $this->assertSame(
                     '#d9c8b6',

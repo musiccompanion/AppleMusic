@@ -437,9 +437,9 @@ class LibraryTest extends TestCase
                         ),
                 );
                 $this->assertSame(
-                    'https://is2-ssl.mzstatic.com/image/thumb/Music/c5/98/81/mzi.ljuovcvg.jpg/%7Bw%7Dx%7Bh%7Dbb.jpeg',
+                    'https://is2-ssl.mzstatic.com/image/thumb/Music/c5/98/81/mzi.ljuovcvg.jpg/{w}x{h}bb.jpeg',
                     \current($albums)->artwork()->match(
-                        static fn($artwork) => $artwork->url()->toString(),
+                        static fn($artwork) => \urldecode($artwork->url()->toString()),
                         static fn() => null,
                     ),
                 );
