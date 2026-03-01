@@ -100,7 +100,7 @@ class SDKTest extends TestCase
 
                 $this->assertInstanceOf(Storefronts::class, $sdk->storefronts());
                 $this->assertInstanceOf(Catalog::class, $sdk->catalog($storefront));
-                $this->assertNotEmpty($sdk->jwt());
+                $this->assertNotSame('', $sdk->jwt());
                 $sdk->storefronts()->all(); // trigger the assertion on the transport
             });
     }
