@@ -7,9 +7,9 @@ use MusicCompanion\AppleMusic\{
     SDK\Library\Album\Id,
     Exception\DomainException,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -17,7 +17,7 @@ class IdTest extends TestCase
 {
     use BlackBox;
 
-    public function testStringsOfSpecifiedFormatAreAccepted()
+    public function testStringsOfSpecifiedFormatAreAccepted(): BlackBox\Proof
     {
         $chars = Set\Decorate::immutable(
             static fn(array $chars) => \implode('', $chars),
@@ -33,9 +33,9 @@ class IdTest extends TestCase
             )->between(1, 15),
         );
 
-        $this
+        return $this
             ->forAll($chars)
-            ->then(function(string $chars) {
+            ->prove(function(string $chars) {
                 $string = 'l.'.$chars;
                 $id = Id::of($string);
 
@@ -43,11 +43,11 @@ class IdTest extends TestCase
             });
     }
 
-    public function testAnyRandomStringIsRejected()
+    public function testAnyRandomStringIsRejected(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\Strings::any())
-            ->then(function(string $string) {
+            ->prove(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);
 

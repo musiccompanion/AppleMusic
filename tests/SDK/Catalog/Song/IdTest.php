@@ -7,9 +7,9 @@ use MusicCompanion\AppleMusic\{
     SDK\Catalog\Song\Id,
     Exception\DomainException,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -17,11 +17,11 @@ class IdTest extends TestCase
 {
     use BlackBox;
 
-    public function testRealNumbersAreAccepted()
+    public function testRealNumbersAreAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\NaturalNumbers::any())
-            ->then(function(int $number) {
+            ->prove(function(int $number) {
                 $id = Id::of($number);
 
                 $this->assertSame($number, $id->toInt());
@@ -29,11 +29,11 @@ class IdTest extends TestCase
             });
     }
 
-    public function testNegativeNumbersAreRejected()
+    public function testNegativeNumbersAreRejected(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\Integers::below(0))
-            ->then(function(int $negative) {
+            ->prove(function(int $negative) {
                 try {
                     Id::of($negative);
                     $this->fail('it should throw');

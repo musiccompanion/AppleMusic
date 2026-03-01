@@ -30,8 +30,10 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Library\Album as AlbumSet,
     Storefront as StorefrontSet
 };
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\PHPUnit\{
+    BlackBox,
+    Framework\TestCase,
+};
 
 class LibraryTest extends TestCase
 {
@@ -116,11 +118,11 @@ class LibraryTest extends TestCase
         $this->assertSame(2, $storefront->supportedLanguages()->size());
     }
 
-    public function testArtists()
+    public function testArtists(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(StorefrontSet::any())
-            ->then(function($storefront) {
+            ->prove(function($storefront) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -246,11 +248,11 @@ class LibraryTest extends TestCase
             });
     }
 
-    public function testAlbums()
+    public function testAlbums(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(ArtistSet\Id::any(), StorefrontSet::any())
-            ->then(function($artist, $storefront) {
+            ->prove(function($artist, $storefront) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -446,11 +448,11 @@ class LibraryTest extends TestCase
             });
     }
 
-    public function testSongs()
+    public function testSongs(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(AlbumSet\Id::any(), StorefrontSet::any())
-            ->then(function($album, $storefront) {
+            ->prove(function($album, $storefront) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,

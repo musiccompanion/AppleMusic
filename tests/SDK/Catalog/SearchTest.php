@@ -9,9 +9,9 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Album as AlbumSet,
     Song as SongSet,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set as DataSet,
 };
 use Fixtures\Innmind\Immutable\Sequence as ISequence;
@@ -20,16 +20,16 @@ class SearchTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 DataSet\Strings::any(),
                 ISequence::of(ArtistSet\Id::any()),
                 ISequence::of(AlbumSet\Id::any()),
                 ISequence::of(SongSet\Id::any()),
             )
-            ->then(function($term, $artists, $albums, $songs) {
+            ->prove(function($term, $artists, $albums, $songs) {
                 $search = Search::of($term, $artists, $albums, $songs);
 
                 $this->assertSame($term, $search->term());
