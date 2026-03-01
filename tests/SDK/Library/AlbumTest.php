@@ -11,24 +11,26 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Album\Artwork,
     Artist as ArtistSet,
 };
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\PHPUnit\{
+    BlackBox,
+    Framework\TestCase,
+};
 use Fixtures\Innmind\Immutable\Set as ISet;
 
 class AlbumTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Id::any(),
                 Name::any(),
                 Artwork::any(),
                 ISet::of(ArtistSet\Id::any()),
             )
-            ->then(function($id, $name, $artwork, $artists) {
+            ->prove(function($id, $name, $artwork, $artists) {
                 $album = Album::of($id, $name, Maybe::just($artwork), $artists);
 
                 $this->assertSame($id, $album->id());
@@ -41,15 +43,15 @@ class AlbumTest extends TestCase
             });
     }
 
-    public function testAlbumMayNotHaveAnArtwork()
+    public function testAlbumMayNotHaveAnArtwork(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Id::any(),
                 Name::any(),
                 ISet::of(ArtistSet\Id::any()),
             )
-            ->then(function($id, $name, $artists) {
+            ->prove(function($id, $name, $artists) {
                 $album = Album::of($id, $name, Maybe::nothing(), $artists);
 
                 $this->assertSame($id, $album->id());

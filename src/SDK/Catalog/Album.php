@@ -11,7 +11,7 @@ use MusicCompanion\AppleMusic\SDK\Catalog\Album\{
     EditorialNotes,
 };
 use Innmind\Url\Url;
-use Innmind\TimeContinuum\PointInTime;
+use Innmind\Time\Point;
 use Innmind\Immutable\{
     Set,
     Maybe,
@@ -33,7 +33,7 @@ final class Album
     /** @var Set<Song\Id> */
     private Set $tracks;
     private bool $masteredForItunes;
-    /** @var Maybe<PointInTime> */
+    /** @var Maybe<Point> */
     private Maybe $release;
     private RecordLabel $recordLabel;
     private Copyright $copyright;
@@ -44,7 +44,7 @@ final class Album
     /**
      * @param Set<Genre> $genres
      * @param Set<Song\Id> $tracks
-     * @param Maybe<PointInTime> $release
+     * @param Maybe<Point> $release
      * @param Set<Artist\Id> $artists
      */
     private function __construct(
@@ -84,7 +84,7 @@ final class Album
      *
      * @param Set<Genre> $genres
      * @param Set<Song\Id> $tracks
-     * @param Maybe<PointInTime> $release
+     * @param Maybe<Point> $release
      * @param Set<Artist\Id> $artists
      */
     public static function of(
@@ -173,7 +173,7 @@ final class Album
     }
 
     /**
-     * @return Maybe<PointInTime>
+     * @return Maybe<Point>
      */
     public function release(): Maybe
     {

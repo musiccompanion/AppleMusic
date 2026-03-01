@@ -8,9 +8,9 @@ use MusicCompanion\AppleMusic\{
     Exception\DomainException,
 };
 use Innmind\Filesystem\File\Content;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -18,14 +18,14 @@ class KeyTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
                 Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
             )
-            ->then(function($id, $teamId) {
+            ->prove(function($id, $teamId) {
                 $id = \implode(\array_pad([], 10, $id));
                 $teamId = \implode(\array_pad([], 10, $teamId));
 
@@ -41,14 +41,14 @@ class KeyTest extends TestCase
             });
     }
 
-    public function testThrowWhenInvalidId()
+    public function testThrowWhenInvalidId(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set\Strings::any(),
                 Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
             )
-            ->then(function($id, $teamId) {
+            ->prove(function($id, $teamId) {
                 $teamId = \implode(\array_pad([], 10, $teamId));
 
                 $this->expectException(DomainException::class);
@@ -62,14 +62,14 @@ class KeyTest extends TestCase
             });
     }
 
-    public function testThrowWhenInvalidTeamId()
+    public function testThrowWhenInvalidTeamId(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9)),
                 Set\Strings::any(),
             )
-            ->then(function($id, $teamId) {
+            ->prove(function($id, $teamId) {
                 $id = \implode(\array_pad([], 10, $id));
 
                 $this->expectException(DomainException::class);

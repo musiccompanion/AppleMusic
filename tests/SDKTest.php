@@ -9,10 +9,10 @@ use MusicCompanion\AppleMusic\{
     SDK\Catalog,
     Key,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
-    Earth\PointInTime\PointInTime,
-    Earth\Period\Minute,
+    Point,
+    Period,
 };
 use Innmind\HttpTransport\{
     Transport,
@@ -30,9 +30,9 @@ use Lcobucci\JWT\{
     Encoding\JoseEncoder,
 };
 use Fixtures\MusicCompanion\AppleMusic\SDK\Storefront;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -40,16 +40,42 @@ class SDKTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Storefront\Id::any(),
                 Set\Strings::any(),
             )
-            ->then(function($storefront, $userToken) {
-                $clock = $this->createMock(Clock::class);
-                $transport = $this->createMock(Transport::class);
+            ->prove(function($storefront, $userToken) {
+                $clock = Clock::frozen(Point::at(new \DateTimeImmutable('2019-01-01T00:00:00+00:00')));
+                $transport = Transport::via(function($request) {
+                    $header = $request
+                        ->headers()
+                        ->get('authorization')
+                        ->flatMap(static fn($header) => $header->values()->find(static fn() => true))
+                        ->match(
+                            static fn($value) => $value->toString(),
+                            static fn() => null,
+                        );
+                    $jwt = \substr($header, 7); // remove Bearer
+                    $jwt = (new Parser(new JoseEncoder))->parse($jwt);
+
+                    $this->assertSame('AAAAAAAAAA', $jwt->headers()->get('kid'));
+                    $this->assertSame('BBBBBBBBBB', $jwt->claims()->get('iss'));
+                    $this->assertSame('2019-01-01T00:00:00+00:00', $jwt->claims()->get('iat')->format(\DateTime::ATOM));
+                    $this->assertSame('2019-01-01T00:01:00+00:00', $jwt->claims()->get('exp')->format(\DateTime::ATOM));
+
+                    return Either::right(new Success(
+                        $request,
+                        Response::of(
+                            StatusCode::ok,
+                            ProtocolVersion::v11,
+                            null,
+                            Content::ofString('{"data":[]}'),
+                        ),
+                    ));
+                });
                 $key = Key::of(
                     'AAAAAAAAAA',
                     'BBBBBBBBBB',
@@ -64,50 +90,17 @@ class SDKTest extends TestCase
                         KEY
                     ),
                 );
-                $clock
-                    ->method('now')
-                    ->willReturn(new PointInTime('2019-01-01T00:00:00+00:00'));
-                $response = Response::of(
-                    StatusCode::ok,
-                    ProtocolVersion::v11,
-                    null,
-                    Content::ofString('{"data":[]}'),
-                );
-                $transport
-                    ->expects($this->any())
-                    ->method('__invoke')
-                    ->with($this->callback(static function($request) {
-                        $header = $request
-                            ->headers()
-                            ->get('authorization')
-                            ->flatMap(static fn($header) => $header->values()->find(static fn() => true))
-                            ->match(
-                                static fn($value) => $value->toString(),
-                                static fn() => null,
-                            );
-                        $jwt = \substr($header, 7); // remove Bearer
-                        $jwt = (new Parser(new JoseEncoder))->parse($jwt);
-
-                        return $jwt->headers()->get('kid') === 'AAAAAAAAAA' &&
-                            $jwt->claims()->get('iss') === 'BBBBBBBBBB' &&
-                            $jwt->claims()->get('iat')->format(\DateTime::ATOM) === '2019-01-01T00:00:00+00:00' &&
-                            $jwt->claims()->get('exp')->format(\DateTime::ATOM) === '2019-01-01T00:01:00+00:00';
-                    }))
-                    ->willReturnCallback(static fn($request) => Either::right(new Success(
-                        $request,
-                        $response,
-                    )));
 
                 $sdk = SDK::of(
                     $clock,
                     $transport,
                     $key,
-                    new Minute(1),
+                    Period::minute(1),
                 );
 
                 $this->assertInstanceOf(Storefronts::class, $sdk->storefronts());
                 $this->assertInstanceOf(Catalog::class, $sdk->catalog($storefront));
-                $this->assertNotEmpty($sdk->jwt());
+                $this->assertNotSame('', $sdk->jwt());
                 $sdk->storefronts()->all(); // trigger the assertion on the transport
             });
     }

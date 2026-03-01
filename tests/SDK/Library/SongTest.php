@@ -14,17 +14,19 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Library\{
     Album as AlbumSet,
     Artist as ArtistSet,
 };
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\PHPUnit\{
+    BlackBox,
+    Framework\TestCase,
+};
 use Fixtures\Innmind\Immutable\Set as ISet;
 
 class SongTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Id::any(),
                 Name::any(),
@@ -34,7 +36,7 @@ class SongTest extends TestCase
                 ISet::of(AlbumSet\Id::any()),
                 ISet::of(ArtistSet\Id::any()),
             )
-            ->then(function($id, $name, $duration, $trackNumber, $genres, $albums, $artists) {
+            ->prove(function($id, $name, $duration, $trackNumber, $genres, $albums, $artists) {
                 $song = Song::of(
                     $id,
                     $name,

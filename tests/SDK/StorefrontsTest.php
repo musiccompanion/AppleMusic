@@ -13,7 +13,6 @@ use Innmind\HttpTransport\{
 };
 use Innmind\Http\{
     Header\Authorization,
-    Header\AuthorizationValue,
     ProtocolVersion,
     Response,
     Response\StatusCode,
@@ -29,12 +28,6 @@ class StorefrontsTest extends TestCase
 {
     public function testAll()
     {
-        $storefronts = new Storefronts(
-            new HttpTransport(
-                $send = $this->createMock(Transport::class),
-            ),
-            $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-        );
         $response = Response::of(
             StatusCode::ok,
             ProtocolVersion::v11,
@@ -1624,21 +1617,34 @@ class StorefrontsTest extends TestCase
             }
             JSON),
         );
-        $send
-            ->expects($this->once())
-            ->method('__invoke')
-            ->with($this->callback(static function($request) use ($authorization): bool {
-                return $request->url()->toString() === 'https://api.music.apple.com/v1/storefronts' &&
-                    $request->method()->toString() === 'GET' &&
-                    $authorization === $request->headers()->get('authorization')->match(
-                        static fn($header) => $header,
-                        static fn() => null,
+        $authorization = Authorization::of('Bearer', 'jwt');
+        $storefronts = new Storefronts(
+            new HttpTransport(
+                Transport::via(function($request) use ($authorization, $response) {
+                    $this->assertSame(
+                        'https://api.music.apple.com/v1/storefronts',
+                        $request->url()->toString(),
                     );
-            }))
-            ->willReturnCallback(static fn($request) => Either::right(new Success(
-                $request,
-                $response,
-            )));
+                    $this->assertSame(
+                        'GET',
+                        $request->method()->toString(),
+                    );
+                    $this->assertEquals(
+                        $authorization->normalize(),
+                        $request->headers()->get('authorization')->match(
+                            static fn($header) => $header,
+                            static fn() => null,
+                        ),
+                    );
+
+                    return Either::right(new Success(
+                        $request,
+                        $response,
+                    ));
+                }),
+            ),
+            $authorization,
+        );
 
         $all = $storefronts->all();
 

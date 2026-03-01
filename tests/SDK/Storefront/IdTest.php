@@ -7,9 +7,9 @@ use MusicCompanion\AppleMusic\{
     SDK\Storefront\Id,
     Exception\DomainException,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -17,28 +17,28 @@ class IdTest extends TestCase
 {
     use BlackBox;
 
-    public function testAnyCountryCodeIsAccepted()
+    public function testAnyCountryCodeIsAccepted(): BlackBox\Proof
     {
         $char = Set\Elements::of(...\range('a', 'z'));
 
-        $this
+        return $this
             ->forAll($char, $char)
-            ->then(function(string $char1, string $char2) {
+            ->prove(function(string $char1, string $char2) {
                 $id = Id::of($char1.$char2);
 
                 $this->assertSame($char1.$char2, $id->toString());
             });
     }
 
-    public function testAnyOtherStringIsNotAccepted()
+    public function testAnyOtherStringIsNotAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set\Strings::any()->filter(static function($string): bool {
                     return !\preg_match('~^[a-z]{2}$~', $string);
                 }),
             )
-            ->then(function(string $string) {
+            ->prove(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);
 

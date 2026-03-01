@@ -152,6 +152,7 @@ final class Artwork
     public function ofSize(Width $width, Height $height): Url
     {
         $path = Str::of($this->url->path()->toString())
+            ->map(static fn($path) => \urldecode($path))
             ->replace('{w}', $width->toString())
             ->replace('{h}', $height->toString())
             ->toString();

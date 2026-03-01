@@ -3,15 +3,16 @@ declare(strict_types = 1);
 
 namespace MusicCompanion\AppleMusic\SDK;
 
-use Innmind\TimeContinuum\Format;
+use Innmind\Time\Format;
 
 /**
  * @psalm-immutable
  */
-final class ReleaseDate implements Format
+final class ReleaseDate implements Format\Custom
 {
-    public function toString(): string
+    #[\Override]
+    public function normalize(): Format
     {
-        return 'Y-m-d';
+        return Format::of('Y-m-d');
     }
 }

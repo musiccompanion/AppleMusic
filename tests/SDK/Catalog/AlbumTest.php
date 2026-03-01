@@ -16,22 +16,22 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\{
     Artist as ArtistSet,
 };
 use Innmind\Immutable\Maybe;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set as DataSet,
 };
 use Fixtures\Innmind\Immutable\Set as ISet;
 use Fixtures\Innmind\Url\Url;
-use Fixtures\Innmind\TimeContinuum\Earth\PointInTime;
+use Fixtures\Innmind\Time\Point;
 
 class AlbumTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Id::any(),
                 Artwork::any(),
@@ -42,13 +42,13 @@ class AlbumTest extends TestCase
                 ISet::of(GenreSet::any()),
                 ISet::of(SongSet\Id::any()),
                 DataSet\Elements::of(true, false),
-                PointInTime::any(),
+                Point::any(),
                 RecordLabel::any(),
                 Copyright::any(),
                 EditorialNotes::any(),
                 ISet::of(ArtistSet\Id::any()),
             )
-            ->then(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
+            ->prove(function($id, $artwork, $name, $single, $url, $complete, $genres, $tracks, $masteredForItunes, $release, $recordLabel, $copyright, $editorialNotes, $artists) {
                 $album = Album::of(
                     $id,
                     $artwork,

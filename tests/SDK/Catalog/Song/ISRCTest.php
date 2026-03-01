@@ -7,9 +7,9 @@ use MusicCompanion\AppleMusic\{
     SDK\Catalog\Song\ISRC,
     Exception\DomainException,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -17,14 +17,14 @@ class ISRCTest extends TestCase
 {
     use BlackBox;
 
-    public function testOnlyISO3901StringsAreAccepted()
+    public function testOnlyISO3901StringsAreAccepted(): BlackBox\Proof
     {
         $c = Set\Elements::of(...\range('A', 'Z'));
         $x = Set\Elements::of(...\range('A', 'Z'), ...\range(0, 9));
         $y = Set\Elements::of(...\range(0, 9));
         $n = Set\Elements::of(...\range(0, 9));
 
-        $this
+        return $this
             ->forAll(
                 $c,
                 $c,
@@ -39,7 +39,7 @@ class ISRCTest extends TestCase
                 $n,
                 $n,
             )
-            ->then(function(...$bits) {
+            ->prove(function(...$bits) {
                 $string = \implode('', $bits);
 
                 $isrc = ISRC::of($string);
@@ -48,11 +48,11 @@ class ISRCTest extends TestCase
             });
     }
 
-    public function testAnyRandomStringWillThrowAnException()
+    public function testAnyRandomStringWillThrowAnException(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\Strings::any())
-            ->then(function(string $string) {
+            ->prove(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);
 

@@ -10,16 +10,18 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Storefront\{
     Language,
 };
 use Innmind\Immutable\Set;
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\PHPUnit\{
+    BlackBox,
+    Framework\TestCase,
+};
 
 class StorefrontTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Id::any(),
                 Name::any(),
@@ -27,7 +29,7 @@ class StorefrontTest extends TestCase
                 Language::any(),
                 Language::any(),
             )
-            ->then(function($id, $name, $defaultLanguage, $supportedLanguage1, $supportedLanguage2) {
+            ->prove(function($id, $name, $defaultLanguage, $supportedLanguage1, $supportedLanguage2) {
                 $storefront = Storefront::of(
                     $id,
                     $name,

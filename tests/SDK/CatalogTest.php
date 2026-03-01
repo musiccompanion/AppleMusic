@@ -11,17 +11,13 @@ use MusicCompanion\AppleMusic\SDK\{
     Catalog\Search,
     HttpTransport,
 };
-use Innmind\TimeContinuum\{
-    Clock,
-    Earth,
-};
+use Innmind\Time\Clock;
 use Innmind\HttpTransport\{
     Transport,
     Success,
 };
 use Innmind\Http\{
     Header\Authorization,
-    Header\AuthorizationValue,
     ProtocolVersion,
     Response,
     Response\StatusCode,
@@ -37,9 +33,9 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Catalog\Album as AlbumSet,
     Catalog\Song as SongSet,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set as DataSet,
 };
 
@@ -47,22 +43,14 @@ class CatalogTest extends TestCase
 {
     use BlackBox;
 
-    public function testArtist()
+    public function testArtist(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 StorefrontSet\Id::any(),
                 ArtistSet\Id::any(),
             )
-            ->then(function($storefront, $id) {
-                $catalog = new Catalog(
-                    $this->createMock(Clock::class),
-                    new HttpTransport(
-                        $fulfill = $this->createMock(Transport::class),
-                    ),
-                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront,
-                );
+            ->prove(function($storefront, $id) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -154,42 +142,51 @@ class CatalogTest extends TestCase
                     }
                     JSON),
                 );
-                $fulfill
-                    ->expects($matcher = $this->exactly(2))
-                    ->method('__invoke')
-                    ->willReturnCallback(function($request) use ($matcher, $storefront, $id, $authorization, $response1, $response2) {
-                        $this->assertSame('GET', $request->method()->toString());
-                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
+                $count = 0;
+                $authorization = Authorization::of('Bearer', 'jwt');
+                $catalog = new Catalog(
+                    Clock::live(),
+                    new HttpTransport(
+                        Transport::via(function($request) use (&$count, $storefront, $id, $authorization, $response1, $response2) {
+                            $this->assertSame('GET', $request->method()->toString());
+                            $this->assertEquals(
+                                $authorization->normalize(),
+                                $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ),
+                            );
 
-                        match ($matcher->numberOfInvocations()) {
-                            1 => $this->assertSame(
-                                "/v1/catalog/{$storefront->toString()}/artists/{$id->toString()}",
-                                $request->url()->path()->toString(),
-                            ),
-                            2 => $this->assertSame(
-                                '/v1/catalog/fr/artists/178834/albums',
-                                $request->url()->path()->toString(),
-                            ),
-                        };
+                            match ($count) {
+                                0 => $this->assertSame(
+                                    "/v1/catalog/{$storefront->toString()}/artists/{$id->toString()}",
+                                    $request->url()->path()->toString(),
+                                ),
+                                1 => $this->assertSame(
+                                    '/v1/catalog/fr/artists/178834/albums',
+                                    $request->url()->path()->toString(),
+                                ),
+                            };
 
-                        if ($matcher->numberOfInvocations() === 2) {
-                            $this->assertSame('offset=1', $request->url()->query()->toString());
-                        }
+                            if ($count === 1) {
+                                $this->assertSame('offset=1', $request->url()->query()->toString());
+                            }
 
-                        return match ($matcher->numberOfInvocations()) {
-                            1 => Either::right(new Success(
-                                $request,
-                                $response1,
-                            )),
-                            2 => Either::right(new Success(
-                                $request,
-                                $response2,
-                            )),
-                        };
-                    });
+                            return match ($count++) {
+                                0 => Either::right(new Success(
+                                    $request,
+                                    $response1,
+                                )),
+                                1 => Either::right(new Success(
+                                    $request,
+                                    $response2,
+                                )),
+                            };
+                        }),
+                    ),
+                    $authorization,
+                    $storefront,
+                );
 
                 $artist = $catalog->artist($id)->match(
                     static fn($artist) => $artist,
@@ -203,7 +200,7 @@ class CatalogTest extends TestCase
                     'https://music.apple.com/fr/artist/bruce-springsteen/178834',
                     $artist->url()->toString(),
                 );
-                $this->assertCount(1, $artist->genres());
+                $this->assertSame(1, $artist->genres()->size());
                 $this->assertSame(
                     'Rock',
                     $artist
@@ -222,22 +219,14 @@ class CatalogTest extends TestCase
             });
     }
 
-    public function testAlbum()
+    public function testAlbum(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 StorefrontSet\Id::any(),
                 AlbumSet\Id::any(),
             )
-            ->then(function($storefront, $id) {
-                $catalog = new Catalog(
-                    new Earth\Clock,
-                    new HttpTransport(
-                        $fulfill = $this->createMock(Transport::class),
-                    ),
-                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront,
-                );
+            ->prove(function($storefront, $id) {
                 $response = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -790,21 +779,37 @@ class CatalogTest extends TestCase
                     }
                     JSON),
                 );
-                $fulfill
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->with($this->callback(static function($request) use ($storefront, $id, $authorization) {
-                        return $request->url()->path()->toString() === "/v1/catalog/{$storefront->toString()}/albums/{$id->toString()}" &&
-                            $request->method()->toString() === 'GET' &&
-                            $authorization === $request->headers()->get('authorization')->match(
-                                static fn($header) => $header,
-                                static fn() => null,
+                $count = 0;
+                $authorization = Authorization::of('Bearer', 'jwt');
+                $catalog = new Catalog(
+                    Clock::live(),
+                    new HttpTransport(
+                        Transport::via(function($request) use (&$count, $storefront, $id, $authorization, $response) {
+                            $this->assertSame(
+                                "/v1/catalog/{$storefront->toString()}/albums/{$id->toString()}",
+                                $request->url()->path()->toString(),
                             );
-                    }))
-                    ->willReturnCallback(static fn($request) => Either::right(new Success(
-                        $request,
-                        $response,
-                    )));
+                            $this->assertSame(
+                                'GET',
+                                $request->method()->toString(),
+                            );
+                            $this->assertEquals(
+                                $authorization->normalize(),
+                                $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ),
+                            );
+
+                            return Either::right(new Success(
+                                $request,
+                                $response,
+                            ));
+                        }),
+                    ),
+                    $authorization,
+                    $storefront,
+                );
 
                 $album = $catalog->album($id)->match(
                     static fn($album) => $album,
@@ -817,7 +822,7 @@ class CatalogTest extends TestCase
                 $this->assertSame(6000, $album->artwork()->height()->toInt());
                 $this->assertSame(
                     'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg',
-                    $album->artwork()->url()->toString(),
+                    \urldecode($album->artwork()->url()->toString()),
                 );
                 $this->assertSame(
                     '#d9c8b6',
@@ -876,7 +881,7 @@ class CatalogTest extends TestCase
                     $album->url()->toString(),
                 );
                 $this->assertTrue($album->complete());
-                $this->assertCount(7, $album->genres());
+                $this->assertSame(7, $album->genres()->size());
                 $this->assertSame(
                     'Rock',
                     $album
@@ -887,39 +892,31 @@ class CatalogTest extends TestCase
                             static fn() => null,
                         ),
                 );
-                $this->assertCount(12, $album->tracks());
+                $this->assertSame(12, $album->tracks()->size());
                 $this->assertTrue($album->masteredForItunes());
                 $this->assertSame('1984-6-4', $album->release()->match(
                     static fn($point) => \sprintf(
                         '%s-%s-%s',
-                        $point->year()->toString(),
-                        $point->month()->toInt(),
-                        $point->day()->toInt(),
+                        $point->year()->toInt(),
+                        $point->month()->ofYear()->toInt(),
+                        $point->day()->ofMonth(),
                     ),
                     static fn() => null,
                 ));
                 $this->assertSame('Columbia', $album->recordLabel()->toString());
                 $this->assertSame('℗ 1984 Bruce Springsteen', $album->copyright()->toString());
-                $this->assertCount(1, $album->artists());
+                $this->assertSame(1, $album->artists()->size());
             });
     }
 
-    public function testSong()
+    public function testSong(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 StorefrontSet\Id::any(),
                 SongSet\Id::any(),
             )
-            ->then(function($storefront, $id) {
-                $catalog = new Catalog(
-                    new Earth\Clock,
-                    new HttpTransport(
-                        $fulfill = $this->createMock(Transport::class),
-                    ),
-                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront,
-                );
+            ->prove(function($storefront, $id) {
                 $response = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -993,21 +990,36 @@ class CatalogTest extends TestCase
                     }
                     JSON),
                 );
-                $fulfill
-                    ->expects($this->once())
-                    ->method('__invoke')
-                    ->with($this->callback(static function($request) use ($storefront, $id, $authorization) {
-                        return $request->url()->path()->toString() === "/v1/catalog/{$storefront->toString()}/songs/{$id->toString()}" &&
-                            $request->method()->toString() === 'GET' &&
-                            $authorization === $request->headers()->get('authorization')->match(
-                                static fn($header) => $header,
-                                static fn() => null,
+                $authorization = Authorization::of('Bearer', 'jwt');
+                $catalog = new Catalog(
+                    Clock::live(),
+                    new HttpTransport(
+                        Transport::via(function($request) use ($storefront, $id, $authorization, $response) {
+                            $this->assertSame(
+                                "/v1/catalog/{$storefront->toString()}/songs/{$id->toString()}",
+                                $request->url()->path()->toString(),
                             );
-                    }))
-                    ->willReturnCallback(static fn($request) => Either::right(new Success(
-                        $request,
-                        $response,
-                    )));
+                            $this->assertSame(
+                                'GET',
+                                $request->method()->toString(),
+                            );
+                            $this->assertEquals(
+                                $authorization->normalize(),
+                                $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ),
+                            );
+
+                            return Either::right(new Success(
+                                $request,
+                                $response,
+                            ));
+                        }),
+                    ),
+                    $authorization,
+                    $storefront,
+                );
 
                 $song = $catalog->song($id)->match(
                     static fn($song) => $song,
@@ -1016,7 +1028,7 @@ class CatalogTest extends TestCase
 
                 $this->assertInstanceOf(Song::class, $song);
                 $this->assertSame(203708455, $song->id()->toInt());
-                $this->assertCount(1, $song->previews());
+                $this->assertSame(1, $song->previews()->size());
                 $this->assertSame(
                     'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview71/v4/c4/e7/0d/c4e70dda-9011-caf6-bc47-e80c93412dba/mzaf_702934268268391713.plus.aac.p.m4a',
                     $song
@@ -1031,7 +1043,7 @@ class CatalogTest extends TestCase
                 $this->assertSame(6000, $song->artwork()->height()->toInt());
                 $this->assertSame(
                     'https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/b0/2d/1db02d23-6e40-ae43-29c9-ff31a854e8aa/074643865326.jpg/{w}x{h}bb.jpeg',
-                    $song->artwork()->url()->toString(),
+                    \urldecode($song->artwork()->url()->toString()),
                 );
                 $this->assertSame(
                     '#d9c8b6',
@@ -1064,7 +1076,7 @@ class CatalogTest extends TestCase
                     static fn($number) => $number->toInt(),
                     static fn() => null,
                 ));
-                $this->assertCount(2, $song->genres());
+                $this->assertSame(2, $song->genres()->size());
                 $this->assertSame(279784, $song->duration()->match(
                     static fn($duration) => $duration->toInt(),
                     static fn() => null,
@@ -1072,9 +1084,9 @@ class CatalogTest extends TestCase
                 $this->assertSame('1984-6-4', $song->release()->match(
                     static fn($point) => \sprintf(
                         '%s-%s-%s',
-                        $point->year()->toString(),
-                        $point->month()->toInt(),
-                        $point->day()->toInt(),
+                        $point->year()->toInt(),
+                        $point->month()->ofYear()->toInt(),
+                        $point->day()->ofMonth(),
                     ),
                     static fn() => null,
                 ));
@@ -1088,24 +1100,16 @@ class CatalogTest extends TestCase
                     static fn() => null,
                 ));
                 $this->assertSame('Bruce Springsteen', $song->composer()->name());
-                $this->assertCount(1, $song->artists());
-                $this->assertCount(1, $song->albums());
+                $this->assertSame(1, $song->artists()->size());
+                $this->assertSame(1, $song->albums()->size());
             });
     }
 
-    public function testGenres()
+    public function testGenres(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(StorefrontSet\Id::any())
-            ->then(function($storefront) {
-                $catalog = new Catalog(
-                    $this->createMock(Clock::class),
-                    new HttpTransport(
-                        $fulfill = $this->createMock(Transport::class),
-                    ),
-                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront,
-                );
+            ->prove(function($storefront) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -1145,38 +1149,47 @@ class CatalogTest extends TestCase
                     }
                     JSON),
                 );
-                $fulfill
-                    ->expects($matcher = $this->exactly(2))
-                    ->method('__invoke')
-                    ->willReturnCallback(function($request) use ($matcher, $storefront, $authorization, $response1, $response2) {
-                        $this->assertSame('GET', $request->method()->toString());
-                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
+                $count = 0;
+                $authorization = Authorization::of('Bearer', 'jwt');
+                $catalog = new Catalog(
+                    Clock::live(),
+                    new HttpTransport(
+                        Transport::via(function($request) use (&$count, $storefront, $authorization, $response1, $response2) {
+                            $this->assertSame('GET', $request->method()->toString());
+                            $this->assertEquals(
+                                $authorization->normalize(),
+                                $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ),
+                            );
 
-                        match ($matcher->numberOfInvocations()) {
-                            1 => $this->assertSame(
-                                "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/genres",
-                                $request->url()->toString(),
-                            ),
-                            2 => $this->assertSame(
-                                "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/genres?offset=1",
-                                $request->url()->toString(),
-                            ),
-                        };
+                            match ($count) {
+                                0 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/genres",
+                                    $request->url()->toString(),
+                                ),
+                                1 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/genres?offset=1",
+                                    $request->url()->toString(),
+                                ),
+                            };
 
-                        return match ($matcher->numberOfInvocations()) {
-                            1 => Either::right(new Success(
-                                $request,
-                                $response1,
-                            )),
-                            2 => Either::right(new Success(
-                                $request,
-                                $response2,
-                            )),
-                        };
-                    });
+                            return match ($count++) {
+                                0 => Either::right(new Success(
+                                    $request,
+                                    $response1,
+                                )),
+                                1 => Either::right(new Success(
+                                    $request,
+                                    $response2,
+                                )),
+                            };
+                        }),
+                    ),
+                    $authorization,
+                    $storefront,
+                );
 
                 $genres = $catalog->genres();
 
@@ -1189,23 +1202,15 @@ class CatalogTest extends TestCase
             });
     }
 
-    public function testSearch()
+    public function testSearch(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 StorefrontSet\Id::any(),
                 DataSet\Strings::any(),
             )
             ->take(100)
-            ->then(function($storefront, $term) {
-                $catalog = new Catalog(
-                    $this->createMock(Clock::class),
-                    new HttpTransport(
-                        $fulfill = $this->createMock(Transport::class),
-                    ),
-                    $authorization = new Authorization(new AuthorizationValue('Bearer', 'jwt')),
-                    $storefront,
-                );
+            ->prove(function($storefront, $term) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -1313,56 +1318,65 @@ class CatalogTest extends TestCase
                     }
                     JSON),
                 );
-                $fulfill
-                    ->expects($matcher = $this->exactly(4))
-                    ->method('__invoke')
-                    ->willReturnCallback(function($request) use ($matcher, $storefront, $term, $authorization, $response1, $response2, $response3, $response4) {
-                        $term = \urlencode($term);
+                $count = 0;
+                $authorization = Authorization::of('Bearer', 'jwt');
+                $catalog = new Catalog(
+                    Clock::live(),
+                    new HttpTransport(
+                        Transport::via(function($request) use (&$count, $storefront, $term, $authorization, $response1, $response2, $response3, $response4) {
+                            $term = \urlencode($term);
 
-                        $this->assertSame('GET', $request->method()->toString());
-                        $this->assertSame($authorization, $request->headers()->get('authorization')->match(
-                            static fn($header) => $header,
-                            static fn() => null,
-                        ));
+                            $this->assertSame('GET', $request->method()->toString());
+                            $this->assertEquals(
+                                $authorization->normalize(),
+                                $request->headers()->get('authorization')->match(
+                                    static fn($header) => $header,
+                                    static fn() => null,
+                                ),
+                            );
 
-                        match ($matcher->numberOfInvocations()) {
-                            1 => $this->assertSame(
-                                "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?term=$term&types=artists,albums,songs&limit=25",
-                                $request->url()->toString(),
-                            ),
-                            2 => $this->assertSame(
-                                "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=artists",
-                                $request->url()->toString(),
-                            ),
-                            3 => $this->assertSame(
-                                "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=albums",
-                                $request->url()->toString(),
-                            ),
-                            4 => $this->assertSame(
-                                "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=songs",
-                                $request->url()->toString(),
-                            ),
-                        };
+                            match ($count) {
+                                0 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?term=$term&types=artists,albums,songs&limit=25",
+                                    $request->url()->toString(),
+                                ),
+                                1 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=artists",
+                                    $request->url()->toString(),
+                                ),
+                                2 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=albums",
+                                    $request->url()->toString(),
+                                ),
+                                3 => $this->assertSame(
+                                    "https://api.music.apple.com/v1/catalog/{$storefront->toString()}/search?offset=1&term=foo&types=songs",
+                                    $request->url()->toString(),
+                                ),
+                            };
 
-                        return match ($matcher->numberOfInvocations()) {
-                            1 => Either::right(new Success(
-                                $request,
-                                $response1,
-                            )),
-                            2 => Either::right(new Success(
-                                $request,
-                                $response2,
-                            )),
-                            3 => Either::right(new Success(
-                                $request,
-                                $response3,
-                            )),
-                            4 => Either::right(new Success(
-                                $request,
-                                $response4,
-                            )),
-                        };
-                    });
+                            return match ($count++) {
+                                0 => Either::right(new Success(
+                                    $request,
+                                    $response1,
+                                )),
+                                1 => Either::right(new Success(
+                                    $request,
+                                    $response2,
+                                )),
+                                2 => Either::right(new Success(
+                                    $request,
+                                    $response3,
+                                )),
+                                3 => Either::right(new Success(
+                                    $request,
+                                    $response4,
+                                )),
+                            };
+                        }),
+                    ),
+                    $authorization,
+                    $storefront,
+                );
 
                 $search = $catalog->search($term);
                 $artists = $search->artists()->toList();
