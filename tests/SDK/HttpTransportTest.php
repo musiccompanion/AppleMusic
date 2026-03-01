@@ -18,9 +18,9 @@ use Innmind\Http\{
     ProtocolVersion,
 };
 use Innmind\Immutable\Either;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 use Fixtures\Innmind\Url\Url;
@@ -29,14 +29,14 @@ class HttpTransportTest extends TestCase
 {
     use BlackBox;
 
-    public function testTheUrlIsRewrittenToPointToTheAPIDomain()
+    public function testTheUrlIsRewrittenToPointToTheAPIDomain(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Url::any(),
                 Set\Integers::between(200, 208),
             )
-            ->then(function($url, $statusCode) {
+            ->prove(function($url, $statusCode) {
                 $initial = Request::of(
                     $url,
                     Method::get,
@@ -95,14 +95,14 @@ class HttpTransportTest extends TestCase
             });
     }
 
-    public function testReturnNothingOnClientError()
+    public function testReturnNothingOnClientError(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Url::any(),
                 Set\Elements::of(...\range(400, 418)),
             )
-            ->then(function($url, $statusCode) {
+            ->prove(function($url, $statusCode) {
                 $fulfill = new HttpTransport(
                     Transport::via(static fn($request) => Either::left(new ClientError(
                         $request,
@@ -125,14 +125,14 @@ class HttpTransportTest extends TestCase
             });
     }
 
-    public function testReturnNothingOnServerError()
+    public function testReturnNothingOnServerError(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Url::any(),
                 Set\Integers::between(500, 508),
             )
-            ->then(function($url, $statusCode) {
+            ->prove(function($url, $statusCode) {
                 $fulfill = new HttpTransport(
                     Transport::via(static fn($request) => Either::left(new ServerError(
                         $request,

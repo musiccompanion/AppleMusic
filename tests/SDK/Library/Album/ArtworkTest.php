@@ -10,23 +10,25 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Library\Album\Artwork\{
 };
 use Innmind\Url\Url as ConcreteUrl;
 use Innmind\Immutable\Maybe;
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\PHPUnit\{
+    BlackBox,
+    Framework\TestCase,
+};
 use Fixtures\Innmind\Url\Url;
 
 class ArtworkTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Width::any(),
                 Height::any(),
                 Url::any(),
             )
-            ->then(function($width, $height, $url) {
+            ->prove(function($width, $height, $url) {
                 $artwork = Artwork::of(
                     Maybe::of($width),
                     Maybe::of($height),
@@ -45,14 +47,14 @@ class ArtworkTest extends TestCase
             });
     }
 
-    public function testOfSize()
+    public function testOfSize(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Width::any(),
                 Height::any(),
             )
-            ->then(function($width, $height) {
+            ->prove(function($width, $height) {
                 $artwork = Artwork::of(
                     Maybe::of($width),
                     Maybe::of($height),

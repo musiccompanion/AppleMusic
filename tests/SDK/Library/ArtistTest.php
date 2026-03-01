@@ -10,18 +10,20 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Library\Artist\Name,
     Catalog\Artist\Id as Catalog,
 };
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\PHPUnit\{
+    BlackBox,
+    Framework\TestCase,
+};
 
 class ArtistTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Id::any(), Name::any(), Catalog::any())
-            ->then(function($id, $name, $catalog) {
+            ->prove(function($id, $name, $catalog) {
                 $artist = Artist::of($id, $name, Maybe::of($catalog));
 
                 $this->assertSame($id, $artist->id());

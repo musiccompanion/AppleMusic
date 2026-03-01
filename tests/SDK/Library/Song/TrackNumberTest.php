@@ -7,9 +7,9 @@ use MusicCompanion\AppleMusic\{
     SDK\Library\Song\TrackNumber,
     Exception\DomainException,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -17,11 +17,11 @@ class TrackNumberTest extends TestCase
 {
     use BlackBox;
 
-    public function testAnyStringIsAccepted()
+    public function testAnyStringIsAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
-            ->then(function(int $number) {
+            ->prove(function(int $number) {
                 $trackNumber = TrackNumber::of($number);
 
                 $this->assertSame($number, $trackNumber->toInt());
@@ -29,11 +29,11 @@ class TrackNumberTest extends TestCase
             });
     }
 
-    public function testThrowWhenNegativeNumber()
+    public function testThrowWhenNegativeNumber(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\Integers::below(1))
-            ->then(function(int $number) {
+            ->prove(function(int $number) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $number);
 

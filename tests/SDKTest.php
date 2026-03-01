@@ -30,9 +30,9 @@ use Lcobucci\JWT\{
     Encoding\JoseEncoder,
 };
 use Fixtures\MusicCompanion\AppleMusic\SDK\Storefront;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -40,14 +40,14 @@ class SDKTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Storefront\Id::any(),
                 Set\Strings::any(),
             )
-            ->then(function($storefront, $userToken) {
+            ->prove(function($storefront, $userToken) {
                 $clock = Clock::frozen(Point::at(new \DateTimeImmutable('2019-01-01T00:00:00+00:00')));
                 $transport = Transport::via(function($request) {
                     $header = $request
@@ -100,7 +100,7 @@ class SDKTest extends TestCase
 
                 $this->assertInstanceOf(Storefronts::class, $sdk->storefronts());
                 $this->assertInstanceOf(Catalog::class, $sdk->catalog($storefront));
-                $this->assertNotEmpty($sdk->jwt());
+                $this->assertNotSame('', $sdk->jwt());
                 $sdk->storefronts()->all(); // trigger the assertion on the transport
             });
     }

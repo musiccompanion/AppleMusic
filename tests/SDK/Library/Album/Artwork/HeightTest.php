@@ -8,9 +8,9 @@ use MusicCompanion\AppleMusic\{
     Exception\DomainException,
 };
 use Fixtures\MusicCompanion\AppleMusic\SDK\Library\Album\Artwork\Height as HeightSet;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -18,11 +18,11 @@ class HeightTest extends TestCase
 {
     use BlackBox;
 
-    public function testItCanBeOfAnyNaturalNumber()
+    public function testItCanBeOfAnyNaturalNumber(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
-            ->then(function(int $number) {
+            ->prove(function(int $number) {
                 $height = Height::of($number);
 
                 $this->assertSame($number, $height->toInt());
@@ -30,21 +30,21 @@ class HeightTest extends TestCase
             });
     }
 
-    public function testOf()
+    public function testOf(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(HeightSet::any())
-            ->then(function($height) {
+            ->prove(function($height) {
                 $this->assertInstanceOf(Height::class, Height::of($height->toInt()));
                 $this->assertSame($height->toInt(), Height::of($height->toInt())->toInt());
             });
     }
 
-    public function testNegativeNumbersAreNotAccepted()
+    public function testNegativeNumbersAreNotAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\Integers::below(1))
-            ->then(function(int $negative) {
+            ->prove(function(int $negative) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);
 

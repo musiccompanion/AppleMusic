@@ -7,9 +7,9 @@ use MusicCompanion\AppleMusic\{
     SDK\Storefront\Language,
     Exception\DomainException,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -17,57 +17,57 @@ class LanguageTest extends TestCase
 {
     use BlackBox;
 
-    public function testAnyCountryCodeIsAccepted()
+    public function testAnyCountryCodeIsAccepted(): BlackBox\Proof
     {
         $char = Set\Elements::of(...\range('a', 'z'));
 
-        $this
+        return $this
             ->forAll($char, $char)
-            ->then(function(string $char1, string $char2) {
+            ->prove(function(string $char1, string $char2) {
                 $language = Language::of($char1.$char2);
 
                 $this->assertSame($char1.$char2, $language->toString());
             });
     }
 
-    public function testRegionalLanguageIsAccepted()
+    public function testRegionalLanguageIsAccepted(): BlackBox\Proof
     {
         $char = Set\Elements::of(...\range('a', 'z'));
         $region = Set\Elements::of(...\range('A', 'Z'));
 
-        $this
+        return $this
             ->forAll($char, $char, $region, $region)
-            ->then(function(string $char1, string $char2, $region1, $region2) {
+            ->prove(function(string $char1, string $char2, $region1, $region2) {
                 $language = Language::of($char1.$char2.'-'.$region1.$region2);
 
                 $this->assertSame($char1.$char2.'-'.$region1.$region2, $language->toString());
             });
     }
 
-    public function testChineseCodesAreAccepted()
+    public function testChineseCodesAreAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\Elements::of(
                 'zh-Hans-CN',
                 'zh-Hant-HK',
                 'zh-Hant-TW',
             ))
-            ->then(function(string $code) {
+            ->prove(function(string $code) {
                 $language = Language::of($code);
 
                 $this->assertSame($code, $language->toString());
             });
     }
 
-    public function testAnyOtherStringIsNotAccepted()
+    public function testAnyOtherStringIsNotAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set\Strings::any()->filter(static function($string): bool {
                     return !\preg_match('~^[a-z]{2}$~', $string);
                 }),
             )
-            ->then(function(string $string) {
+            ->prove(function(string $string) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage($string);
 

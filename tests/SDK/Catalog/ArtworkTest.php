@@ -10,8 +10,10 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\Catalog\Artwork\{
 };
 use Innmind\Url\Url as ConcreteUrl;
 use Innmind\Immutable\Maybe;
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\PHPUnit\{
+    BlackBox,
+    Framework\TestCase,
+};
 use Fixtures\Innmind\Url\Url;
 use Fixtures\Innmind\Colour\Colour;
 
@@ -19,9 +21,9 @@ class ArtworkTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Width::any(),
                 Height::any(),
@@ -32,7 +34,7 @@ class ArtworkTest extends TestCase
                 Colour::any(),
                 Colour::any(),
             )
-            ->then(function($width, $height, $url, $background, $text1, $text2, $text3, $text4) {
+            ->prove(function($width, $height, $url, $background, $text1, $text2, $text3, $text4) {
                 $artwork = Artwork::of(
                     $width,
                     $height,
@@ -70,9 +72,9 @@ class ArtworkTest extends TestCase
             });
     }
 
-    public function testOfSize()
+    public function testOfSize(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Width::any(),
                 Height::any(),
@@ -82,7 +84,7 @@ class ArtworkTest extends TestCase
                 Colour::any(),
                 Colour::any(),
             )
-            ->then(function($width, $height, $background, $text1, $text2, $text3, $text4) {
+            ->prove(function($width, $height, $background, $text1, $text2, $text3, $text4) {
                 $artwork = Artwork::of(
                     $width,
                     $height,

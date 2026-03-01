@@ -8,9 +8,9 @@ use MusicCompanion\AppleMusic\{
     Exception\DomainException,
 };
 use Fixtures\MusicCompanion\AppleMusic\SDK\Library\Album\Artwork\Width as WidthSet;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -18,11 +18,11 @@ class WidthTest extends TestCase
 {
     use BlackBox;
 
-    public function testItCanBeOfAnyNaturalNumber()
+    public function testItCanBeOfAnyNaturalNumber(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\NaturalNumbersExceptZero::any())
-            ->then(function(int $number) {
+            ->prove(function(int $number) {
                 $width = Width::of($number);
 
                 $this->assertSame($number, $width->toInt());
@@ -30,21 +30,21 @@ class WidthTest extends TestCase
             });
     }
 
-    public function testOf()
+    public function testOf(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(WidthSet::any())
-            ->then(function($width) {
+            ->prove(function($width) {
                 $this->assertInstanceOf(Width::class, Width::of($width->toInt()));
                 $this->assertSame($width->toInt(), Width::of($width->toInt())->toInt());
             });
     }
 
-    public function testNegativeNumbersAreNotAccepted()
+    public function testNegativeNumbersAreNotAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set\Integers::below(1))
-            ->then(function(int $negative) {
+            ->prove(function(int $negative) {
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage((string) $negative);
 

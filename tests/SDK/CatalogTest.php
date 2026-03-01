@@ -33,9 +33,9 @@ use Fixtures\MusicCompanion\AppleMusic\SDK\{
     Catalog\Album as AlbumSet,
     Catalog\Song as SongSet,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set as DataSet,
 };
 
@@ -43,14 +43,14 @@ class CatalogTest extends TestCase
 {
     use BlackBox;
 
-    public function testArtist()
+    public function testArtist(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 StorefrontSet\Id::any(),
                 ArtistSet\Id::any(),
             )
-            ->then(function($storefront, $id) {
+            ->prove(function($storefront, $id) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -219,14 +219,14 @@ class CatalogTest extends TestCase
             });
     }
 
-    public function testAlbum()
+    public function testAlbum(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 StorefrontSet\Id::any(),
                 AlbumSet\Id::any(),
             )
-            ->then(function($storefront, $id) {
+            ->prove(function($storefront, $id) {
                 $response = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -909,14 +909,14 @@ class CatalogTest extends TestCase
             });
     }
 
-    public function testSong()
+    public function testSong(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 StorefrontSet\Id::any(),
                 SongSet\Id::any(),
             )
-            ->then(function($storefront, $id) {
+            ->prove(function($storefront, $id) {
                 $response = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -1105,11 +1105,11 @@ class CatalogTest extends TestCase
             });
     }
 
-    public function testGenres()
+    public function testGenres(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(StorefrontSet\Id::any())
-            ->then(function($storefront) {
+            ->prove(function($storefront) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
@@ -1202,15 +1202,15 @@ class CatalogTest extends TestCase
             });
     }
 
-    public function testSearch()
+    public function testSearch(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 StorefrontSet\Id::any(),
                 DataSet\Strings::any(),
             )
             ->take(100)
-            ->then(function($storefront, $term) {
+            ->prove(function($storefront, $term) {
                 $response1 = Response::of(
                     StatusCode::ok,
                     ProtocolVersion::v11,
